@@ -1,0 +1,4 @@
+net\coding\template\GoldApplication.class
+net\coding\template\configuration\ApplicationConfig.class
+net\coding\template\configuration\MvcConfig.class
+net\coding\template\controller\HelloWorldController.class

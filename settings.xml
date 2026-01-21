@@ -1,0 +1,77 @@
+<settings>
+
+
+    <interactiveMode>false</interactiveMode>
+
+    <servers>
+        <server>
+            <id>codingcorp-6685-dev</id>
+            <username>dev-1732155206285</username>
+            <password>53461cfa0b0286309bcf0dedd9f424ff262ec4b3</password>
+        </server>
+        <server>
+            <id>codingcorp-6685-dev-maven</id>
+            <username>dev-maven-1725864593956</username>
+            <password>1d0618f347d93a9b8cd07e5d85ca3676e381d3e1</password>
+        </server>
+        <server>
+            <id>codingcorp-gonggongxiangmu-maven-proxy</id>
+            <username>codingtest1</username>
+            <password>coding@coding123</password>
+        </server>
+    </servers>
+
+    <mirrors>
+        <mirror>
+            <id>codingcorp-gonggongxiangmu-maven-proxy</id>
+            <name>DevOps Proxy Repo</name>
+            <url>https://codingcorp-maven.pkg.coding.csair.com/repository/gonggongxiangmu/maven-proxy/</url>
+            <mirrorOf>*</mirrorOf>
+        </mirror>
+    </mirrors>
+
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>codingcorp-gonggongxiangmu-maven-proxy</id>
+                    <name>DevOps Proxy Repo</name>
+                    <url>https://codingcorp-maven.pkg.coding.csair.com/repository/gonggongxiangmu/maven-proxy/</url>
+                    <layout>default</layout>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                        <checksumPolicy>warn</checksumPolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                        <checksumPolicy>warn</checksumPolicy>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>codingcorp-gonggongxiangmu-maven-proxy</id>
+                    <name>DevOps Proxy Repo</name>
+                    <url>https://codingcorp-maven.pkg.coding.csair.com/repository/gonggongxiangmu/maven-proxy/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                        <checksumPolicy>warn</checksumPolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                        <checksumPolicy>warn</checksumPolicy>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+   
+</settings>
