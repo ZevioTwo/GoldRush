@@ -1,8 +1,8 @@
 package net.coding.template.controller;
 
-import net.coding.template.entity.request.CreditScoreDTO;
+import net.coding.template.entity.dto.CreditScoreDTO;
 import net.coding.template.entity.request.LoginRequest;
-import net.coding.template.entity.request.UserProfileDTO;
+import net.coding.template.entity.dto.UserProfileDTO;
 import net.coding.template.entity.response.CommonResponse;
 import net.coding.template.exception.BusinessException;
 import net.coding.template.service.UserService;

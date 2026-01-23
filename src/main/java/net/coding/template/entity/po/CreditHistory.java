@@ -1,4 +1,4 @@
-package net.coding.template.entity.dto.po;
+package net.coding.template.entity.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package net.coding.template.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import net.coding.template.entity.dto.po.User;
+import net.coding.template.entity.po.User;
 import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDateTime;

@@ -44,13 +44,31 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
 
-# 微信小程序配置
+# 支付相关配置
+payment:
+  service-fee-rate: 0.01
+  default-deposit: 20
+  max-deposit: 200
+  penalty-fee-rate: 0.01
+  order-expire-minutes: 30
+
+# 微信支付配置
 wechat:
-  app-id: your_app_id
-  app-secret: your_app_secret
-  mch-id: your_mch_id
-  mch-key: your_mch_key
-  notify-url: https://yourdomain.com/api/payment/notify
+  pay:
+    app-id: wx1234567890abcdef
+    mch-id: 1234567890
+    mch-key: your_mch_key_32_characters
+    api-key: your_api_key_32_characters
+    serial-no: your_serial_number
+    cert-path: /path/to/apiclient_cert.p12
+    notify-url: https://yourdomain.com/api/payment/notify
+    freeze-notify-url: https://yourdomain.com/api/payment/freeze-notify
+    api-v3-key: your_api_v3_key_32_characters
+    private-key-path: /path/to/apiclient_key.pem
+    private-key: |
+      -----BEGIN PRIVATE KEY-----
+      your_private_key_content
+      -----END PRIVATE KEY-----
 
 # 日志配置
 logging:

@@ -1,4 +1,4 @@
-package net.coding.template.entity.request;
+package net.coding.template.entity.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;
