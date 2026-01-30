@@ -1,24 +1,36 @@
 package net.coding.template.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import net.coding.template.entity.enums.ContractStatus;
 import net.coding.template.entity.enums.OrderType;
 import net.coding.template.entity.enums.PaymentStatus;
 import net.coding.template.entity.po.Contract;
 import net.coding.template.entity.po.PaymentOrder;
 import net.coding.template.entity.po.User;
-import net.coding.template.entity.request.PaymentRequest;
+import net.coding.template.entity.request.*;
+import net.coding.template.entity.response.DeductResponse;
+import net.coding.template.entity.response.FreezeResponse;
 import net.coding.template.entity.response.PaymentResponse;
+import net.coding.template.entity.response.UnfreezeResponse;
 import net.coding.template.exception.BusinessException;
 import net.coding.template.mapper.ContractMapper;
 import net.coding.template.mapper.PaymentOrderMapper;
+import net.coding.template.mapper.UserMapper;
 import net.coding.template.util.OrderNoGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -31,6 +43,9 @@ public class PaymentService {
     private ContractMapper contractMapper;
 
     @Resource
+    private UserMapper userMapper;
+
+    @Resource
     private UserService userService;
 
     @Resource
@@ -40,225 +55,333 @@ public class PaymentService {
     private OrderNoGenerator orderNoGenerator;
 
     @Resource
-    private ContractService contractService;
+    private SystemConfigService configService;
+
+    @Resource
+    private RedisService redisService;
 
     /**
-     * 创建支付订单
+     * 1. 生成支付预订单
      */
     @Transactional
-    public PaymentResponse createPaymentOrder(PaymentRequest request, String token) {
-        // 1. 获取当前用户
-        User currentUser = userService.getCurrentUser(token);
-        if (currentUser == null) {
-            throw new BusinessException(401, "用户未登录");
-        }
-
-        // 2. 验证契约
-        Contract contract = contractMapper.selectContractDetail(request.getContractId());
-        if (contract == null) {
-            throw new BusinessException(404, "契约不存在");
-        }
-
-        // 3. 验证用户是否是参与方
-        if (!contract.getInitiatorId().equals(currentUser.getId())
-                && !contract.getReceiverId().equals(currentUser.getId())) {
-            throw new BusinessException(403, "无权支付此契约");
-        }
-
-        // 4. 验证契约状态
-        if (!"PENDING".equals(contract.getStatus())) {
-            throw new BusinessException(400, "契约状态不允许支付");
-        }
-
-        // 5. 检查是否已支付过
-        List<PaymentOrder> existingOrders = paymentOrderMapper.selectByContractAndType(
-                request.getContractId(), request.getOrderType());
-
-        for (PaymentOrder order : existingOrders) {
-            if (order.getUserId().equals(currentUser.getId())
-                    && "SUCCESS".equals(order.getPaymentStatus())) {
-                throw new BusinessException(400, "您已经支付过此费用");
+    public PaymentResponse prepay(PaymentRequest request, String token) {
+        try {
+            // 1. 获取当前用户
+            User currentUser = userService.getCurrentUser(token);
+            if (currentUser == null) {
+                throw new BusinessException(401, "用户未登录");
             }
+
+            // 2. 验证请求参数
+            validatePaymentRequest(request, currentUser);
+
+            // 3. 创建支付订单记录
+            PaymentOrder paymentOrder = createPaymentOrder(request, currentUser);
+
+            // 4. 调用微信支付接口生成预支付参数
+            Map<String, String> payParams = generatePayParams(paymentOrder, currentUser);
+
+            // 5. 构建响应
+            PaymentResponse response = new PaymentResponse();
+            response.setSuccess(true);
+            response.setOrderId(paymentOrder.getId());
+            response.setOrderNo(paymentOrder.getOrderNo());
+            response.setContractId(paymentOrder.getContractId());
+            response.setOrderType(paymentOrder.getOrderType());
+            response.setAmount(paymentOrder.getAmount());
+            response.setPayParams(payParams);
+            response.setExpireTime(paymentOrder.getExpireTime());
+            response.setMessage("预支付订单创建成功");
+
+            log.info("预支付订单创建成功: orderNo={}, amount={}, type={}",
+                    paymentOrder.getOrderNo(), paymentOrder.getAmount(), paymentOrder.getOrderType());
+
+            return response;
+
+        } catch (BusinessException e) {
+            log.error("生成预支付订单失败: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("生成预支付订单异常", e);
+            throw new BusinessException(500, "生成预支付订单失败");
         }
-
-        // 6. 创建支付订单
-        PaymentOrder paymentOrder = createOrderRecord(request, currentUser, contract);
-
-        // 7. 调用微信支付
-        Map<String, String> payParams;
-        if ("DEPOSIT_FREEZE".equals(request.getOrderType())) {
-            // 资金冻结
-            payParams = weChatPayService.freezeDeposit(paymentOrder, currentUser.getOpenid());
-
-            // 保存冻结协议号
-            if (payParams.containsKey("freeze_contract_id")) {
-                paymentOrder.setFreezeContractId(payParams.get("freeze_contract_id"));
-                paymentOrderMapper.updateById(paymentOrder);
-            }
-        } else {
-            // 普通支付（服务费、VIP等）
-            payParams = weChatPayService.unifiedOrder(paymentOrder, currentUser.getOpenid());
-        }
-
-        // 8. 构建响应
-        PaymentResponse response = new PaymentResponse();
-        response.setOrderId(paymentOrder.getId());
-        response.setOrderNo(paymentOrder.getOrderNo());
-        response.setAmount(paymentOrder.getAmount());
-        response.setPayParams(payParams);
-        response.setExpireTime(paymentOrder.getExpireTime());
-
-        log.info("支付订单创建成功: {}, 类型: {}", paymentOrder.getOrderNo(), request.getOrderType());
-
-        return response;
     }
 
     /**
-     * 处理支付回调
+     * 2. 处理微信支付回调
      */
     @Transactional
-    public void handlePaymentNotify(String notifyBody) {
+    public void handlePaymentNotify(PaymentNotifyRequest notifyRequest) {
         try {
+            log.info("收到支付回调通知: {}", JSON.toJSONString(notifyRequest));
+
             // 1. 验证回调签名
-            // 这里需要从请求头获取签名信息，简化处理
+            boolean valid = weChatPayService.verifyNotification(
+                    notifyRequest.getTimestamp(),
+                    notifyRequest.getNonce(),
+                    notifyRequest.getBody(),
+                    notifyRequest.getSignature()
+            );
 
-            // 2. 解析回调数据
-            Map<String, String> notifyResult = weChatPayService.handlePaymentNotify(notifyBody);
+            if (!valid) {
+                log.error("支付回调签名验证失败");
+                throw new BusinessException(400, "签名验证失败");
+            }
 
-            String outTradeNo = notifyResult.get("out_trade_no");
-            String transactionId = notifyResult.get("transaction_id");
-            String tradeState = notifyResult.get("trade_state");
+            // 2. 解密回调数据
+            String decryptedData = weChatPayService.decryptNotifyData(
+                    notifyRequest.getResource().getCiphertext(),
+                    notifyRequest.getResource().getNonce(),
+                    notifyRequest.getResource().getAssociatedData()
+            );
+
+            JSONObject notifyData = JSON.parseObject(decryptedData);
+            String outTradeNo = notifyData.getString("out_trade_no");
+            String transactionId = notifyData.getString("transaction_id");
+            String tradeState = notifyData.getString("trade_state");
+            String successTime = notifyData.getString("success_time");
 
             // 3. 查询订单
             PaymentOrder paymentOrder = paymentOrderMapper.selectByOutTradeNo(outTradeNo);
             if (paymentOrder == null) {
                 log.error("支付回调订单不存在: {}", outTradeNo);
+                throw new BusinessException(404, "订单不存在");
+            }
+
+            // 4. 防止重复处理
+            if (PaymentStatus.SUCCESS.getCode().equals(paymentOrder.getPaymentStatus())) {
+                log.warn("订单已处理过，跳过重复回调: {}", outTradeNo);
                 return;
             }
 
-            // 4. 更新订单状态
+            // 5. 更新订单状态
             if ("SUCCESS".equals(tradeState)) {
+                // 支付成功
                 paymentOrder.setPaymentStatus(PaymentStatus.SUCCESS.getCode());
                 paymentOrder.setWxTransactionId(transactionId);
-                paymentOrder.setPayTime(LocalDateTime.now());
+                paymentOrder.setPayTime(LocalDateTime.parse(successTime.replace("+", "")));
+                paymentOrder.setCallbackStatus("PENDING");
                 paymentOrderMapper.updateById(paymentOrder);
 
-                // 5. 根据订单类型处理后续逻辑
-                handleOrderAfterPayment(paymentOrder);
+                // 6. 处理订单支付成功逻辑
+                handleSuccessfulPayment(paymentOrder);
 
-                log.info("支付成功处理完成: {}", outTradeNo);
+                log.info("支付成功处理完成: outTradeNo={}, transactionId={}", outTradeNo, transactionId);
+
+            } else if ("REFUND".equals(tradeState)) {
+                // 退款通知
+                handleRefundNotify(paymentOrder, notifyData);
             } else {
-                log.warn("支付未成功: {}, 状态: {}", outTradeNo, tradeState);
+                // 支付失败或其他状态
+                paymentOrder.setPaymentStatus(PaymentStatus.FAILED.getCode());
+                paymentOrderMapper.updateById(paymentOrder);
+                log.warn("支付失败: outTradeNo={}, tradeState={}", outTradeNo, tradeState);
             }
+
+        } catch (BusinessException e) {
+            log.error("处理支付回调业务异常", e);
+            throw e;
         } catch (Exception e) {
             log.error("处理支付回调异常", e);
-            throw new BusinessException(500, "支付回调处理失败");
+            throw new BusinessException(500, "处理支付回调失败");
         }
     }
 
     /**
-     * 解冻押金
+     * 3. 资金冻结（预授权）
      */
     @Transactional
-    public void unfreezeDeposit(String contractId) {
+    public FreezeResponse freezeDeposit(FreezeRequest request, String token) {
         try {
-            // 1. 查询契约的押金冻结订单
-            List<PaymentOrder> freezeOrders = paymentOrderMapper.selectByContractAndType(
-                    contractId, OrderType.DEPOSIT_FREEZE.getCode());
-
-            for (PaymentOrder freezeOrder : freezeOrders) {
-                if (!"SUCCESS".equals(freezeOrder.getPaymentStatus())) {
-                    continue;
-                }
-
-                // 2. 创建解冻订单
-                PaymentOrder unfreezeOrder = new PaymentOrder();
-                unfreezeOrder.setOrderNo(orderNoGenerator.generate("UNFREEZE"));
-                unfreezeOrder.setContractId(contractId);
-                unfreezeOrder.setUserId(freezeOrder.getUserId());
-                unfreezeOrder.setOrderType(OrderType.DEPOSIT_UNFREEZE.getCode());
-                unfreezeOrder.setAmount(freezeOrder.getAmount());
-                unfreezeOrder.setPaymentStatus(PaymentStatus.PENDING.getCode());
-                unfreezeOrder.setExpireTime(LocalDateTime.now().plusDays(7));
-                paymentOrderMapper.insert(unfreezeOrder);
-
-                // 3. 调用微信解冻接口
-                boolean success = weChatPayService.unfreezeDeposit(freezeOrder);
-                if (success) {
-                    // 更新解冻订单状态
-                    unfreezeOrder.setPaymentStatus(PaymentStatus.SUCCESS.getCode());
-                    unfreezeOrder.setUnfreezeTime(LocalDateTime.now());
-                    paymentOrderMapper.updateById(unfreezeOrder);
-
-                    // 更新冻结订单的解冻信息
-                    freezeOrder.setUnfreezeTransactionId(unfreezeOrder.getOrderNo());
-                    freezeOrder.setUnfreezeTime(LocalDateTime.now());
-                    paymentOrderMapper.updateById(freezeOrder);
-
-                    log.info("押金解冻成功: 用户={}, 金额={}",
-                            freezeOrder.getUserId(), freezeOrder.getAmount());
-                } else {
-                    log.error("押金解冻失败: 用户={}", freezeOrder.getUserId());
-                    // 可以记录失败，后续手动处理
-                }
+            // 1. 获取当前用户
+            User currentUser = userService.getCurrentUser(token);
+            if (currentUser == null) {
+                throw new BusinessException(401, "用户未登录");
             }
+
+            // 2. 验证契约
+            Contract contract = contractMapper.selectContractDetail(request.getContractId());
+            if (contract == null) {
+                throw new BusinessException(404, "契约不存在");
+            }
+
+            // 3. 验证用户是否是契约参与方
+            if (!contract.getInitiatorId().equals(currentUser.getId())
+                    && !contract.getReceiverId().equals(currentUser.getId())) {
+                throw new BusinessException(403, "无权操作此契约");
+            }
+
+            // 4. 检查是否已冻结过
+            PaymentOrder existingFreeze = paymentOrderMapper.selectDepositFreezeOrder(
+                    currentUser.getId(), request.getContractId());
+            if (existingFreeze != null && PaymentStatus.SUCCESS.getCode().equals(existingFreeze.getPaymentStatus())) {
+                throw new BusinessException(400, "押金已冻结");
+            }
+
+            // 5. 创建冻结订单
+            PaymentOrder freezeOrder = createFreezeOrder(request, contract, currentUser);
+
+            // 6. 调用微信支付分冻结接口
+            Map<String, String> freezeResult = weChatPayService.freezeDeposit(freezeOrder, currentUser.getOpenid());
+
+            // 7. 更新冻结信息
+            if (freezeResult.containsKey("authorization_code")) {
+                freezeOrder.setFreezeContractId(freezeResult.get("authorization_code"));
+                freezeOrder.setFreezeTransactionId(freezeResult.get("transaction_id"));
+                freezeOrder.setFreezeTime(LocalDateTime.now());
+                paymentOrderMapper.updateById(freezeOrder);
+            }
+
+            // 8. 更新契约冻结状态
+            updateContractFreezeStatus(contract, currentUser.getId());
+
+            // 9. 构建响应
+            FreezeResponse response = new FreezeResponse();
+            response.setSuccess(true);
+            response.setOrderId(freezeOrder.getId());
+            response.setOrderNo(freezeOrder.getOrderNo());
+            response.setContractId(contract.getId());
+            response.setFreezeAmount(freezeOrder.getAmount());
+            response.setAuthorizationCode(freezeOrder.getFreezeContractId());
+            response.setMessage("资金冻结成功");
+
+            log.info("资金冻结成功: userId={}, contractId={}, amount={}",
+                    currentUser.getId(), contract.getId(), freezeOrder.getAmount());
+
+            return response;
+
+        } catch (BusinessException e) {
+            log.error("资金冻结失败: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
-            log.error("解冻押金异常", e);
-            throw new BusinessException(500, "解冻押金失败");
+            log.error("资金冻结异常", e);
+            throw new BusinessException(500, "资金冻结失败");
         }
     }
 
     /**
-     * 扣除违约金
+     * 4. 资金解冻
      */
     @Transactional
-    public void deductPenalty(String contractId, Long violatorUserId, Long victimUserId, BigDecimal amount) {
+    public UnfreezeResponse unfreezeDeposit(UnfreezeRequest request) {
         try {
-            // 1. 查询违约者的押金冻结订单
-            List<PaymentOrder> freezeOrders = paymentOrderMapper.selectByContractAndType(
-                    contractId, OrderType.DEPOSIT_FREEZE.getCode());
+            // 1. 查询契约
+            Contract contract = contractMapper.selectContractDetail(request.getContractId());
+            if (contract == null) {
+                throw new BusinessException(404, "契约不存在");
+            }
 
-            PaymentOrder violatorFreezeOrder = freezeOrders.stream()
-                    .filter(order -> order.getUserId().equals(violatorUserId))
-                    .findFirst()
-                    .orElseThrow(() -> new BusinessException(404, "未找到押金冻结记录"));
+            // 2. 查询双方的冻结订单
+            PaymentOrder initiatorFreeze = paymentOrderMapper.selectDepositFreezeOrder(
+                    contract.getInitiatorId(), contract.getId());
+            PaymentOrder receiverFreeze = paymentOrderMapper.selectDepositFreezeOrder(
+                    contract.getReceiverId(), contract.getId());
 
-            // 2. 创建扣除订单
-            PaymentOrder deductOrder = new PaymentOrder();
-            deductOrder.setOrderNo(orderNoGenerator.generate("DEDUCT"));
-            deductOrder.setContractId(contractId);
-            deductOrder.setUserId(violatorUserId);
-            deductOrder.setOrderType(OrderType.DEPOSIT_DEDUCT.getCode());
-            deductOrder.setAmount(amount);
-            deductOrder.setPaymentStatus(PaymentStatus.PENDING.getCode());
-            paymentOrderMapper.insert(deductOrder);
+            List<PaymentOrder> freezeOrders = new ArrayList<>();
+            if (initiatorFreeze != null) freezeOrders.add(initiatorFreeze);
+            if (receiverFreeze != null) freezeOrders.add(receiverFreeze);
 
-            // 3. 调用微信扣款接口
-            boolean success = weChatPayService.deductPenalty(violatorFreezeOrder);
-            if (success) {
-                // 更新扣除订单状态
+            if (freezeOrders.isEmpty()) {
+                throw new BusinessException(400, "未找到冻结记录");
+            }
+
+            // 3. 批量解冻
+            List<UnfreezeResponse.UnfreezeResult> results = new ArrayList<>();
+            for (PaymentOrder freezeOrder : freezeOrders) {
+                UnfreezeResponse.UnfreezeResult result = unfreezeSingleOrder(freezeOrder);
+                results.add(result);
+            }
+
+            // 4. 更新契约解冻状态
+            contractMapper.updateFreezeStatus(contract.getId(), "UNFROZEN");
+
+            // 5. 构建响应
+            UnfreezeResponse response = new UnfreezeResponse();
+            response.setSuccess(true);
+            response.setContractId(contract.getId());
+            response.setResults(results);
+            response.setMessage("资金解冻处理完成");
+
+            log.info("资金解冻成功: contractId={}, 解冻{}笔订单", contract.getId(), results.size());
+
+            return response;
+
+        } catch (BusinessException e) {
+            log.error("资金解冻失败: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("资金解冻异常", e);
+            throw new BusinessException(500, "资金解冻失败");
+        }
+    }
+
+    /**
+     * 5. 扣除违约金
+     */
+    @Transactional
+    public DeductResponse deductPenalty(DeductRequest request) {
+        try {
+            // 1. 查询契约
+            Contract contract = contractMapper.selectContractDetail(request.getContractId());
+            if (contract == null) {
+                throw new BusinessException(404, "契约不存在");
+            }
+
+            // 2. 查询违约者的冻结订单
+            PaymentOrder violatorFreeze = paymentOrderMapper.selectDepositFreezeOrder(
+                    request.getViolatorUserId(), contract.getId());
+
+            if (violatorFreeze == null || !PaymentStatus.SUCCESS.getCode().equals(violatorFreeze.getPaymentStatus())) {
+                throw new BusinessException(400, "违约者未冻结押金或冻结失败");
+            }
+
+            // 3. 检查冻结金额是否足够
+            if (violatorFreeze.getAmount().compareTo(request.getDeductAmount()) < 0) {
+                throw new BusinessException(400, "冻结金额不足");
+            }
+
+            // 4. 创建扣除订单
+            PaymentOrder deductOrder = createDeductOrder(request, contract, violatorFreeze);
+
+            // 5. 调用微信扣款接口
+            boolean deductSuccess = weChatPayService.deductPenalty(violatorFreeze);
+
+            if (deductSuccess) {
+                // 6. 更新扣除订单状态
                 deductOrder.setPaymentStatus(PaymentStatus.SUCCESS.getCode());
                 deductOrder.setPayTime(LocalDateTime.now());
                 paymentOrderMapper.updateById(deductOrder);
 
-                // 4. 创建受害者的收款订单（模拟）
-                PaymentOrder victimOrder = new PaymentOrder();
-                victimOrder.setOrderNo(orderNoGenerator.generate("COMPENSATE"));
-                victimOrder.setContractId(contractId);
-                victimOrder.setUserId(victimUserId);
-                victimOrder.setOrderType("COMPENSATION");
-                victimOrder.setAmount(amount.subtract(amount.multiply(new BigDecimal("0.01")))); // 扣除1%手续费
-                victimOrder.setPaymentStatus(PaymentStatus.SUCCESS.getCode());
-                victimOrder.setPayTime(LocalDateTime.now());
-                paymentOrderMapper.insert(victimOrder);
+                // 7. 创建赔偿订单（给受害者）
+                PaymentOrder compensationOrder = createCompensationOrder(request, contract);
 
-                log.info("违约金扣除成功: 违约者={}, 受害者={}, 金额={}",
-                        violatorUserId, victimUserId, amount);
+                // 8. 更新契约违约状态
+                contractMapper.markAsViolated(contract.getId());
+
+                // 9. 更新用户信用分
+                updateUserCreditAfterViolation(request.getViolatorUserId(), request.getVictimUserId());
+
+                // 10. 构建响应
+                DeductResponse response = new DeductResponse();
+                response.setSuccess(true);
+                response.setContractId(contract.getId());
+                response.setDeductOrderId(deductOrder.getId());
+                response.setCompensationOrderId(compensationOrder.getId());
+                response.setDeductAmount(request.getDeductAmount());
+                response.setCompensationAmount(compensationOrder.getAmount());
+                response.setMessage("违约金扣除成功");
+
+                log.info("违约金扣除成功: contractId={}, violator={}, victim={}, amount={}",
+                        contract.getId(), request.getViolatorUserId(), request.getVictimUserId(),
+                        request.getDeductAmount());
+
+                return response;
             } else {
-                log.error("违约金扣除失败: 违约者={}", violatorUserId);
-                throw new BusinessException(500, "违约金扣除失败");
+                throw new BusinessException(500, "微信扣款失败");
             }
+
         } catch (BusinessException e) {
+            log.error("扣除违约金失败: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error("扣除违约金异常", e);
@@ -266,165 +389,708 @@ public class PaymentService {
         }
     }
 
-    /**
-     * 检查契约支付状态
-     */
-    public boolean checkContractPayment(String contractId) {
-        // 1. 查询契约
-        Contract contract = contractMapper.selectContractDetail(contractId);
-        if (contract == null) {
-            return false;
-        }
-
-        // 2. 检查服务费支付状态
-        List<PaymentOrder> serviceFeeOrders = paymentOrderMapper.selectByContractAndType(
-                contractId, OrderType.SERVICE_FEE.getCode());
-
-        boolean serviceFeePaid = serviceFeeOrders.stream()
-                .allMatch(order -> "SUCCESS".equals(order.getPaymentStatus()));
-
-        // 3. 检查押金冻结状态
-        List<PaymentOrder> depositOrders = paymentOrderMapper.selectByContractAndType(
-                contractId, OrderType.DEPOSIT_FREEZE.getCode());
-
-        boolean depositFrozen = depositOrders.stream()
-                .allMatch(order -> "SUCCESS".equals(order.getPaymentStatus()));
-
-        // 4. 更新契约支付状态
-        if (serviceFeePaid && depositFrozen) {
-            contractMapper.updatePaymentStatus(contractId, "FULL");
-            contractMapper.updateContractStatus(contractId, "PAID");
-            return true;
-        } else if (serviceFeePaid || depositFrozen) {
-            contractMapper.updatePaymentStatus(contractId, "PARTIAL");
-            return false;
-        } else {
-            return false;
-        }
-    }
+    // ============ 私有方法 ============
 
     /**
-     * 退款处理
+     * 验证支付请求
      */
-    public void refundIfPaid(String contractId) {
-        // 查询已支付的订单并进行退款
-        List<PaymentOrder> paidOrders = paymentOrderMapper.selectByContractAndType(contractId, null);
+    private void validatePaymentRequest(PaymentRequest request, User user) {
+        if (request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException(400, "支付金额必须大于0");
+        }
 
-        for (PaymentOrder order : paidOrders) {
-            if ("SUCCESS".equals(order.getPaymentStatus()) && "NONE".equals(order.getRefundStatus())) {
-                // 执行退款逻辑
-                processRefund(order);
+        // 验证订单类型
+        OrderType orderType = OrderType.fromCode(request.getOrderType());
+        if (orderType == null) {
+            throw new BusinessException(400, "不支持的订单类型");
+        }
+
+        // 如果是契约相关支付，验证契约
+        if (StringUtils.hasText(request.getContractId())) {
+            Contract contract = contractMapper.selectContractDetail(request.getContractId());
+            if (contract == null) {
+                throw new BusinessException(404, "契约不存在");
+            }
+
+            // 验证用户是否有权限
+            if (!contract.getInitiatorId().equals(user.getId())
+                    && !contract.getReceiverId().equals(user.getId())) {
+                throw new BusinessException(403, "无权支付此契约");
+            }
+
+            // 检查是否已支付过
+            List<PaymentOrder> existingOrders = paymentOrderMapper.selectByContractAndType(
+                    request.getContractId(), request.getOrderType());
+
+            for (PaymentOrder order : existingOrders) {
+                if (order.getUserId().equals(user.getId())
+                        && PaymentStatus.SUCCESS.getCode().equals(order.getPaymentStatus())) {
+                    throw new BusinessException(400, "您已经支付过此费用");
+                }
             }
         }
     }
 
-    // ============ 私有方法 ============
+    /**
+     * 创建支付订单记录
+     */
+    private PaymentOrder createPaymentOrder(PaymentRequest request, User user) {
+        PaymentOrder order = new PaymentOrder();
+        order.setOrderNo(orderNoGenerator.generate("PAY"));
+        order.setContractId(request.getContractId());
+        order.setUserId(user.getId());
+        order.setOrderType(request.getOrderType());
+        order.setAmount(request.getAmount());
+        order.setActualAmount(request.getAmount());
 
-    private PaymentOrder createOrderRecord(PaymentRequest request, User user, Contract contract) {
-        PaymentOrder paymentOrder = new PaymentOrder();
-        paymentOrder.setOrderNo(orderNoGenerator.generate(request.getOrderType()));
-        paymentOrder.setContractId(request.getContractId());
-        paymentOrder.setUserId(user.getId());
-        paymentOrder.setOrderType(request.getOrderType());
-
-        // 设置金额
-        BigDecimal amount = calculateAmount(request, contract, user);
-        paymentOrder.setAmount(amount);
-
-        // 计算实际金额（扣除手续费前）
-        paymentOrder.setActualAmount(amount);
+        // 计算手续费（根据不同订单类型）
+        BigDecimal feeRate = calculateFeeRate(request.getOrderType());
+        BigDecimal feeAmount = request.getAmount().multiply(feeRate).setScale(2, RoundingMode.HALF_UP);
+        order.setFeeRate(feeRate);
+        order.setFeeAmount(feeAmount);
 
         // 微信商户订单号
-        paymentOrder.setWxOutTradeNo(generateOutTradeNo());
+        order.setWxOutTradeNo(generateOutTradeNo());
 
-        // 设置过期时间
-        paymentOrder.setExpireTime(LocalDateTime.now().plusMinutes(30));
+        // 设置过期时间（默认30分钟）
+        order.setExpireTime(LocalDateTime.now().plusMinutes(
+                configService.getInt("payment.order_expire_minutes", 30)));
 
-        // 保存到数据库
-        paymentOrderMapper.insert(paymentOrder);
+        // 设置回调URL
+        if (StringUtils.hasText(request.getNotifyUrl())) {
+            order.setNotifyUrl(request.getNotifyUrl());
+        } else {
+            order.setNotifyUrl(configService.getString("wechat.pay.notify-url"));
+        }
 
-        return paymentOrder;
+        // 存储扩展数据
+        if (request.getExtraData() != null && !request.getExtraData().isEmpty()) {
+            order.setBusinessData(JSON.toJSONString(request.getExtraData()));
+        }
+
+        paymentOrderMapper.insert(order);
+        return order;
     }
 
-    private BigDecimal calculateAmount(PaymentRequest request, Contract contract, User user) {
-        switch (request.getOrderType()) {
-            case "SERVICE_FEE":
-                // VIP用户免费
-                if (Boolean.TRUE.equals(user.getIsVip())) {
-                    return BigDecimal.ZERO;
-                }
-                return contract.getServiceFeeAmount();
-
-            case "DEPOSIT_FREEZE":
-                return contract.getDepositAmount();
-
-            case "VIP_PAYMENT":
-                // 从配置或请求中获取VIP价格
-                return request.getAmount() != null ? request.getAmount() : new BigDecimal("9.90");
-
-            case "ARBITRATION_FEE":
-                return new BigDecimal("5.00");
-
-            default:
-                throw new BusinessException(400, "不支持的订单类型");
+    /**
+     * 生成支付参数
+     */
+    private Map<String, String> generatePayParams(PaymentOrder order, User user) {
+        if (OrderType.DEPOSIT_FREEZE.getCode().equals(order.getOrderType())) {
+            // 资金冻结调用支付分接口
+            return weChatPayService.freezeDeposit(order, user.getOpenid());
+        } else {
+            // 普通支付调用JSAPI接口
+            return weChatPayService.unifiedOrder(order, user.getOpenid());
         }
     }
 
+    /**
+     * 处理支付成功逻辑
+     */
+    private void handleSuccessfulPayment(PaymentOrder order) {
+        // 1. 根据订单类型处理不同逻辑
+        switch (OrderType.fromCode(order.getOrderType())) {
+            case SERVICE_FEE:
+                // 服务费支付成功
+                handleServiceFeePayment(order);
+                break;
+
+            case DEPOSIT_FREEZE:
+                // 押金冻结成功
+                handleDepositFreeze(order);
+                break;
+
+            case VIP_PAYMENT:
+                // VIP支付成功
+                handleVipPayment(order);
+                break;
+
+            case ARBITRATION_FEE:
+                // 仲裁费支付成功
+                handleArbitrationFee(order);
+                break;
+
+            default:
+                log.warn("未知订单类型: {}", order.getOrderType());
+        }
+
+        // 2. 异步通知业务系统（如果配置了回调URL）
+        if (StringUtils.hasText(order.getNotifyUrl())) {
+            asyncNotifyBusinessSystem(order);
+        }
+    }
+
+    /**
+     * 创建冻结订单
+     */
+    private PaymentOrder createFreezeOrder(FreezeRequest request, Contract contract, User user) {
+        PaymentRequest paymentRequest = new PaymentRequest();
+        paymentRequest.setContractId(request.getContractId());
+        paymentRequest.setOrderType(OrderType.DEPOSIT_FREEZE.getCode());
+        paymentRequest.setAmount(request.getFreezeAmount());
+
+        return createPaymentOrder(paymentRequest, user);
+    }
+
+    /**
+     * 更新契约冻结状态
+     */
+    private void updateContractFreezeStatus(Contract contract, Long userId) {
+        String currentFreezeStatus = contract.getFreezeStatus();
+        String newFreezeStatus;
+
+        if (currentFreezeStatus == null || "NONE".equals(currentFreezeStatus)) {
+            // 第一笔冻结
+            newFreezeStatus = contract.getInitiatorId().equals(userId) ?
+                    "INITIATOR_FROZEN" : "RECEIVER_FROZEN";
+        } else if ("INITIATOR_FROZEN".equals(currentFreezeStatus) && contract.getReceiverId().equals(userId)) {
+            // 发起人已冻结，接收人现在冻结
+            newFreezeStatus = "BOTH_FROZEN";
+        } else if ("RECEIVER_FROZEN".equals(currentFreezeStatus) && contract.getInitiatorId().equals(userId)) {
+            // 接收人已冻结，发起人现在冻结
+            newFreezeStatus = "BOTH_FROZEN";
+        } else {
+            // 已经冻结过
+            return;
+        }
+
+        contractMapper.updateFreezeStatus(contract.getId(), newFreezeStatus);
+    }
+
+    /**
+     * 解冻单个订单
+     */
+    private UnfreezeResponse.UnfreezeResult unfreezeSingleOrder(PaymentOrder freezeOrder) {
+        UnfreezeResponse.UnfreezeResult result = new UnfreezeResponse.UnfreezeResult();
+        result.setUserId(freezeOrder.getUserId());
+        result.setFreezeOrderId(freezeOrder.getId());
+        result.setFreezeAmount(freezeOrder.getAmount());
+
+        try {
+            // 1. 创建解冻订单
+            PaymentOrder unfreezeOrder = createUnfreezeOrder(freezeOrder);
+
+            // 2. 调用微信解冻接口
+            boolean success = weChatPayService.unfreezeDeposit(freezeOrder);
+
+            if (success) {
+                // 3. 更新解冻订单状态
+                unfreezeOrder.setPaymentStatus(PaymentStatus.SUCCESS.getCode());
+                unfreezeOrder.setUnfreezeTime(LocalDateTime.now());
+                paymentOrderMapper.updateById(unfreezeOrder);
+
+                // 4. 更新冻结订单的解冻信息
+                freezeOrder.setUnfreezeTransactionId(unfreezeOrder.getOrderNo());
+                freezeOrder.setUnfreezeTime(LocalDateTime.now());
+                paymentOrderMapper.updateById(freezeOrder);
+
+                result.setSuccess(true);
+                result.setUnfreezeOrderId(unfreezeOrder.getId());
+                result.setMessage("解冻成功");
+
+                log.info("订单解冻成功: userId={}, amount={}",
+                        freezeOrder.getUserId(), freezeOrder.getAmount());
+            } else {
+                result.setSuccess(false);
+                result.setMessage("微信解冻接口调用失败");
+                log.error("解冻失败: userId={}, orderId={}",
+                        freezeOrder.getUserId(), freezeOrder.getId());
+            }
+
+        } catch (Exception e) {
+            result.setSuccess(false);
+            result.setMessage("解冻异常: " + e.getMessage());
+            log.error("解冻异常", e);
+        }
+
+        return result;
+    }
+
+    /**
+     * 创建解冻订单
+     */
+    private PaymentOrder createUnfreezeOrder(PaymentOrder freezeOrder) {
+        PaymentOrder order = new PaymentOrder();
+        order.setOrderNo(orderNoGenerator.generate("UNFREEZE"));
+        order.setContractId(freezeOrder.getContractId());
+        order.setUserId(freezeOrder.getUserId());
+        order.setOrderType(OrderType.DEPOSIT_UNFREEZE.getCode());
+        order.setAmount(freezeOrder.getAmount());
+        order.setActualAmount(freezeOrder.getAmount());
+        order.setPaymentStatus(PaymentStatus.PENDING.getCode());
+        order.setFreezeContractId(freezeOrder.getFreezeContractId());
+
+        paymentOrderMapper.insert(order);
+        return order;
+    }
+
+    /**
+     * 创建扣除订单
+     */
+    private PaymentOrder createDeductOrder(DeductRequest request, Contract contract, PaymentOrder freezeOrder) {
+        PaymentOrder order = new PaymentOrder();
+        order.setOrderNo(orderNoGenerator.generate("DEDUCT"));
+        order.setContractId(contract.getId());
+        order.setUserId(request.getViolatorUserId());
+        order.setOrderType(OrderType.DEPOSIT_DEDUCT.getCode());
+        order.setAmount(request.getDeductAmount());
+        order.setActualAmount(request.getDeductAmount());
+        order.setPaymentStatus(PaymentStatus.PENDING.getCode());
+        order.setFreezeContractId(freezeOrder.getFreezeContractId());
+
+        // 存储违约信息
+        Map<String, Object> businessData = new HashMap<>();
+        businessData.put("violatorUserId", request.getViolatorUserId());
+        businessData.put("victimUserId", request.getVictimUserId());
+        businessData.put("reason", request.getReason());
+        businessData.put("evidence", request.getEvidence());
+        order.setBusinessData(JSON.toJSONString(businessData));
+
+        paymentOrderMapper.insert(order);
+        return order;
+    }
+
+    /**
+     * 创建赔偿订单
+     */
+    private PaymentOrder createCompensationOrder(DeductRequest request, Contract contract) {
+        // 计算实际赔偿金额（扣除1%手续费）
+        BigDecimal feeRate = configService.getDecimal("payment.penalty_fee_rate", new BigDecimal("0.01"));
+        BigDecimal compensationAmount = request.getDeductAmount()
+                .subtract(request.getDeductAmount().multiply(feeRate))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        PaymentOrder order = new PaymentOrder();
+        order.setOrderNo(orderNoGenerator.generate("COMP"));
+        order.setContractId(contract.getId());
+        order.setUserId(request.getVictimUserId());
+        order.setOrderType(OrderType.COMPENSATION.getCode());
+        order.setAmount(compensationAmount);
+        order.setActualAmount(compensationAmount);
+        order.setPaymentStatus(PaymentStatus.SUCCESS.getCode());
+        order.setPayTime(LocalDateTime.now());
+
+        paymentOrderMapper.insert(order);
+        return order;
+    }
+
+    /**
+     * 计算手续费率
+     */
+    private BigDecimal calculateFeeRate(String orderType) {
+        switch (OrderType.fromCode(orderType)) {
+            case SERVICE_FEE:
+                return BigDecimal.ZERO; // 服务费不收手续费
+            case DEPOSIT_FREEZE:
+                return BigDecimal.ZERO; // 冻结不收手续费
+            case VIP_PAYMENT:
+                return new BigDecimal("0.006"); // 0.6%
+            case ARBITRATION_FEE:
+                return new BigDecimal("0.006"); // 0.6%
+            default:
+                return new BigDecimal("0.006"); // 默认0.6%
+        }
+    }
+
+    /**
+     * 生成微信商户订单号
+     */
     private String generateOutTradeNo() {
         return "WX" + System.currentTimeMillis() + (int)(Math.random() * 1000);
     }
 
-    private void handleOrderAfterPayment(PaymentOrder paymentOrder) {
-        switch (paymentOrder.getOrderType()) {
-            case "SERVICE_FEE":
-                // 服务费支付成功，检查契约是否可开始
-                checkAndStartContract(paymentOrder.getContractId());
-                break;
+    /**
+     * 处理退款通知
+     */
+    private void handleRefundNotify(PaymentOrder order, JSONObject notifyData) {
+        // 实现退款处理逻辑
+        log.info("处理退款通知: orderNo={}", order.getOrderNo());
+    }
 
-            case "DEPOSIT_FREEZE":
-                // 押金冻结成功，检查契约是否可开始
-                checkAndStartContract(paymentOrder.getContractId());
-                break;
+    /**
+     * 处理服务费支付成功
+     */
+    private void handleServiceFeePayment(PaymentOrder order) {
+        // 检查契约是否所有费用都已支付，如果都已支付则开始契约
+        checkAndStartContract(order.getContractId());
+    }
 
-            case "VIP_PAYMENT":
-                // VIP支付成功，更新用户VIP状态
-                updateUserVipStatus(paymentOrder.getUserId());
-                break;
+    /**
+     * 处理押金冻结成功
+     */
+    private void handleDepositFreeze(PaymentOrder order) {
+        // 检查契约是否所有费用都已支付，如果都已支付则开始契约
+        checkAndStartContract(order.getContractId());
+    }
 
-            case "ARBITRATION_FEE":
-                // 仲裁费支付成功，更新仲裁状态
-                updateArbitrationStatus(paymentOrder);
-                break;
+    /**
+     * 处理VIP支付成功
+     */
+    private void handleVipPayment(PaymentOrder order) {
+        // 更新用户VIP状态
+        User user = userMapper.selectById(order.getUserId());
+        if (user != null) {
+            user.setIsVip(true);
+            user.setVipStartTime(LocalDateTime.now());
+            user.setVipExpireTime(LocalDateTime.now().plusMonths(1)); // 默认一个月
+            userMapper.updateById(user);
+            log.info("用户VIP状态更新: userId={}", user.getId());
         }
     }
 
+    /**
+     * 处理仲裁费支付成功
+     */
+    private void handleArbitrationFee(PaymentOrder order) {
+        // 更新仲裁状态为加急处理
+        // 这里需要调用仲裁服务
+        log.info("仲裁费支付成功，标记为加急处理: orderId={}", order.getId());
+    }
+
+    /**
+     * 检查并开始契约
+     */
     private void checkAndStartContract(String contractId) {
-        // 检查契约支付是否完成
-        boolean allPaid = checkContractPayment(contractId);
+        // 检查契约是否所有费用都已支付
+        boolean allPaid = checkContractPaymentStatus(contractId);
 
         if (allPaid) {
-            // 所有费用已支付，开始契约
-            contractService.startContractAfterPayment(contractId);
+            // 更新契约状态为已支付
+            contractMapper.updatePaymentStatus(contractId, "FULL");
+            contractMapper.updateContractStatus(contractId, ContractStatus.PAID.getCode());
+            log.info("契约所有费用支付完成，准备开始: contractId={}", contractId);
         }
     }
 
-    private void updateUserVipStatus(Long userId) {
-        // 更新用户VIP状态
-        // 实现逻辑...
+    /**
+     * 检查契约支付状态
+     */
+    private boolean checkContractPaymentStatus(String contractId) {
+        // 查询契约所有支付订单
+        List<PaymentOrder> orders = paymentOrderMapper.selectByContractId(contractId);
+
+        // 检查服务费和押金是否都已支付成功
+        boolean serviceFeePaid = orders.stream()
+                .filter(o -> OrderType.SERVICE_FEE.getCode().equals(o.getOrderType()))
+                .allMatch(o -> PaymentStatus.SUCCESS.getCode().equals(o.getPaymentStatus()));
+
+        boolean depositPaid = orders.stream()
+                .filter(o -> OrderType.DEPOSIT_FREEZE.getCode().equals(o.getOrderType()))
+                .allMatch(o -> PaymentStatus.SUCCESS.getCode().equals(o.getPaymentStatus()));
+
+        return serviceFeePaid && depositPaid;
     }
 
-    private void updateArbitrationStatus(PaymentOrder paymentOrder) {
-        // 更新仲裁状态为加急处理
-        // 实现逻辑...
+    /**
+     * 异步通知业务系统
+     */
+    private void asyncNotifyBusinessSystem(PaymentOrder order) {
+        // 实现异步通知逻辑
+        // 可以使用消息队列或线程池
+        log.info("异步通知业务系统: orderId={}, notifyUrl={}", order.getId(), order.getNotifyUrl());
     }
 
-    private void processRefund(PaymentOrder order) {
-        // 实现退款逻辑
-        // 这里简化处理
-        order.setRefundStatus("FULL");
-        order.setRefundTime(LocalDateTime.now());
-        paymentOrderMapper.updateById(order);
+    /**
+     * 更新用户信用分（违约后）
+     */
+    private void updateUserCreditAfterViolation(Long violatorUserId, Long victimUserId) {
+        // 违约者扣分
+        int violationDeduct = configService.getInt("credit.violation_deduct", 50);
+        User violator = userMapper.selectById(violatorUserId);
+        if (violator != null) {
+            int newScore = Math.max(0, violator.getCreditScore() - violationDeduct);
+            violator.setCreditScore(newScore);
+            violator.setViolationCount(violator.getViolationCount() + 1);
+            userMapper.updateById(violator);
 
-        log.info("订单退款成功: {}", order.getOrderNo());
+            // 记录信用历史
+            log.info("违约者信用分更新: userId={}, 扣除{}分", violatorUserId, violationDeduct);
+        }
+
+        // 受害者可以适当加分（可选）
+        int compensationAdd = configService.getInt("credit.compensation_add", 5);
+        User victim = userMapper.selectById(victimUserId);
+        if (victim != null) {
+            int newScore = Math.min(100, victim.getCreditScore() + compensationAdd);
+            victim.setCreditScore(newScore);
+            userMapper.updateById(victim);
+
+            log.info("受害者信用分更新: userId={}, 增加{}分", victimUserId, compensationAdd);
+        }
+    }
+
+    /**
+     * 退款处理（如果已支付）
+     * 用于契约取消或超时时，对已支付的订单进行退款
+     */
+    @Transactional
+    public void refundIfPaid(String contractId) {
+        try {
+            log.info("开始处理契约退款: contractId={}", contractId);
+
+            // 1. 查询契约相关的所有支付订单
+            List<PaymentOrder> paymentOrders = paymentOrderMapper.selectByContractId(contractId);
+
+            if (paymentOrders == null || paymentOrders.isEmpty()) {
+                log.info("契约无支付订单，无需退款: contractId={}", contractId);
+                return;
+            }
+
+            // 2. 过滤已支付且未退款的订单
+            List<PaymentOrder> ordersToRefund = paymentOrders.stream()
+                    .filter(order -> PaymentStatus.SUCCESS.getCode().equals(order.getPaymentStatus()))
+                    .filter(order -> PaymentStatus.REFUNDED.getCode().equals(order.getRefundStatus())
+                            || "NONE".equals(order.getRefundStatus()))
+                    .collect(Collectors.toList());
+
+            if (ordersToRefund.isEmpty()) {
+                log.info("没有需要退款的订单: contractId={}", contractId);
+                return;
+            }
+
+            log.info("发现{}笔需要退款的订单: contractId={}", ordersToRefund.size(), contractId);
+
+            // 3. 批量处理退款
+            int successCount = 0;
+            int failedCount = 0;
+
+            for (PaymentOrder order : ordersToRefund) {
+                try {
+                    boolean refundSuccess = processRefund(order);
+
+                    if (refundSuccess) {
+                        successCount++;
+
+                        // 更新订单退款状态
+                        order.setRefundStatus(PaymentStatus.REFUNDED.getCode());
+                        order.setRefundTime(LocalDateTime.now());
+                        paymentOrderMapper.updateById(order);
+
+                        // 记录退款日志
+                        logRefundOperation(order, "契约取消自动退款");
+
+                        log.info("订单退款成功: orderNo={}, userId={}, amount={}",
+                                order.getOrderNo(), order.getUserId(), order.getAmount());
+                    } else {
+                        failedCount++;
+                        log.error("订单退款失败: orderNo={}", order.getOrderNo());
+
+                        // 标记为退款失败
+                        order.setRefundStatus(PaymentStatus.REFUND_FAILED.getCode());
+                        paymentOrderMapper.updateById(order);
+                    }
+
+                } catch (Exception e) {
+                    failedCount++;
+                    log.error("处理订单退款异常: orderId={}", order.getId(), e);
+
+                    // 标记为退款失败
+                    order.setRefundStatus(PaymentStatus.REFUND_FAILED.getCode());
+                    paymentOrderMapper.updateById(order);
+                }
+            }
+
+            // 4. 根据订单类型更新相关状态
+            updateRelatedStatusAfterRefund(contractId, ordersToRefund);
+
+            log.info("契约退款处理完成: contractId={}, 成功{}笔, 失败{}笔",
+                    contractId, successCount, failedCount);
+
+        } catch (Exception e) {
+            log.error("处理契约退款异常: contractId={}", contractId, e);
+            throw new BusinessException(500, "退款处理失败");
+        }
+    }
+
+    /**
+     * 处理单个订单退款
+     */
+    private boolean processRefund(PaymentOrder order) {
+        try {
+            // 1. 创建退款订单记录
+            PaymentOrder refundOrder = createRefundOrder(order);
+
+            // 2. 根据订单类型调用不同的退款接口
+            boolean refundSuccess = false;
+
+            if (OrderType.DEPOSIT_FREEZE.getCode().equals(order.getOrderType())) {
+                // 押金冻结订单：直接解冻，无需调用退款API
+                refundSuccess = true;
+                log.info("押金冻结订单直接解冻: orderNo={}", order.getOrderNo());
+
+            } else if (OrderType.SERVICE_FEE.getCode().equals(order.getOrderType())) {
+                // 服务费订单：调用微信退款API
+                refundSuccess = weChatPayService.refundPayment(order, refundOrder);
+
+            } else if (OrderType.VIP_PAYMENT.getCode().equals(order.getOrderType())) {
+                // VIP支付订单：调用微信退款API
+                refundSuccess = weChatPayService.refundPayment(order, refundOrder);
+
+            } else if (OrderType.ARBITRATION_FEE.getCode().equals(order.getOrderType())) {
+                // 仲裁费订单：调用微信退款API
+                refundSuccess = weChatPayService.refundPayment(order, refundOrder);
+
+            } else {
+                // 其他类型订单不支持退款
+                log.warn("不支持退款的订单类型: orderType={}, orderNo={}",
+                        order.getOrderType(), order.getOrderNo());
+                return false;
+            }
+
+            // 3. 更新退款订单状态
+            if (refundSuccess) {
+                refundOrder.setPaymentStatus(PaymentStatus.SUCCESS.getCode());
+                refundOrder.setPayTime(LocalDateTime.now());
+                paymentOrderMapper.updateById(refundOrder);
+
+                // 关联原订单和退款订单
+                order.setRefundStatus(PaymentStatus.REFUNDED.getCode());
+                order.setRefundTime(LocalDateTime.now());
+                paymentOrderMapper.updateById(order);
+
+                // 记录退款流水
+                recordRefundTransaction(order, refundOrder);
+            } else {
+                refundOrder.setPaymentStatus(PaymentStatus.FAILED.getCode());
+                paymentOrderMapper.updateById(refundOrder);
+            }
+
+            return refundSuccess;
+
+        } catch (Exception e) {
+            log.error("处理退款异常: orderId={}", order.getId(), e);
+            return false;
+        }
+    }
+
+    /**
+     * 创建退款订单
+     */
+    private PaymentOrder createRefundOrder(PaymentOrder originalOrder) {
+        PaymentOrder refundOrder = new PaymentOrder();
+        refundOrder.setOrderNo(orderNoGenerator.generate("REFUND"));
+        refundOrder.setContractId(originalOrder.getContractId());
+        refundOrder.setUserId(originalOrder.getUserId());
+        refundOrder.setOrderType(OrderType.REFUND.getCode());
+        refundOrder.setAmount(originalOrder.getAmount());
+        refundOrder.setActualAmount(originalOrder.getAmount());
+        refundOrder.setPaymentStatus(PaymentStatus.PENDING.getCode());
+        refundOrder.setWxOutTradeNo("REFUND_" + originalOrder.getWxOutTradeNo());
+
+        // 关联原订单信息
+        Map<String, Object> businessData = new HashMap<>();
+        businessData.put("originalOrderId", originalOrder.getId());
+        businessData.put("originalOrderNo", originalOrder.getOrderNo());
+        businessData.put("refundReason", "契约取消自动退款");
+        refundOrder.setBusinessData(JSON.toJSONString(businessData));
+
+        paymentOrderMapper.insert(refundOrder);
+        return refundOrder;
+    }
+
+    /**
+     * 更新退款后的相关状态
+     */
+    private void updateRelatedStatusAfterRefund(String contractId, List<PaymentOrder> refundedOrders) {
+        try {
+            // 1. 检查是否所有费用都已退款
+            List<PaymentOrder> allOrders = paymentOrderMapper.selectByContractId(contractId);
+
+            boolean allRefunded = allOrders.stream()
+                    .filter(order -> PaymentStatus.SUCCESS.getCode().equals(order.getPaymentStatus()))
+                    .allMatch(order -> PaymentStatus.REFUNDED.getCode().equals(order.getRefundStatus()));
+
+            if (allRefunded) {
+                // 2. 更新契约退款状态
+                contractMapper.updateRefundStatus(contractId, "FULL");
+                log.info("契约所有费用已全额退款: contractId={}", contractId);
+            } else {
+                // 部分退款
+                contractMapper.updateRefundStatus(contractId, "PARTIAL");
+                log.info("契约部分费用已退款: contractId={}", contractId);
+            }
+
+            // 3. 对于押金冻结订单，需要更新冻结状态
+            refundedOrders.stream()
+                    .filter(order -> OrderType.DEPOSIT_FREEZE.getCode().equals(order.getOrderType()))
+                    .forEach(order -> {
+                        // 如果押金已解冻，更新冻结状态
+                        if (order.getUnfreezeTransactionId() != null) {
+                            contractMapper.updateFreezeStatus(contractId, "REFUNDED");
+                        }
+                    });
+
+            // 4. 如果是VIP订单退款，需要更新用户VIP状态
+            refundedOrders.stream()
+                    .filter(order -> OrderType.VIP_PAYMENT.getCode().equals(order.getOrderType()))
+                    .forEach(order -> {
+                        updateUserVipStatusAfterRefund(order.getUserId());
+                    });
+
+        } catch (Exception e) {
+            log.error("更新退款后状态异常: contractId={}", contractId, e);
+        }
+    }
+
+    /**
+     * 更新用户VIP状态（退款后）
+     */
+    private void updateUserVipStatusAfterRefund(Long userId) {
+        try {
+            User user = userMapper.selectById(userId);
+            if (user != null && Boolean.TRUE.equals(user.getIsVip())) {
+                // 检查用户是否还有其他有效的VIP订单
+                List<PaymentOrder> vipOrders = paymentOrderMapper.selectUserOrders(
+                        userId, OrderType.VIP_PAYMENT.getCode(), PaymentStatus.SUCCESS.getCode(), 0, 10);
+
+                boolean hasValidVipOrder = vipOrders.stream()
+                        .anyMatch(order -> !PaymentStatus.REFUNDED.getCode().equals(order.getRefundStatus()));
+
+                if (!hasValidVipOrder) {
+                    // 没有其他有效VIP订单，取消VIP状态
+                    user.setIsVip(false);
+                    user.setVipExpireTime(LocalDateTime.now());
+                    userMapper.updateById(user);
+                    log.info("用户VIP状态已取消（退款后）: userId={}", userId);
+                }
+            }
+        } catch (Exception e) {
+            log.error("更新用户VIP状态异常: userId={}", userId, e);
+        }
+    }
+
+    /**
+     * 记录退款操作日志
+     */
+    private void logRefundOperation(PaymentOrder order, String reason) {
+        try {
+            // 这里可以记录到专门的退款日志表或操作日志表
+            log.info("退款操作记录: orderNo={}, userId={}, amount={}, reason={}",
+                    order.getOrderNo(), order.getUserId(), order.getAmount(), reason);
+
+            // 如果需要更详细的记录，可以创建一个RefundLog实体类
+            // refundLogService.save(new RefundLog(order, reason));
+
+        } catch (Exception e) {
+            log.error("记录退款日志异常", e);
+        }
+    }
+
+    /**
+     * 记录退款流水
+     */
+    private void recordRefundTransaction(PaymentOrder originalOrder, PaymentOrder refundOrder) {
+        try {
+            // 这里可以记录到财务流水表
+            log.info("退款流水记录: originalOrderNo={}, refundOrderNo={}, amount={}",
+                    originalOrder.getOrderNo(), refundOrder.getOrderNo(), refundOrder.getAmount());
+
+            // 如果需要，可以创建一个TransactionRecord实体类
+            // transactionService.recordRefund(originalOrder, refundOrder);
+
+        } catch (Exception e) {
+            log.error("记录退款流水异常", e);
+        }
     }
 }

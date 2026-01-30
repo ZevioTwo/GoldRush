@@ -146,4 +146,11 @@ public interface ContractMapper extends BaseMapper<Contract> {
     @Select("SELECT * FROM contracts WHERE status = 'PAID' " +
             "AND create_time < DATE_SUB(NOW(), INTERVAL 30 MINUTE)")
     List<Contract> selectTimeoutContracts();
+
+    /**
+     * 更新契约退款状态
+     */
+    @Update("UPDATE contracts SET refund_status = #{refundStatus}, update_time = NOW() WHERE id = #{contractId}")
+    int updateRefundStatus(@Param("contractId") String contractId,
+                           @Param("refundStatus") String refundStatus);
 }

@@ -11,6 +11,7 @@ import net.coding.template.entity.request.ContractConfirmRequest;
 import net.coding.template.entity.request.ContractCreateRequest;
 import net.coding.template.entity.dto.ContractDetailDTO;
 import net.coding.template.entity.request.ContractListRequest;
+import net.coding.template.entity.request.UnfreezeRequest;
 import net.coding.template.entity.response.ContractConfirmResponse;
 import net.coding.template.entity.response.ContractCreateResponse;
 import net.coding.template.entity.response.ContractListResponse;
@@ -323,7 +324,9 @@ public class ContractService {
             updateCreditScore(contract.getReceiverId(), 10);
 
             // 解冻押金
-            paymentService.unfreezeDeposit(contract.getId());
+            UnfreezeRequest unfreezeRequest = new UnfreezeRequest();
+            unfreezeRequest.setContractId(contract.getId());
+            paymentService.unfreezeDeposit(unfreezeRequest);
 
             log.info("契约完成: {}, 双方确认", contract.getContractNo());
 

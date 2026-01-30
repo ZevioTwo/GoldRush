@@ -86,4 +86,20 @@ public class PaymentOrder {
 
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+
+    // 在PaymentOrder实体类中添加以下字段
+    @TableField("business_data")
+    private String businessData; // 业务扩展数据，JSON格式存储额外信息
+
+    @TableField("callback_status")
+    private String callbackStatus = "PENDING"; // 回调状态：PENDING, SUCCESS, FAILED
+
+    @TableField("callback_count")
+    private Integer callbackCount = 0; // 回调次数
+
+    @TableField("last_callback_time")
+    private LocalDateTime lastCallbackTime; // 最后回调时间
+
+    @TableField("notify_url")
+    private String notifyUrl; // 异步通知URL
 }

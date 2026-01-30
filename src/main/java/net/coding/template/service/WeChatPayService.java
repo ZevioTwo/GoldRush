@@ -10,13 +10,19 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
-import javax.crypto.Mac;
+import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -358,6 +364,86 @@ public class WeChatPayService {
         }
     }
 
+    /**
+     * 解密微信支付回调数据
+     * 使用API v3密钥进行AES-GCM解密
+     */
+    public String decryptNotifyData(String ciphertext, String nonce, String associatedData) {
+        try {
+            // 获取API v3密钥
+            byte[] apiV3Key = weChatPayConfig.getApiV3Key().getBytes(StandardCharsets.UTF_8);
+
+            // Base64解码密文
+            byte[] cipherBytes = Base64.getDecoder().decode(ciphertext);
+
+            // 使用AES-GCM解密
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+            // 创建GCMParameterSpec，tag长度128位
+            GCMParameterSpec spec = new GCMParameterSpec(128, nonce.getBytes(StandardCharsets.UTF_8));
+
+            // 创建密钥
+            SecretKeySpec keySpec = new SecretKeySpec(apiV3Key, "AES");
+
+            // 初始化解密器
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, spec);
+
+            // 设置附加认证数据（AAD）
+            if (associatedData != null) {
+                cipher.updateAAD(associatedData.getBytes(StandardCharsets.UTF_8));
+            }
+
+            // 执行解密
+            byte[] decryptedBytes = cipher.doFinal(cipherBytes);
+
+            // 转换为字符串
+            return new String(decryptedBytes, StandardCharsets.UTF_8);
+
+        } catch (DecodingException e) {
+            log.error("Base64解码失败: ciphertext={}", ciphertext, e);
+            throw new BusinessException(400, "密文格式错误");
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            log.error("AES-GCM算法不支持", e);
+            throw new BusinessException(500, "解密算法不支持");
+        } catch (InvalidKeyException e) {
+            log.error("解密密钥无效", e);
+            throw new BusinessException(500, "解密密钥错误");
+        } catch (InvalidAlgorithmParameterException e) {
+            log.error("解密参数错误", e);
+            throw new BusinessException(400, "解密参数错误");
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            log.error("解密失败，可能是密钥错误或数据被篡改", e);
+            throw new BusinessException(400, "解密失败，数据可能被篡改");
+        } catch (Exception e) {
+            log.error("解密回调数据异常", e);
+            throw new BusinessException(500, "解密回调数据失败");
+        }
+    }
+
+    /**
+     * 微信支付退款接口
+     */
+    public boolean refundPayment(PaymentOrder originalOrder, PaymentOrder refundOrder) {
+        try {
+            Map<String, String> params = new HashMap<>();
+            params.put("transaction_id", originalOrder.getWxTransactionId());
+            params.put("out_refund_no", refundOrder.getWxOutTradeNo());
+            params.put("total", originalOrder.getAmount().multiply(new BigDecimal(100)).intValue() + "");
+            params.put("refund", refundOrder.getAmount().multiply(new BigDecimal(100)).intValue() + "");
+            params.put("reason", "契约取消退款");
+
+            // 调用微信退款API
+            String response = executePost("/v3/refund/domestic/refunds", params);
+            JSONObject jsonResponse = JSON.parseObject(response);
+
+            return jsonResponse.containsKey("refund_id");
+
+        } catch (Exception e) {
+            log.error("微信退款接口调用异常: orderNo={}", originalOrder.getOrderNo(), e);
+            return false;
+        }
+    }
+
     private void handleSuccessfulPayment(Map<String, String> result) {
         // 实际处理逻辑
     }
@@ -365,4 +451,5 @@ public class WeChatPayService {
     private void handleRefund(Map<String, String> result) {
         // 实际处理逻辑
     }
+
 }

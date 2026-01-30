@@ -3,19 +3,15 @@ package net.coding.template.entity.response;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Map;
 
 @Data
-public class PaymentResponse {
+public class FreezeResponse {
     private Boolean success;
     private Long orderId;
     private String orderNo;
     private String contractId;
-    private String orderType;
-    private BigDecimal amount;
-    private Map<String, String> payParams;
-    private LocalDateTime expireTime;
+    private BigDecimal freezeAmount;
+    private String authorizationCode;
     private String message;
     private String errorCode;
 }
