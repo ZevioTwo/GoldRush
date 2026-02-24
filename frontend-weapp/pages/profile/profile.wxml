@@ -1,0 +1,33 @@
+<view class="container">
+  <view class="card">
+    <view style="font-size: 34rpx; font-weight: 600; margin-bottom: 12rpx;">用户信息</view>
+    <view class="row">
+      <text class="text-muted">用户ID</text>
+      <text>{{profile.userId}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">昵称</text>
+      <text>{{profile.nickname}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">手机号</text>
+      <text>{{profile.phone}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <text class="text-muted">当前信用分</text>
+      <text>{{creditScore}}</text>
+    </view>
+    <button class="btn-outline" bindtap="goCredit">查看信用分详情</button>
+  </view>
+
+  <view class="card">
+    <button class="btn-primary" bindtap="goContracts">查看契约</button>
+  </view>
+
+  <view class="card">
+    <button class="btn-outline" bindtap="logout">退出登录</button>
+  </view>
+</view>

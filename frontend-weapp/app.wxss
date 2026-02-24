@@ -1,0 +1,42 @@
+page {
+  background: #f7f7f7;
+  color: #333;
+  font-size: 28rpx;
+}
+
+.container {
+  padding: 32rpx;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.btn-primary {
+  background: #1677ff;
+  color: #fff;
+  padding: 20rpx 24rpx;
+  border-radius: 12rpx;
+}
+
+.btn-outline {
+  border: 2rpx solid #1677ff;
+  color: #1677ff;
+  padding: 18rpx 22rpx;
+  border-radius: 12rpx;
+}
+
+.text-muted {
+  color: #888;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}

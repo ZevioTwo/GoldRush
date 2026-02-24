@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/profile/profile",
+    "pages/credit/credit",
+    "pages/contracts/list",
+    "pages/contracts/detail"
+  ],
+  "window": {
+    "navigationBarTitleText": "Gold Rush Contract",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundTextStyle": "light"
+  }
+}

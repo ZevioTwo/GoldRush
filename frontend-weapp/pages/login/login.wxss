@@ -1,0 +1,7 @@
+.container {
+  padding-top: 160rpx;
+}
+
+button[disabled] {
+  opacity: 0.6;
+}

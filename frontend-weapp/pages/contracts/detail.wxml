@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="card">
+    <view style="font-weight: 600; font-size: 32rpx; margin-bottom: 12rpx;">契约号：{{detail.contractNo}}</view>
+    <view class="row">
+      <text class="text-muted">状态</text>
+      <text>{{detail.status}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">金额</text>
+      <text>{{detail.amount}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">创建时间</text>
+      <text>{{detail.createdAt}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view style="font-weight: 600; margin-bottom: 12rpx;">参与方</view>
+    <view class="row">
+      <text class="text-muted">发起人</text>
+      <text>{{detail.senderNickname}} ({{detail.senderUserId}})</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">接收人</text>
+      <text>{{detail.receiverNickname}} ({{detail.receiverUserId}})</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view style="font-weight: 600; margin-bottom: 12rpx;">条款</view>
+    <view class="row">
+      <text class="text-muted">游戏类型</text>
+      <text>{{detail.gameType}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">违约金</text>
+      <text>{{detail.penaltyAmount}}</text>
+    </view>
+  </view>
+</view>

@@ -230,5 +230,6 @@ public class PaymentController {
         // 实现权限验证逻辑
         // 这里简化处理，实际需要根据token验证用户角色
         // 只有管理员或仲裁员可以扣除违约金
+        throw new BusinessException(403, "无权进行扣款操作");
     }
 }

@@ -1,0 +1,40 @@
+<view class="container">
+  <view class="card">
+    <view class="row">
+      <text class="text-muted">状态</text>
+      <picker mode="selector" range="{{statusOptions}}" bindchange="onStatusChange">
+        <text>{{statusOptions[statusIndex]}}</text>
+      </picker>
+    </view>
+    <view class="row">
+      <text class="text-muted">分页</text>
+      <view>
+        <button size="mini" class="btn-outline" bindtap="prevPage">上一页</button>
+        <text style="margin: 0 12rpx;">{{page}}</text>
+        <button size="mini" class="btn-outline" bindtap="nextPage">下一页</button>
+      </view>
+    </view>
+  </view>
+
+  <block wx:for="{{list}}" wx:key="contractId">
+    <view class="card" bindtap="goDetail" data-id="{{item.contractId}}">
+      <view style="font-weight: 600; margin-bottom: 12rpx;">契约号：{{item.contractNo}}</view>
+      <view class="row">
+        <text class="text-muted">状态</text>
+        <text>{{item.status}}</text>
+      </view>
+      <view class="row">
+        <text class="text-muted">金额</text>
+        <text>{{item.amount}}</text>
+      </view>
+      <view class="row">
+        <text class="text-muted">创建时间</text>
+        <text>{{item.createdAt}}</text>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{list.length === 0}}" class="text-muted" style="text-align:center; margin-top: 48rpx;">
+    暂无数据
+  </view>
+</view>

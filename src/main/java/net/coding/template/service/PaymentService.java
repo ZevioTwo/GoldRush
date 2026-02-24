@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -325,6 +326,24 @@ public class PaymentService {
             Contract contract = contractMapper.selectContractDetail(request.getContractId());
             if (contract == null) {
                 throw new BusinessException(404, "契约不存在");
+            }
+
+            if (!ContractStatus.DISPUTE.getCode().equals(contract.getStatus())) {
+                throw new BusinessException(400, "契约非争议状态，无法扣款");
+            }
+
+            if (request.getViolatorUserId().equals(request.getVictimUserId())) {
+                throw new BusinessException(400, "违约方与受害方不能为同一用户");
+            }
+
+            if (!request.getViolatorUserId().equals(contract.getInitiatorId())
+                    && !request.getViolatorUserId().equals(contract.getReceiverId())) {
+                throw new BusinessException(400, "违约者非契约参与方");
+            }
+
+            if (!request.getVictimUserId().equals(contract.getInitiatorId())
+                    && !request.getVictimUserId().equals(contract.getReceiverId())) {
+                throw new BusinessException(400, "受害者非契约参与方");
             }
 
             // 2. 查询违约者的冻结订单
