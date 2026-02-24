@@ -1,0 +1,58 @@
+<view class="container">
+  <view class="card">
+    <view class="section-title">契约信息</view>
+    <view class="form-item" wx:if="{{showContractPicker}}">
+      <text class="label">选择契约</text>
+      <picker mode="selector" range="{{contractOptions}}" bindchange="onContractChange">
+        <view class="picker">{{contractOptions[contractIndex]}}</view>
+      </picker>
+    </view>
+    <view class="row">
+      <text class="text-muted">契约号</text>
+      <text>{{contract.contractNo || '-'}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">状态</text>
+      <text>{{contract.status || '-'}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">金额</text>
+      <text>{{contract.depositAmount || '-'}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">仲裁信息</view>
+    <view class="form-item">
+      <text class="label">争议类型</text>
+      <picker mode="selector" range="{{disputeTypeOptions}}" bindchange="onDisputeTypeChange">
+        <view class="picker">{{disputeTypeOptions[disputeTypeIndex]}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="label">争议描述</text>
+      <textarea class="textarea" placeholder="请描述争议情况" value="{{form.description}}" bindinput="onInput" data-field="description"></textarea>
+    </view>
+    <view class="form-item">
+      <text class="label">证据链接（可选，逗号分隔）</text>
+      <textarea class="textarea" placeholder="http://example.com/a.jpg, http://example.com/b.jpg" value="{{form.evidenceUrls}}" bindinput="onInput" data-field="evidenceUrls"></textarea>
+    </view>
+    <view class="form-item">
+      <text class="label">游戏截图链接（可选，逗号分隔）</text>
+      <textarea class="textarea" placeholder="http://example.com/1.png, http://example.com/2.png" value="{{form.gameScreenshotUrls}}" bindinput="onInput" data-field="gameScreenshotUrls"></textarea>
+    </view>
+    <view class="form-item">
+      <text class="label">录屏链接（可选，逗号分隔）</text>
+      <textarea class="textarea" placeholder="http://example.com/v.mp4, http://example.com/v2.mp4" value="{{form.videoLinks}}" bindinput="onInput" data-field="videoLinks"></textarea>
+    </view>
+    <view class="form-item">
+      <view class="row" style="margin: 0;">
+        <text class="label">是否加急</text>
+        <switch checked="{{form.isUrgent}}" bindchange="onUrgentChange" />
+      </view>
+      <text class="text-muted">加急可能产生额外费用，请确认后提交</text>
+    </view>
+  </view>
+
+  <button class="btn-primary" bindtap="submit" loading="{{loading}}">提交仲裁申请</button>
+</view>

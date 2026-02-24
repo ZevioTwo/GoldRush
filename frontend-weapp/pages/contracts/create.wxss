@@ -4,21 +4,23 @@
 
 .label {
   display: block;
-  color: #666;
+  color: #5e6572;
   margin-bottom: 12rpx;
+  font-size: 26rpx;
 }
 
 .input,
 .textarea,
 .picker,
 .readonly {
-  background: #f5f5f5;
-  border-radius: 12rpx;
-  padding: 16rpx;
+  background: #f3f4f6;
+  border-radius: 14rpx;
+  padding: 18rpx;
+  border: 1rpx solid rgba(15, 23, 42, 0.06);
 }
 
 .readonly {
-  color: #333;
+  color: #1f2329;
 }
 
 .textarea {

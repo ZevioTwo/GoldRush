@@ -1,0 +1,6 @@
+<view class="container">
+  <view class="card" style="text-align:center;">
+    <view class="text-muted">特权中心建设中</view>
+    <view style="margin-top: 12rpx; font-size: 26rpx; color: #5e6572;">敬请期待</view>
+  </view>
+</view>

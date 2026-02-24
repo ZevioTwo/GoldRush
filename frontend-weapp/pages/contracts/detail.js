@@ -35,6 +35,13 @@ Page({
         wx.showToast({ title: "网络错误", icon: "none" });
       });
   },
+  goDisputeApply() {
+    if (!this.data.id) {
+      wx.showToast({ title: "缺少契约ID", icon: "none" });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/dispute/apply?contractId=${this.data.id}` });
+  },
   formatDate(value) {
     if (!value) return "";
     const pad = (n) => (n < 10 ? `0${n}` : `${n}`);

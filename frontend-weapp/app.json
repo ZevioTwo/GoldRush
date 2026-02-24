@@ -3,9 +3,13 @@
     "pages/login/login",
     "pages/contracts/list",
     "pages/hall/list",
+    "pages/dispute/index",
     "pages/contracts/create",
     "pages/contracts/detail",
+    "pages/dispute/apply",
     "pages/profile/profile",
+    "pages/profile/info",
+    "pages/profile/vip",
     "pages/profile/edit",
     "pages/profile/accounts",
     "pages/credit/credit"
@@ -17,6 +21,7 @@
     "backgroundTextStyle": "light"
   },
   "tabBar": {
+    "custom": true,
     "color": "#666666",
     "selectedColor": "#1677ff",
     "backgroundColor": "#ffffff",
@@ -29,6 +34,10 @@
       {
         "pagePath": "pages/hall/list",
         "text": "契约大厅"
+      },
+      {
+        "pagePath": "pages/dispute/index",
+        "text": "契约仲裁"
       },
       {
         "pagePath": "pages/profile/profile",

@@ -7,23 +7,29 @@ Page({
     size: 10,
     statusIndex: 0,
     statusOptions: ["全部", "我发起", "我接单"],
-    statusValues: ["ALL", "INITIATED", "RECEIVED"]
+    statusValues: ["ALL", "INITIATED", "RECEIVED"],
+    loading: false,
+    hasMore: true
   },
   onShow() {
-    this.fetchList();
+    this.resetAndFetch();
+    const tabbar = this.getTabBar && this.getTabBar();
+    if (tabbar && tabbar.setSelected) {
+      tabbar.setSelected("/pages/contracts/list");
+    }
   },
   onStatusChange(e) {
     const index = Number(e.detail.value) || 0;
-    this.setData({ statusIndex: index, page: 1 }, () => this.fetchList());
+    this.setData({ statusIndex: index }, () => this.resetAndFetch());
   },
-  prevPage() {
-    if (this.data.page <= 1) return;
-    this.setData({ page: this.data.page - 1 }, () => this.fetchList());
+  onReachBottom() {
+    if (!this.data.hasMore || this.data.loading) return;
+    this.setData({ page: this.data.page + 1 }, () => this.fetchList(true));
   },
-  nextPage() {
-    this.setData({ page: this.data.page + 1 }, () => this.fetchList());
+  resetAndFetch() {
+    this.setData({ page: 1, list: [], hasMore: true }, () => this.fetchList());
   },
-  fetchList() {
+  fetchList(append = false) {
     const filter = this.data.statusValues[this.data.statusIndex];
     const data = {
       page: this.data.page,
@@ -35,6 +41,8 @@ Page({
       delete data.scope;
     }
 
+    if (this.data.loading) return;
+    this.setData({ loading: true });
     request({
       url: "/api/contract/list",
       method: "GET",
@@ -48,13 +56,18 @@ Page({
             createTime: this.formatDate(item.createTime),
             completeTime: this.formatDate(item.completeTime)
           }));
-          this.setData({ list });
+          const nextList = append ? this.data.list.concat(list) : list;
+          const hasMore = list.length >= this.data.size;
+          this.setData({ list: nextList, hasMore });
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+      })
+      .finally(() => {
+        this.setData({ loading: false });
       });
   },
   formatDate(value) {

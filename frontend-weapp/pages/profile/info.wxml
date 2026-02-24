@@ -1,0 +1,16 @@
+<view class="container">
+  <view class="card">
+    <view class="row">
+      <text class="text-muted">用户ID</text>
+      <text>{{profile.userId}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">手机号</text>
+      <text>{{profile.phone}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">微信号</text>
+      <text>{{profile.wechatId}}</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,11 @@
+.detail-title {
+  font-weight: 600;
+  font-size: 32rpx;
+  margin-bottom: 12rpx;
+}
+
+.section-title {
+  font-weight: 600;
+  margin-bottom: 12rpx;
+  color: #1f2329;
+}

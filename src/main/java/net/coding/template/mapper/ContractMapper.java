@@ -59,13 +59,13 @@ public interface ContractMapper extends BaseMapper<Contract> {
             "<if test='gameType != null'>" +
             "   AND game_type = #{gameType} " +
             "</if>" +
-            "<if test='keyword != null and keyword != '''>" +
+            "<if test=\"keyword != null and keyword != ''\">" +
             "   AND title LIKE CONCAT('%', #{keyword}, '%') " +
             "</if>" +
-            "<if test='contractNo != null and contractNo != '''>" +
+            "<if test=\"contractNo != null and contractNo != ''\">" +
             "   AND contract_no LIKE CONCAT('%', #{contractNo}, '%') " +
             "</if>" +
-            "<if test='initiatorGameId != null and initiatorGameId != '''>" +
+            "<if test=\"initiatorGameId != null and initiatorGameId != ''\">" +
             "   AND initiator_game_id = #{initiatorGameId} " +
             "</if>" +
             "ORDER BY create_time DESC " +
@@ -87,13 +87,13 @@ public interface ContractMapper extends BaseMapper<Contract> {
             "<if test='gameType != null'>" +
             "   AND game_type = #{gameType} " +
             "</if>" +
-            "<if test='keyword != null and keyword != '''>" +
+            "<if test=\"keyword != null and keyword != ''\">" +
             "   AND title LIKE CONCAT('%', #{keyword}, '%') " +
             "</if>" +
-            "<if test='contractNo != null and contractNo != '''>" +
+            "<if test=\"contractNo != null and contractNo != ''\">" +
             "   AND contract_no LIKE CONCAT('%', #{contractNo}, '%') " +
             "</if>" +
-            "<if test='initiatorGameId != null and initiatorGameId != '''>" +
+            "<if test=\"initiatorGameId != null and initiatorGameId != ''\">" +
             "   AND initiator_game_id = #{initiatorGameId} " +
             "</if>" +
             "</script>")

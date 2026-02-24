@@ -7,19 +7,25 @@ Page({
     size: 10,
     keyword: "",
     contractNo: "",
-    initiatorGameId: ""
+    initiatorGameId: "",
+    loading: false,
+    hasMore: true
   },
   onShow() {
-    this.fetchList();
+    this.resetAndFetch();
+    const tabbar = this.getTabBar && this.getTabBar();
+    if (tabbar && tabbar.setSelected) {
+      tabbar.setSelected("/pages/hall/list");
+    }
   },
-  prevPage() {
-    if (this.data.page <= 1) return;
-    this.setData({ page: this.data.page - 1 }, () => this.fetchList());
+  onReachBottom() {
+    if (!this.data.hasMore || this.data.loading) return;
+    this.setData({ page: this.data.page + 1 }, () => this.fetchList(true));
   },
-  nextPage() {
-    this.setData({ page: this.data.page + 1 }, () => this.fetchList());
+  resetAndFetch() {
+    this.setData({ page: 1, list: [], hasMore: true }, () => this.fetchList());
   },
-  fetchList() {
+  fetchList(append = false) {
     const data = {
       page: this.data.page,
       size: this.data.size
@@ -34,6 +40,8 @@ Page({
       data.initiatorGameId = this.data.initiatorGameId;
     }
 
+    if (this.data.loading) return;
+    this.setData({ loading: true });
     request({
       url: "/api/contract/hall",
       method: "GET",
@@ -46,13 +54,18 @@ Page({
             ...item,
             createTime: this.formatDate(item.createTime)
           }));
-          this.setData({ list });
+          const nextList = append ? this.data.list.concat(list) : list;
+          const hasMore = list.length >= this.data.size;
+          this.setData({ list: nextList, hasMore });
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+      })
+      .finally(() => {
+        this.setData({ loading: false });
       });
   },
   onKeywordInput(e) {
@@ -64,8 +77,12 @@ Page({
   onInitiatorInput(e) {
     this.setData({ initiatorGameId: e.detail.value });
   },
+  getGameTypeName(code) {
+    const map = { DELTA: "三角洲行动", AREA18: "暗区突围", TARKOV: "逃离塔科夫" };
+    return map[code] || code;
+  },
   onSearch() {
-    this.setData({ page: 1 }, () => this.fetchList());
+    this.resetAndFetch();
   },
   acceptContract(e) {
     const contractId = e.currentTarget.dataset.id;

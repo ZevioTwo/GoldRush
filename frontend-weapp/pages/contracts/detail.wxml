@@ -1,6 +1,6 @@
 <view class="container">
   <view class="card">
-    <view style="font-weight: 600; font-size: 32rpx; margin-bottom: 12rpx;">契约号：{{detail.contractNo}}</view>
+    <view class="detail-title">契约号：{{detail.contractNo}}</view>
     <view class="row">
       <text class="text-muted">状态</text>
       <text>{{detail.status}}</text>
@@ -20,7 +20,7 @@
   </view>
 
   <view class="card">
-    <view style="font-weight: 600; margin-bottom: 12rpx;">参与方</view>
+    <view class="section-title">参与方</view>
     <view class="row">
       <text class="text-muted">发起人</text>
       <text>{{detail.initiator.nickname}} ({{detail.initiator.userId}})</text>
@@ -40,7 +40,7 @@
   </view>
 
   <view class="card">
-    <view style="font-weight: 600; margin-bottom: 12rpx;">条款</view>
+    <view class="section-title">条款</view>
     <view class="row">
       <text class="text-muted">游戏类型</text>
       <text>{{detail.gameType}}</text>
@@ -62,4 +62,6 @@
       <text>{{detail.failureCondition}}</text>
     </view>
   </view>
+
+  <button class="btn-outline" bindtap="goDisputeApply">申请仲裁</button>
 </view>

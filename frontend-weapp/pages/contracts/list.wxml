@@ -1,18 +1,12 @@
-<view class="container">
+<view class="container list-page">
   <view class="card">
-    <button class="btn-primary" bindtap="goCreate">创建契约</button>
-    <view class="row" style="margin-top: 16rpx;">
-      <text class="text-muted">状态</text>
-      <picker mode="selector" range="{{statusOptions}}" bindchange="onStatusChange">
-        <text>{{statusOptions[statusIndex]}}</text>
-      </picker>
-    </view>
-    <view class="row">
-      <text class="text-muted">分页</text>
-      <view>
-        <button size="mini" class="btn-outline" bindtap="prevPage">上一页</button>
-        <text style="margin: 0 12rpx;">{{page}}</text>
-        <button size="mini" class="btn-outline" bindtap="nextPage">下一页</button>
+    <view class="list-header-actions">
+      <button class="btn-primary" bindtap="goCreate">创建契约</button>
+      <view class="row" style="margin: 0; flex: 1;">
+        <text class="text-muted">状态</text>
+        <picker mode="selector" range="{{statusOptions}}" bindchange="onStatusChange">
+          <text>{{statusOptions[statusIndex]}}</text>
+        </picker>
       </view>
     </view>
   </view>
@@ -42,4 +36,7 @@
   <view wx:if="{{list.length === 0}}" class="text-muted" style="text-align:center; margin-top: 48rpx;">
     暂无数据
   </view>
+
+  <view wx:if="{{loading}}" class="text-muted" style="text-align:center; margin: 24rpx 0;">加载中...</view>
+  <view wx:if="{{!hasMore && list.length > 0}}" class="text-muted" style="text-align:center; margin: 24rpx 0;">没有更多了</view>
 </view>

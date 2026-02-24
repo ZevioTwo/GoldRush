@@ -11,10 +11,3 @@
 .list-area {
   min-height: 1100rpx;
 }
-
-.pager-fixed {
-  position: fixed;
-  left: 32rpx;
-  right: 32rpx;
-  bottom: 32rpx;
-}

@@ -9,6 +9,10 @@ Page({
   onShow() {
     this.fetchProfile();
     this.fetchCredit();
+    const tabbar = this.getTabBar && this.getTabBar();
+    if (tabbar && tabbar.setSelected) {
+      tabbar.setSelected("/pages/profile/profile");
+    }
   },
   fetchProfile() {
     request({
@@ -44,6 +48,12 @@ Page({
   },
   goCredit() {
     wx.navigateTo({ url: "/pages/credit/credit" });
+  },
+  goUserInfo() {
+    wx.navigateTo({ url: "/pages/profile/info" });
+  },
+  goVipCenter() {
+    wx.navigateTo({ url: "/pages/profile/vip" });
   },
   goContracts() {
     wx.navigateTo({ url: "/pages/contracts/list" });

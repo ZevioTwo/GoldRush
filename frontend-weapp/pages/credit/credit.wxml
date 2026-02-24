@@ -1,7 +1,7 @@
 <view class="container">
   <view class="card" style="text-align: center;">
     <view class="text-muted" style="margin-bottom: 16rpx;">当前信用分</view>
-    <view style="font-size: 64rpx; font-weight: 700; color: #1677ff;">{{creditScore}}</view>
+    <view class="credit-score">{{creditScore}}</view>
   </view>
 
   <view class="card">
