@@ -1,0 +1,53 @@
+<view class="container">
+  <view class="card">
+    <view style="font-size: 32rpx; font-weight: 600; margin-bottom: 12rpx;">我的账号</view>
+    <block wx:for="{{accounts}}" wx:key="id">
+      <view class="account-item">
+        <view class="row">
+          <text class="text-muted">游戏类型</text>
+          <text>{{item.gameTypeName}}</text>
+        </view>
+        <view class="row">
+          <text class="text-muted">游戏大区</text>
+          <text>{{item.gameRegion}}</text>
+        </view>
+        <view class="row">
+          <text class="text-muted">游戏ID</text>
+          <text>{{item.gameId}}</text>
+        </view>
+        <view class="row" wx:if="{{item.remark}}">
+          <text class="text-muted">备注</text>
+          <text>{{item.remark}}</text>
+        </view>
+        <view class="row actions">
+          <button size="mini" class="btn-outline" bindtap="editAccount" data-id="{{item.id}}">编辑</button>
+          <button size="mini" class="btn-outline" bindtap="deleteAccount" data-id="{{item.id}}">删除</button>
+        </view>
+      </view>
+    </block>
+    <view wx:if="{{accounts.length === 0}}" class="text-muted" style="text-align:center; margin-top: 24rpx;">暂无账号</view>
+  </view>
+
+  <view class="card">
+    <view style="font-size: 32rpx; font-weight: 600; margin-bottom: 12rpx;">新增账号</view>
+    <view class="form-item">
+      <text class="label">游戏类型</text>
+      <picker mode="selector" range="{{gameTypeOptions}}" bindchange="onGameTypeChange">
+        <view class="picker">{{gameTypeOptions[gameTypeIndex]}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="label">游戏大区</text>
+      <input class="input" placeholder="请输入游戏大区" value="{{form.gameRegion}}" bindinput="onInput" data-field="gameRegion" />
+    </view>
+    <view class="form-item">
+      <text class="label">游戏ID</text>
+      <input class="input" placeholder="请输入游戏ID" value="{{form.gameId}}" bindinput="onInput" data-field="gameId" />
+    </view>
+    <view class="form-item">
+      <text class="label">备注（可选）</text>
+      <input class="input" placeholder="例如：小号/主号" value="{{form.remark}}" bindinput="onInput" data-field="remark" />
+    </view>
+    <button class="btn-primary" bindtap="submit" loading="{{loading}}">保存账号</button>
+  </view>
+</view>

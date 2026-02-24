@@ -5,6 +5,7 @@ import net.coding.template.entity.request.ContractConfirmRequest;
 import net.coding.template.entity.request.ContractCreateRequest;
 import net.coding.template.entity.dto.ContractDetailDTO;
 import net.coding.template.entity.request.ContractListRequest;
+import net.coding.template.entity.request.ContractAcceptRequest;
 import net.coding.template.entity.response.CommonResponse;
 import net.coding.template.entity.response.ContractConfirmResponse;
 import net.coding.template.entity.response.ContractCreateResponse;
@@ -217,6 +218,48 @@ public class ContractController {
         } catch (Exception e) {
             log.error("取消契约异常", e);
             throw new BusinessException(500, "取消契约失败");
+        }
+    }
+
+    /**
+     * 契约大厅：待接单列表
+     * GET /api/contract/hall
+     */
+    @GetMapping("/hall")
+    public CommonResponse<ContractListResponse> getHallList(
+            @Valid ContractListRequest request) {
+        try {
+            ContractListResponse response = contractService.getHallList(request);
+            return CommonResponse.success(response);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("查询契约大厅异常", e);
+            throw new BusinessException(500, "查询契约大厅失败");
+        }
+    }
+
+    /**
+     * 接单
+     * POST /api/contract/accept
+     */
+    @PostMapping("/accept")
+    public CommonResponse<Void> acceptContract(
+            @Valid @RequestBody ContractAcceptRequest request,
+            @RequestHeader("Authorization") String token) {
+        try {
+            if (token == null || !token.startsWith("Bearer ")) {
+                throw new BusinessException(401, "token格式错误");
+            }
+            String accessToken = token.substring(7);
+
+            contractService.acceptContract(request, accessToken);
+            return CommonResponse.success("接单成功", null);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("接单异常", e);
+            throw new BusinessException(500, "接单失败");
         }
     }
 }

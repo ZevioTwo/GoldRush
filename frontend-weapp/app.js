@@ -1,6 +1,6 @@
 App({
   globalData: {
-    baseUrl: "https://api.example.com",
+    baseUrl: "http://localhost:8080",
     token: ""
   },
   onLaunch() {

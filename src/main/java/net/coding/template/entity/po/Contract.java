@@ -42,6 +42,9 @@ public class Contract {
     @TableField("penalty_amount")
     private BigDecimal penaltyAmount;
 
+    @TableField("title")
+    private String title;
+
     @TableField("guarantee_item")
     private String guaranteeItem;
 

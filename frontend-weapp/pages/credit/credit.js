@@ -15,7 +15,7 @@ Page({
       method: "GET"
     })
       .then((res) => {
-        if (res && res.code === 0) {
+        if (res && (res.code === 0 || res.code === 200)) {
           this.setData({ creditScore: res.data?.currentScore ?? "-" });
           return;
         }
@@ -31,7 +31,7 @@ Page({
       method: "GET"
     })
       .then((res) => {
-        if (res && res.code === 0) {
+        if (res && (res.code === 0 || res.code === 200)) {
           this.setData({ profile: res.data || {} });
           return;
         }

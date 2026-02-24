@@ -1,15 +1,39 @@
 {
   "pages": [
     "pages/login/login",
-    "pages/profile/profile",
-    "pages/credit/credit",
     "pages/contracts/list",
-    "pages/contracts/detail"
+    "pages/hall/list",
+    "pages/contracts/create",
+    "pages/contracts/detail",
+    "pages/profile/profile",
+    "pages/profile/edit",
+    "pages/profile/accounts",
+    "pages/credit/credit"
   ],
   "window": {
     "navigationBarTitleText": "Gold Rush Contract",
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
     "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#1677ff",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/contracts/list",
+        "text": "我的契约"
+      },
+      {
+        "pagePath": "pages/hall/list",
+        "text": "契约大厅"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "个人中心"
+      }
+    ]
   }
 }

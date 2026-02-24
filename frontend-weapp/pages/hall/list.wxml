@@ -1,0 +1,58 @@
+<view class="container hall-page">
+  <view class="card">
+    <view class="form-item">
+      <input class="input" placeholder="搜索标题关键字" value="{{keyword}}" bindinput="onKeywordInput" />
+    </view>
+    <view class="form-item">
+      <input class="input" placeholder="契约号（模糊匹配）" value="{{contractNo}}" bindinput="onContractNoInput" />
+    </view>
+    <view class="form-item">
+      <input class="input" placeholder="发起人游戏ID（精确匹配）" value="{{initiatorGameId}}" bindinput="onInitiatorInput" />
+    </view>
+    <button class="btn-outline" bindtap="onSearch">搜索</button>
+  </view>
+
+  <view class="list-area">
+    <block wx:for="{{list}}" wx:key="contractId">
+      <view class="card">
+        <view style="font-weight: 600; margin-bottom: 12rpx;">{{item.title || '未命名契约'}}</view>
+        <view class="row">
+          <text class="text-muted">契约号</text>
+          <text>{{item.contractNo}}</text>
+        </view>
+        <view class="row">
+          <text class="text-muted">状态</text>
+          <text>{{item.status}}</text>
+        </view>
+        <view class="row">
+          <text class="text-muted">金额</text>
+          <text>{{item.depositAmount}}</text>
+        </view>
+        <view class="row">
+          <text class="text-muted">发起人游戏ID</text>
+          <text>{{item.opponentGameId}}</text>
+        </view>
+        <view class="row">
+          <text class="text-muted">创建时间</text>
+          <text>{{item.createTime}}</text>
+        </view>
+        <button class="btn-primary" bindtap="acceptContract" data-id="{{item.contractId}}">接单</button>
+      </view>
+    </block>
+
+    <view wx:if="{{list.length === 0}}" class="text-muted" style="text-align:center; margin-top: 48rpx;">
+      暂无待接单契约
+    </view>
+  </view>
+
+  <view class="card pager-fixed">
+    <view class="row">
+      <text class="text-muted">分页</text>
+      <view>
+        <button size="mini" class="btn-outline" bindtap="prevPage">上一页</button>
+        <text style="margin: 0 12rpx;">{{page}}</text>
+        <button size="mini" class="btn-outline" bindtap="nextPage">下一页</button>
+      </view>
+    </view>
+  </view>
+</view>

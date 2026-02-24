@@ -1,0 +1,20 @@
+.row text:first-child {
+  margin-right: 12rpx;
+}
+
+.hall-page {
+  min-height: 100vh;
+  padding-bottom: 140rpx;
+  box-sizing: border-box;
+}
+
+.list-area {
+  min-height: 1100rpx;
+}
+
+.pager-fixed {
+  position: fixed;
+  left: 32rpx;
+  right: 32rpx;
+  bottom: 32rpx;
+}

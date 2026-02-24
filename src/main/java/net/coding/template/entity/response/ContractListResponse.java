@@ -18,6 +18,7 @@ public class ContractListResponse {
     public static class ContractItem {
         private String contractId;
         private String contractNo;
+        private String title;
         private String gameType;
         private String gameRegion;
         private String status;

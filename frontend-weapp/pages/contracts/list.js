@@ -6,8 +6,8 @@ Page({
     page: 1,
     size: 10,
     statusIndex: 0,
-    statusOptions: ["全部", "进行中", "已完成", "已取消"],
-    statusValues: [null, "ACTIVE", "COMPLETED", "CANCELLED"]
+    statusOptions: ["全部", "我发起", "我接单"],
+    statusValues: ["ALL", "INITIATED", "RECEIVED"]
   },
   onShow() {
     this.fetchList();
@@ -24,13 +24,15 @@ Page({
     this.setData({ page: this.data.page + 1 }, () => this.fetchList());
   },
   fetchList() {
-    const status = this.data.statusValues[this.data.statusIndex];
+    const filter = this.data.statusValues[this.data.statusIndex];
     const data = {
       page: this.data.page,
-      size: this.data.size
+      size: this.data.size,
+      scope: filter
     };
-    if (status) {
-      data.status = status;
+
+    if (data.scope === "ALL") {
+      delete data.scope;
     }
 
     request({
@@ -39,8 +41,14 @@ Page({
       data
     })
       .then((res) => {
-        if (res && res.code === 0) {
-          this.setData({ list: res.data?.contracts || [] });
+        if (res && (res.code === 0 || res.code === 200)) {
+          const rawList = res.data?.contracts || [];
+          const list = rawList.map((item) => ({
+            ...item,
+            createTime: this.formatDate(item.createTime),
+            completeTime: this.formatDate(item.completeTime)
+          }));
+          this.setData({ list });
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
@@ -49,9 +57,33 @@ Page({
         wx.showToast({ title: "网络错误", icon: "none" });
       });
   },
+  formatDate(value) {
+    if (!value) return "";
+    const pad = (n) => (n < 10 ? `0${n}` : `${n}`);
+
+    if (Array.isArray(value)) {
+      const [y, m, d, hh = 0, mm = 0] = value;
+      return `${y}-${pad(m)}-${pad(d)} ${pad(hh)}:${pad(mm)}`;
+    }
+
+    if (typeof value === "string" && value.includes(",")) {
+      const parts = value.split(",").map((v) => Number(v.trim()));
+      if (parts.length >= 3 && parts.every((v) => !Number.isNaN(v))) {
+        const [y, m, d, hh = 0, mm = 0] = parts;
+        return `${y}-${pad(m)}-${pad(d)} ${pad(hh)}:${pad(mm)}`;
+      }
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  },
   goDetail(e) {
     const contractId = e.currentTarget.dataset.id;
     if (!contractId) return;
     wx.navigateTo({ url: `/pages/contracts/detail?id=${contractId}` });
+  },
+  goCreate() {
+    wx.navigateTo({ url: "/pages/contracts/create" });
   }
 });

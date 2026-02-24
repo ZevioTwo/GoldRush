@@ -25,7 +25,7 @@ Page({
           }
         })
           .then((res) => {
-            if (res && res.code === 0 && res.data && res.data.token) {
+            if (res && (res.code === 0 || res.code === 200) && res.data && res.data.token) {
               setToken(res.data.token);
               wx.reLaunch({ url: "/pages/profile/profile" });
               return;

@@ -27,6 +27,9 @@ public class UserController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private net.coding.template.service.UserGameAccountService userGameAccountService;
+
     /**
      * 微信登录接口
      * POST /api/user/login
@@ -111,6 +114,141 @@ public class UserController {
         } catch (Exception e) {
             log.error("查询信用分失败", e);
             throw new BusinessException(500, "查询信用分失败");
+        }
+    }
+
+    /**
+     * 完善资料（游戏ID/大区/微信号/手机号）
+     * POST /api/user/profile/update
+     */
+    @PostMapping("/profile/update")
+    public CommonResponse<Void> updateProfile(@Valid @RequestBody net.coding.template.entity.request.UserProfileUpdateRequest request,
+                                              HttpServletRequest httpRequest) {
+        try {
+            String token = extractToken(httpRequest);
+            if (token == null) {
+                throw new BusinessException(401, "未提供认证token");
+            }
+
+            Long userId = userService.getUserIdByToken(token);
+            if (userId == null) {
+                throw new BusinessException(401, "token无效或已过期");
+            }
+
+            userService.updateProfile(userId, request.getGameId(), request.getGameRegion(), request.getWechatId(), request.getPhone());
+
+            return CommonResponse.success("更新成功", null);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("更新用户信息失败", e);
+            throw new BusinessException(500, "更新用户信息失败");
+        }
+    }
+
+    /**
+     * 获取用户游戏账号列表
+     * GET /api/user/game-accounts
+     */
+    @GetMapping("/game-accounts")
+    public CommonResponse<java.util.List<net.coding.template.entity.response.UserGameAccountResponse>> listGameAccounts(HttpServletRequest httpRequest) {
+        try {
+            String token = extractToken(httpRequest);
+            if (token == null) {
+                throw new BusinessException(401, "未提供认证token");
+            }
+            Long userId = userService.getUserIdByToken(token);
+            if (userId == null) {
+                throw new BusinessException(401, "token无效或已过期");
+            }
+
+            return CommonResponse.success(userGameAccountService.listByUser(userId));
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("获取账号列表失败", e);
+            throw new BusinessException(500, "获取账号列表失败");
+        }
+    }
+
+    /**
+     * 新增用户游戏账号
+     * POST /api/user/game-accounts
+     */
+    @PostMapping("/game-accounts")
+    public CommonResponse<net.coding.template.entity.response.UserGameAccountResponse> createGameAccount(
+            @Valid @RequestBody net.coding.template.entity.request.UserGameAccountCreateRequest request,
+            HttpServletRequest httpRequest) {
+        try {
+            String token = extractToken(httpRequest);
+            if (token == null) {
+                throw new BusinessException(401, "未提供认证token");
+            }
+            Long userId = userService.getUserIdByToken(token);
+            if (userId == null) {
+                throw new BusinessException(401, "token无效或已过期");
+            }
+
+            return CommonResponse.success("新增成功", userGameAccountService.create(userId, request));
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("新增账号失败", e);
+            throw new BusinessException(500, "新增账号失败");
+        }
+    }
+
+    /**
+     * 更新用户游戏账号
+     * PUT /api/user/game-accounts/{id}
+     */
+    @PutMapping("/game-accounts/{id}")
+    public CommonResponse<net.coding.template.entity.response.UserGameAccountResponse> updateGameAccount(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody net.coding.template.entity.request.UserGameAccountUpdateRequest request,
+            HttpServletRequest httpRequest) {
+        try {
+            String token = extractToken(httpRequest);
+            if (token == null) {
+                throw new BusinessException(401, "未提供认证token");
+            }
+            Long userId = userService.getUserIdByToken(token);
+            if (userId == null) {
+                throw new BusinessException(401, "token无效或已过期");
+            }
+
+            return CommonResponse.success("更新成功", userGameAccountService.update(userId, id, request));
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("更新账号失败", e);
+            throw new BusinessException(500, "更新账号失败");
+        }
+    }
+
+    /**
+     * 删除用户游戏账号
+     * DELETE /api/user/game-accounts/{id}
+     */
+    @DeleteMapping("/game-accounts/{id}")
+    public CommonResponse<Void> deleteGameAccount(@PathVariable("id") Long id, HttpServletRequest httpRequest) {
+        try {
+            String token = extractToken(httpRequest);
+            if (token == null) {
+                throw new BusinessException(401, "未提供认证token");
+            }
+            Long userId = userService.getUserIdByToken(token);
+            if (userId == null) {
+                throw new BusinessException(401, "token无效或已过期");
+            }
+
+            userGameAccountService.delete(userId, id);
+            return CommonResponse.success("删除成功", null);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("删除账号失败", e);
+            throw new BusinessException(500, "删除账号失败");
         }
     }
 

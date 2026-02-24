@@ -55,8 +55,8 @@ payment:
 # 微信小程序配置
 wechat:
   # 小程序登录配置（对应 WeChatService 中的 wechat.app-id / wechat.app-secret）
-  app-id: wx1234567890abcdef
-  app-secret: your_app_secret
+  app-id: wx9e1d8be4da6a6d70
+  app-secret: 3a17f4a7d8e73a35f128aa08ab609b83
 
   # 微信支付配置（对应 WeChatPayConfig 的 wechat.pay.*）
   pay:
@@ -65,8 +65,8 @@ wechat:
     api-key: your_api_key_32_characters
     serial-no: your_serial_number
     cert-path: /path/to/apiclient_cert.p12
-    notify-url: https://yourdomain.com/api/payment/notify
-    freeze-notify-url: https://yourdomain.com/api/payment/freeze-notify
+    notify-url: http://localhost:8080/api/payment/notify
+    freeze-notify-url: http://localhost:8080/api/payment/freeze-notify
     api-v3-key: your_api_v3_key_32_characters
 
 # 日志配置

@@ -13,6 +13,11 @@
       <text class="text-muted">手机号</text>
       <text>{{profile.phone}}</text>
     </view>
+    <view class="row">
+      <text class="text-muted">微信号</text>
+      <text>{{profile.wechatId}}</text>
+    </view>
+    <button class="btn-outline" bindtap="goAccountManage">账号管理</button>
   </view>
 
   <view class="card">
@@ -21,10 +26,6 @@
       <text>{{creditScore}}</text>
     </view>
     <button class="btn-outline" bindtap="goCredit">查看信用分详情</button>
-  </view>
-
-  <view class="card">
-    <button class="btn-primary" bindtap="goContracts">查看契约</button>
   </view>
 
   <view class="card">

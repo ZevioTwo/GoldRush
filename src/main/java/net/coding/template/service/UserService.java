@@ -28,8 +28,8 @@ public class UserService {
     @Resource
     private WeChatService weChatService;
 
-    @Resource
-    private StringRedisTemplate redisService; // 假设有Redis服务
+    @Resource(name = "stringRedisTemplate")
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 用户登录/注册
@@ -114,6 +114,10 @@ public class UserService {
         dto.setCompletedContracts(user.getCompletedContracts());
         dto.setDisputeCount(user.getDisputeCount());
         dto.setViolationCount(user.getViolationCount());
+        dto.setGameId(user.getGameId());
+        dto.setGameRegion(user.getGameRegion());
+        dto.setWechatId(user.getWechatId());
+        dto.setPhone(user.getPhone());
 
         // 计算成功率
         if (user.getTotalContracts() > 0) {
@@ -201,9 +205,9 @@ public class UserService {
 
         // 缓存7天
         String catchStr = JSON.toJSONString(userCache);
-        redisService.opsForValue().set("user:token:" + token, catchStr, 7 * 24 * 60 * 60, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set("user:token:" + token, catchStr, 7 * 24 * 60 * 60, TimeUnit.MINUTES);
         // 维护token-userId映射
-        redisService.opsForValue().set("user:token_mapping:" + user.getId(), token, 7 * 24 * 60 * 60, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set("user:token_mapping:" + user.getId(), token, 7 * 24 * 60 * 60, TimeUnit.MINUTES);
     }
 
     /**
@@ -224,7 +228,7 @@ public class UserService {
      * 根据token获取用户ID（供其他服务调用）
      */
     public Long getUserIdByToken(String token) {
-        String cache = redisService.opsForValue().get("user:token:" + token);
+        String cache = stringRedisTemplate.opsForValue().get("user:token:" + token);
         Map<String, Object> map = JSON.parseObject(cache, Map.class);
         if (cache != null && map.containsKey("userId")) {
             return Long.parseLong(map.get("userId").toString());
@@ -241,5 +245,16 @@ public class UserService {
             throw new RuntimeException("用户未登录或token已过期");
         }
         return userMapper.selectById(userId);
+    }
+
+    /**
+     * 更新用户游戏信息与联系方式
+     */
+    @Transactional
+    public void updateProfile(Long userId, String gameId, String gameRegion, String wechatId, String phone) {
+        int rows = userMapper.updateGameInfo(userId, gameId, gameRegion, wechatId, phone);
+        if (rows == 0) {
+            throw new RuntimeException("更新用户信息失败");
+        }
     }
 }

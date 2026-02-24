@@ -1,6 +1,7 @@
 <view class="container">
   <view class="card">
-    <view class="row">
+    <button class="btn-primary" bindtap="goCreate">创建契约</button>
+    <view class="row" style="margin-top: 16rpx;">
       <text class="text-muted">状态</text>
       <picker mode="selector" range="{{statusOptions}}" bindchange="onStatusChange">
         <text>{{statusOptions[statusIndex]}}</text>
@@ -25,11 +26,15 @@
       </view>
       <view class="row">
         <text class="text-muted">金额</text>
-        <text>{{item.amount}}</text>
+        <text>{{item.depositAmount}}</text>
+      </view>
+      <view class="row">
+        <text class="text-muted">对手游戏ID</text>
+        <text>{{item.opponentGameId}}</text>
       </view>
       <view class="row">
         <text class="text-muted">创建时间</text>
-        <text>{{item.createdAt}}</text>
+        <text>{{item.createTime}}</text>
       </view>
     </view>
   </block>

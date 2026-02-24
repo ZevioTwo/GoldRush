@@ -28,6 +28,12 @@ public interface ContractMapper extends BaseMapper<Contract> {
     @Select("<script>" +
             "SELECT * FROM contracts " +
             "WHERE (initiator_id = #{userId} OR receiver_id = #{userId}) " +
+            "<if test=\"scope == 'INITIATED'\">" +
+            "   AND initiator_id = #{userId} " +
+            "</if>" +
+            "<if test=\"scope == 'RECEIVED'\">" +
+            "   AND receiver_id = #{userId} " +
+            "</if>" +
             "<if test='status != null'>" +
             "   AND status = #{status} " +
             "</if>" +
@@ -38,10 +44,72 @@ public interface ContractMapper extends BaseMapper<Contract> {
             "LIMIT #{offset}, #{limit}" +
             "</script>")
     List<Contract> selectUserContracts(@Param("userId") Long userId,
+                                       @Param("scope") String scope,
                                        @Param("status") String status,
                                        @Param("gameType") String gameType,
                                        @Param("offset") Integer offset,
                                        @Param("limit") Integer limit);
+
+    /**
+     * 查询契约大厅待接单列表
+     */
+    @Select("<script>" +
+            "SELECT * FROM contracts " +
+            "WHERE status = 'PENDING' AND receiver_id IS NULL " +
+            "<if test='gameType != null'>" +
+            "   AND game_type = #{gameType} " +
+            "</if>" +
+            "<if test='keyword != null and keyword != '''>" +
+            "   AND title LIKE CONCAT('%', #{keyword}, '%') " +
+            "</if>" +
+            "<if test='contractNo != null and contractNo != '''>" +
+            "   AND contract_no LIKE CONCAT('%', #{contractNo}, '%') " +
+            "</if>" +
+            "<if test='initiatorGameId != null and initiatorGameId != '''>" +
+            "   AND initiator_game_id = #{initiatorGameId} " +
+            "</if>" +
+            "ORDER BY create_time DESC " +
+            "LIMIT #{offset}, #{limit}" +
+            "</script>")
+    List<Contract> selectHallContracts(@Param("gameType") String gameType,
+                                       @Param("keyword") String keyword,
+                                       @Param("contractNo") String contractNo,
+                                       @Param("initiatorGameId") String initiatorGameId,
+                                       @Param("offset") Integer offset,
+                                       @Param("limit") Integer limit);
+
+    /**
+     * 统计大厅契约数量
+     */
+    @Select("<script>" +
+            "SELECT COUNT(*) FROM contracts " +
+            "WHERE status = 'PENDING' AND receiver_id IS NULL " +
+            "<if test='gameType != null'>" +
+            "   AND game_type = #{gameType} " +
+            "</if>" +
+            "<if test='keyword != null and keyword != '''>" +
+            "   AND title LIKE CONCAT('%', #{keyword}, '%') " +
+            "</if>" +
+            "<if test='contractNo != null and contractNo != '''>" +
+            "   AND contract_no LIKE CONCAT('%', #{contractNo}, '%') " +
+            "</if>" +
+            "<if test='initiatorGameId != null and initiatorGameId != '''>" +
+            "   AND initiator_game_id = #{initiatorGameId} " +
+            "</if>" +
+            "</script>")
+    int countHallContracts(@Param("gameType") String gameType,
+                           @Param("keyword") String keyword,
+                           @Param("contractNo") String contractNo,
+                           @Param("initiatorGameId") String initiatorGameId);
+
+    /**
+     * 接单绑定接收人
+     */
+    @Update("UPDATE contracts SET receiver_id = #{receiverId}, receiver_game_id = #{receiverGameId}, " +
+            "update_time = NOW() WHERE id = #{contractId} AND receiver_id IS NULL")
+    int acceptContract(@Param("contractId") String contractId,
+                       @Param("receiverId") Long receiverId,
+                       @Param("receiverGameId") String receiverGameId);
 
     /**
      * 统计用户契约数量
@@ -49,11 +117,18 @@ public interface ContractMapper extends BaseMapper<Contract> {
     @Select("<script>" +
             "SELECT COUNT(*) FROM contracts " +
             "WHERE (initiator_id = #{userId} OR receiver_id = #{userId}) " +
+            "<if test=\"scope == 'INITIATED'\">" +
+            "   AND initiator_id = #{userId} " +
+            "</if>" +
+            "<if test=\"scope == 'RECEIVED'\">" +
+            "   AND receiver_id = #{userId} " +
+            "</if>" +
             "<if test='status != null'>" +
             "   AND status = #{status} " +
             "</if>" +
             "</script>")
     int countUserContracts(@Param("userId") Long userId,
+                           @Param("scope") String scope,
                            @Param("status") String status);
 
     /**

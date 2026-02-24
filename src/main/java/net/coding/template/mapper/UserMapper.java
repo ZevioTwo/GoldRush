@@ -72,4 +72,15 @@ public interface UserMapper extends BaseMapper<User> {
     int updateUserStatus(@Param("userId") Long userId,
                          @Param("status") String status,
                          @Param("reason") String reason);
+
+    /**
+     * 更新用户游戏信息与联系方式
+     */
+    @Update("UPDATE users SET game_id = #{gameId}, game_region = #{gameRegion}, " +
+            "wechat_id = #{wechatId}, phone = #{phone}, update_time = NOW() WHERE id = #{userId}")
+    int updateGameInfo(@Param("userId") Long userId,
+                       @Param("gameId") String gameId,
+                       @Param("gameRegion") String gameRegion,
+                       @Param("wechatId") String wechatId,
+                       @Param("phone") String phone);
 }

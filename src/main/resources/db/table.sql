@@ -45,7 +45,22 @@ CREATE TABLE `users` (
                          KEY `idx_game_wechat` (`game_id`, `wechat_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
--- 2. 契约表（contracts）- 核心业务表
+-- 2. 用户游戏账号表（user_game_accounts）
+CREATE TABLE `user_game_accounts` (
+                              `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                              `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+                              `game_type` varchar(20) NOT NULL COMMENT '游戏类型：DELTA/AREA18/TARKOV',
+                              `game_region` varchar(50) NOT NULL COMMENT '游戏大区',
+                              `game_id` varchar(50) NOT NULL COMMENT '游戏ID',
+                              `remark` varchar(100) DEFAULT NULL COMMENT '备注',
+                              `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                              `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                              PRIMARY KEY (`id`),
+                              KEY `idx_user` (`user_id`),
+                              UNIQUE KEY `uk_game_unique` (`game_type`, `game_region`, `game_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户游戏账号表';
+
+-- 3. 契约表（contracts）- 核心业务表
 CREATE TABLE `contracts` (
                              `id` varchar(32) NOT NULL COMMENT '契约ID，使用UUID生成',
                              `contract_no` varchar(50) NOT NULL COMMENT '契约编号，如：MJ-20240120-001',
@@ -53,8 +68,8 @@ CREATE TABLE `contracts` (
     -- 参与双方
                              `initiator_id` bigint(20) NOT NULL COMMENT '发起人ID',
                              `initiator_game_id` varchar(50) NOT NULL COMMENT '发起人游戏ID',
-                             `receiver_id` bigint(20) NOT NULL COMMENT '接收人ID',
-                             `receiver_game_id` varchar(50) NOT NULL COMMENT '接收人游戏ID',
+                             `receiver_id` bigint(20) DEFAULT NULL COMMENT '接收人ID',
+                             `receiver_game_id` varchar(50) DEFAULT NULL COMMENT '接收人游戏ID',
 
     -- 契约条款
                              `game_type` varchar(20) NOT NULL COMMENT '游戏类型：DELTA-三角洲，AREA18-暗区，TARKOV-塔科夫',
@@ -64,6 +79,7 @@ CREATE TABLE `contracts` (
                              `penalty_amount` decimal(10,2) DEFAULT NULL COMMENT '违约金金额',
 
     -- 约定条件
+                             `title` varchar(100) DEFAULT NULL COMMENT '契约标题',
                              `guarantee_item` varchar(100) DEFAULT NULL COMMENT '保底物品，如：保底出红',
                              `success_condition` varchar(500) DEFAULT NULL COMMENT '成功条件描述',
                              `failure_condition` varchar(500) DEFAULT NULL COMMENT '失败条件描述',
@@ -251,6 +267,7 @@ CREATE TABLE `system_configs` (
                                   `config_group` varchar(50) DEFAULT 'COMMON' COMMENT '配置分组：PAYMENT-支付，CREDIT-信用，CONTRACT-契约，VIP-VIP',
                                   `description` varchar(500) DEFAULT NULL COMMENT '配置描述',
                                   `is_system` tinyint(1) DEFAULT 0 COMMENT '是否系统内置',
+                                  `ext_data` text COMMENT '扩展字段（JSON等）',
 
                                   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                                   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

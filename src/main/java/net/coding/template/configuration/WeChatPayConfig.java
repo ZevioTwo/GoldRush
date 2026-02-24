@@ -1,6 +1,7 @@
 package net.coding.template.configuration;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 
+@Slf4j
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "wechat.pay")
@@ -34,9 +36,20 @@ public class WeChatPayConfig {
 
     @Bean
     public CloseableHttpClient wechatPayHttpClient() throws Exception {
+        if (certPath == null || certPath.isBlank()) {
+            log.warn("wechat.pay.cert-path 未配置，使用默认HttpClient启动（微信支付将不可用）");
+            return HttpClients.createDefault();
+        }
+
+        File certFile = new File(certPath);
+        if (!certFile.exists()) {
+            log.warn("wechat.pay.cert-path 文件不存在: {}，使用默认HttpClient启动（微信支付将不可用）", certFile.getAbsolutePath());
+            return HttpClients.createDefault();
+        }
+
         // 加载商户证书
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        try (FileInputStream fis = new FileInputStream(new File(certPath))) {
+        try (FileInputStream fis = new FileInputStream(certFile)) {
             keyStore.load(fis, mchId.toCharArray());
         }
 

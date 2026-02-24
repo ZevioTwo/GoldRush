@@ -6,12 +6,16 @@
       <text>{{detail.status}}</text>
     </view>
     <view class="row">
-      <text class="text-muted">金额</text>
-      <text>{{detail.amount}}</text>
+      <text class="text-muted">保证金</text>
+      <text>{{detail.depositAmount}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">服务费</text>
+      <text>{{detail.serviceFeeAmount}}</text>
     </view>
     <view class="row">
       <text class="text-muted">创建时间</text>
-      <text>{{detail.createdAt}}</text>
+      <text>{{detail.createTime}}</text>
     </view>
   </view>
 
@@ -19,11 +23,19 @@
     <view style="font-weight: 600; margin-bottom: 12rpx;">参与方</view>
     <view class="row">
       <text class="text-muted">发起人</text>
-      <text>{{detail.senderNickname}} ({{detail.senderUserId}})</text>
+      <text>{{detail.initiator.nickname}} ({{detail.initiator.userId}})</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">发起人游戏ID</text>
+      <text>{{detail.initiator.gameId}}</text>
     </view>
     <view class="row">
       <text class="text-muted">接收人</text>
-      <text>{{detail.receiverNickname}} ({{detail.receiverUserId}})</text>
+      <text>{{detail.receiver.nickname}} ({{detail.receiver.userId}})</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">接收人游戏ID</text>
+      <text>{{detail.receiver.gameId}}</text>
     </view>
   </view>
 
@@ -34,8 +46,20 @@
       <text>{{detail.gameType}}</text>
     </view>
     <view class="row">
-      <text class="text-muted">违约金</text>
-      <text>{{detail.penaltyAmount}}</text>
+      <text class="text-muted">游戏大区</text>
+      <text>{{detail.gameRegion}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">保底物品</text>
+      <text>{{detail.guaranteeItem}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">成功条件</text>
+      <text>{{detail.successCondition}}</text>
+    </view>
+    <view class="row">
+      <text class="text-muted">失败条件</text>
+      <text>{{detail.failureCondition}}</text>
     </view>
   </view>
 </view>

@@ -17,4 +17,8 @@ public class UserProfileDTO {
     private Integer disputeCount;
     private Integer violationCount;
     private String userLevel;        // 用户等级
+    private String gameId;
+    private String gameRegion;
+    private String wechatId;
+    private String phone;
 }

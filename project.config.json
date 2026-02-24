@@ -1,7 +1,7 @@
 {
-  "miniprogramRoot": "",
+  "miniprogramRoot": "frontend-weapp/",
   "projectname": "GoldRushContract",
-  "appid": "wx9e1d8be4da6a6d70",
+  "appid": "wxf63e6820cbe2f874",
   "setting": {
     "urlCheck": false,
     "es6": true,
