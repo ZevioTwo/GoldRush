@@ -666,7 +666,6 @@ public class SystemConfigService {
         configs.add(createConfig("credit.recover_points", "5", "NUMBER", "CREDIT", "每次恢复点数"));
 
         // 契约配置
-        configs.add(createConfig("contract.default_game_type", "DELTA", "STRING", "CONTRACT", "默认游戏类型"));
         configs.add(createConfig("contract.dispute_timeout_hours", "24", "NUMBER", "CONTRACT", "争议举证超时时间(小时)"));
         configs.add(createConfig("contract.auto_complete_hours", "72", "NUMBER", "CONTRACT", "自动完成时间(小时)"));
         configs.add(createConfig("contract.auto_cancel_minutes", "30", "NUMBER", "CONTRACT", "自动取消时间(分钟)"));

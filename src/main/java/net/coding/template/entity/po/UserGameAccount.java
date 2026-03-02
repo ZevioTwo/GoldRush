@@ -14,15 +14,6 @@ public class UserGameAccount {
     @TableField("user_id")
     private Long userId;
 
-    @TableField("game_type")
-    private String gameType;
-
-    @TableField("game_region")
-    private String gameRegion;
-
-    @TableField("game_id")
-    private String gameId;
-
     @TableField("remark")
     private String remark;
 

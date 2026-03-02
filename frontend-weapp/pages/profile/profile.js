@@ -58,9 +58,6 @@ Page({
   goContracts() {
     wx.navigateTo({ url: "/pages/contracts/list" });
   },
-  goAccountManage() {
-    wx.navigateTo({ url: "/pages/profile/accounts" });
-  },
   logout() {
     setToken("");
     wx.reLaunch({ url: "/pages/login/login" });

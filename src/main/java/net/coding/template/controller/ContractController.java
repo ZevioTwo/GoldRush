@@ -46,10 +46,9 @@ public class ContractController {
 
             String accessToken = token.substring(7);
 
-            log.info("创建契约请求: {}, 用户Token: {}",
-                    request.getReceiverGameId(), accessToken.substring(0, 10) + "...");
-
-            ContractCreateResponse response = contractService.createContract(request, accessToken);
+        log.info("创建契约请求: 用户Token: {}",
+                accessToken.substring(0, 10) + "...");
+ContractCreateResponse response = contractService.createContract(request, accessToken);
 
             log.info("契约创建成功: {}", response.getContractNo());
 

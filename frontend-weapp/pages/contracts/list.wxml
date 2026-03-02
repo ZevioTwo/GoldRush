@@ -23,10 +23,6 @@
         <text>{{item.depositAmount}}</text>
       </view>
       <view class="row">
-        <text class="text-muted">对手游戏ID</text>
-        <text>{{item.opponentGameId}}</text>
-      </view>
-      <view class="row">
         <text class="text-muted">创建时间</text>
         <text>{{item.createTime}}</text>
       </view>

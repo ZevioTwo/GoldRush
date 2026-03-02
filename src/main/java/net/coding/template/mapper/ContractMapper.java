@@ -37,16 +37,12 @@ public interface ContractMapper extends BaseMapper<Contract> {
             "<if test='status != null'>" +
             "   AND status = #{status} " +
             "</if>" +
-            "<if test='gameType != null'>" +
-            "   AND game_type = #{gameType} " +
-            "</if>" +
             "ORDER BY create_time DESC " +
             "LIMIT #{offset}, #{limit}" +
             "</script>")
     List<Contract> selectUserContracts(@Param("userId") Long userId,
                                        @Param("scope") String scope,
                                        @Param("status") String status,
-                                       @Param("gameType") String gameType,
                                        @Param("offset") Integer offset,
                                        @Param("limit") Integer limit);
 
@@ -56,25 +52,17 @@ public interface ContractMapper extends BaseMapper<Contract> {
     @Select("<script>" +
             "SELECT * FROM contracts " +
             "WHERE status = 'PENDING' AND receiver_id IS NULL " +
-            "<if test='gameType != null'>" +
-            "   AND game_type = #{gameType} " +
-            "</if>" +
             "<if test=\"keyword != null and keyword != ''\">" +
             "   AND title LIKE CONCAT('%', #{keyword}, '%') " +
             "</if>" +
             "<if test=\"contractNo != null and contractNo != ''\">" +
             "   AND contract_no LIKE CONCAT('%', #{contractNo}, '%') " +
             "</if>" +
-            "<if test=\"initiatorGameId != null and initiatorGameId != ''\">" +
-            "   AND initiator_game_id = #{initiatorGameId} " +
-            "</if>" +
             "ORDER BY create_time DESC " +
             "LIMIT #{offset}, #{limit}" +
             "</script>")
-    List<Contract> selectHallContracts(@Param("gameType") String gameType,
-                                       @Param("keyword") String keyword,
+    List<Contract> selectHallContracts(@Param("keyword") String keyword,
                                        @Param("contractNo") String contractNo,
-                                       @Param("initiatorGameId") String initiatorGameId,
                                        @Param("offset") Integer offset,
                                        @Param("limit") Integer limit);
 
@@ -84,32 +72,23 @@ public interface ContractMapper extends BaseMapper<Contract> {
     @Select("<script>" +
             "SELECT COUNT(*) FROM contracts " +
             "WHERE status = 'PENDING' AND receiver_id IS NULL " +
-            "<if test='gameType != null'>" +
-            "   AND game_type = #{gameType} " +
-            "</if>" +
             "<if test=\"keyword != null and keyword != ''\">" +
             "   AND title LIKE CONCAT('%', #{keyword}, '%') " +
             "</if>" +
             "<if test=\"contractNo != null and contractNo != ''\">" +
             "   AND contract_no LIKE CONCAT('%', #{contractNo}, '%') " +
             "</if>" +
-            "<if test=\"initiatorGameId != null and initiatorGameId != ''\">" +
-            "   AND initiator_game_id = #{initiatorGameId} " +
-            "</if>" +
             "</script>")
-    int countHallContracts(@Param("gameType") String gameType,
-                           @Param("keyword") String keyword,
-                           @Param("contractNo") String contractNo,
-                           @Param("initiatorGameId") String initiatorGameId);
+    int countHallContracts(@Param("keyword") String keyword,
+                           @Param("contractNo") String contractNo);
 
     /**
      * 接单绑定接收人
      */
-    @Update("UPDATE contracts SET receiver_id = #{receiverId}, receiver_game_id = #{receiverGameId}, " +
+    @Update("UPDATE contracts SET receiver_id = #{receiverId}, " +
             "update_time = NOW() WHERE id = #{contractId} AND receiver_id IS NULL")
     int acceptContract(@Param("contractId") String contractId,
-                       @Param("receiverId") Long receiverId,
-                       @Param("receiverGameId") String receiverGameId);
+                       @Param("receiverId") Long receiverId);
 
     /**
      * 统计用户契约数量

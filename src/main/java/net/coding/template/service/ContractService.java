@@ -21,8 +21,6 @@ import net.coding.template.mapper.ContractMapper;
 import net.coding.template.mapper.PaymentOrderMapper;
 import net.coding.template.mapper.UserMapper;
 import net.coding.template.util.ContractNoGenerator;
-import net.coding.template.util.GameTypeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,8 +59,6 @@ public class ContractService {
     @Resource
     private ContractNoGenerator contractNoGenerator;
 
-    @Resource
-    private GameTypeUtil gameTypeUtil;
 
     @Resource
     private SystemConfigService configService;
@@ -87,32 +83,12 @@ public class ContractService {
             throw new BusinessException(400, "您已有进行中的契约，请先完成");
         }
 
-        // 3. 验证游戏类型
-        if (!gameTypeUtil.isValidGameType(request.getGameType())) {
-            throw new BusinessException(400, "不支持的游戏类型");
-        }
-
-        // 4. 获取发起方账号（允许多账号）
-        net.coding.template.entity.po.UserGameAccount initiatorAccount = userGameAccountMapper.selectByIdAndUser(
-                request.getInitiatorAccountId(), currentUser.getId());
-        if (initiatorAccount == null) {
-            throw new BusinessException(400, "发起方账号不存在");
-        }
-        if (!request.getGameType().equals(initiatorAccount.getGameType())
-                || !request.getGameRegion().equals(initiatorAccount.getGameRegion())) {
-            throw new BusinessException(400, "发起方账号游戏类型或大区不匹配");
-        }
-
-        // 5. 创建契约记录（接收人由接单时绑定）
+        // 3. 创建契约记录（接收人由接单时绑定）
         Contract contract = new Contract();
         contract.setId(generateContractId());
         contract.setContractNo(contractNoGenerator.generate());
         contract.setInitiatorId(currentUser.getId());
-        contract.setInitiatorGameId(initiatorAccount.getGameId());
         contract.setReceiverId(null);
-        contract.setReceiverGameId(null);
-        contract.setGameType(request.getGameType());
-        contract.setGameRegion(request.getGameRegion());
         contract.setDepositAmount(request.getDepositAmount());
 
         // 计算服务费（如果是VIP则免费）
@@ -121,9 +97,9 @@ public class ContractService {
         contract.setServiceFeeAmount(serviceFee);
 
         contract.setTitle(request.getTitle());
-        contract.setGuaranteeItem(request.getGuaranteeItem());
+        contract.setGuaranteeItem(null);
         contract.setSuccessCondition(request.getSuccessCondition());
-        contract.setFailureCondition(request.getFailureCondition());
+        contract.setFailureCondition(null);
         contract.setStatus(ContractStatus.PENDING.getCode());
         contract.setPhase(ContractPhase.PREPARE.getCode());
         contract.setPaymentStatus("UNPAID");
@@ -152,7 +128,7 @@ public class ContractService {
         response.setCreateTime(contract.getCreateTime());
 
         log.info("契约创建成功: 发起人={}, 契约号: {}",
-                currentUser.getGameId(), contract.getContractNo());
+                currentUser.getId(), contract.getContractNo());
 
         return response;
     }
@@ -173,7 +149,6 @@ public class ContractService {
                 currentUser.getId(),
                 request.getScope(),
                 request.getStatus(),
-                request.getGameType(),
                 offset,
                 request.getSize()
         );
@@ -211,18 +186,14 @@ public class ContractService {
 
         int offset = (request.getPage() - 1) * request.getSize();
         List<Contract> contracts = contractMapper.selectHallContracts(
-                request.getGameType(),
                 request.getKeyword(),
                 request.getContractNo(),
-                request.getInitiatorGameId(),
                 offset,
                 request.getSize()
         );
         int total = contractMapper.countHallContracts(
-                request.getGameType(),
                 request.getKeyword(),
-                request.getContractNo(),
-                request.getInitiatorGameId()
+                request.getContractNo()
         );
 
         List<ContractListResponse.ContractItem> items = contracts.stream()
@@ -260,17 +231,7 @@ public class ContractService {
             throw new BusinessException(400, "不能接自己的契约");
         }
 
-        net.coding.template.entity.po.UserGameAccount receiverAccount = userGameAccountMapper.selectByIdAndUser(
-                request.getReceiverAccountId(), currentUser.getId());
-        if (receiverAccount == null) {
-            throw new BusinessException(400, "接单账号不存在");
-        }
-        if (!contract.getGameType().equals(receiverAccount.getGameType())
-                || !contract.getGameRegion().equals(receiverAccount.getGameRegion())) {
-            throw new BusinessException(400, "接单账号游戏类型或大区不匹配");
-        }
-
-        int rows = contractMapper.acceptContract(contract.getId(), currentUser.getId(), receiverAccount.getGameId());
+        int rows = contractMapper.acceptContract(contract.getId(), currentUser.getId());
         if (rows == 0) {
             throw new BusinessException(400, "接单失败");
         }
@@ -314,14 +275,13 @@ public class ContractService {
         dto.setContractNo(contract.getContractNo());
         dto.setStatus(contract.getStatus());
         dto.setPhase(contract.getPhase());
+        dto.setTitle(contract.getTitle());
 
         // 用户信息
         dto.setInitiator(buildUserInfo(initiator));
         dto.setReceiver(buildUserInfo(receiver));
 
         // 契约条款
-        dto.setGameType(gameTypeUtil.getGameName(contract.getGameType()));
-        dto.setGameRegion(contract.getGameRegion());
         dto.setDepositAmount(contract.getDepositAmount());
         dto.setServiceFeeAmount(contract.getServiceFeeAmount());
         dto.setGuaranteeItem(contract.getGuaranteeItem());
@@ -420,7 +380,7 @@ public class ContractService {
             return response;
         } else {
             // 只有一方确认，等待另一方
-            log.info("契约部分确认: {}, 用户: {}", contract.getContractNo(), currentUser.getGameId());
+            log.info("契约部分确认: {}, 用户: {}", contract.getContractNo(), currentUser.getId());
 
             ContractConfirmResponse response = new ContractConfirmResponse();
             response.setContractId(contract.getId());
@@ -496,20 +456,11 @@ public class ContractService {
         item.setContractId(contract.getId());
         item.setContractNo(contract.getContractNo());
         item.setTitle(contract.getTitle());
-        item.setGameType(contract.getGameType());
-        item.setGameRegion(contract.getGameRegion());
         item.setStatus(contract.getStatus());
         item.setDepositAmount(contract.getDepositAmount());
         item.setGuaranteeItem(contract.getGuaranteeItem());
         item.setCreateTime(contract.getCreateTime());
         item.setCompleteTime(contract.getCompleteTime());
-
-        // 设置对手信息：使用查询出来的发起人/接收人游戏ID，不依赖上下文
-        if (contract.getReceiverGameId() != null) {
-            item.setOpponentGameId(contract.getReceiverGameId());
-        } else {
-            item.setOpponentGameId(contract.getInitiatorGameId());
-        }
 
         User opponent = null;
         if (contract.getReceiverId() != null) {
@@ -532,7 +483,6 @@ public class ContractService {
         info.setUserId(user.getId());
         info.setNickname(user.getNickname());
         info.setAvatarUrl(user.getAvatarUrl());
-        info.setGameId(user.getGameId());
         info.setCreditScore(user.getCreditScore());
         info.setIsVip(user.getIsVip());
         info.setCompletedContracts(user.getCompletedContracts());
@@ -640,7 +590,7 @@ public class ContractService {
     private void sendNotificationToReceiver(User receiver, Contract contract) {
         // 发送微信模板消息或站内信
         // 这里简化处理
-        log.info("发送通知给接收方: {}, 契约: {}", receiver.getGameId(), contract.getContractNo());
+        log.info("发送通知给接收方: {}, 契约: {}", receiver.getId(), contract.getContractNo());
     }
 
     private void sendContractStartNotification(Contract contract) {

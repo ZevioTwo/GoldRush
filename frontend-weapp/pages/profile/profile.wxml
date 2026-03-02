@@ -12,10 +12,6 @@
         <view class="grid-icon">信息</view>
         <view class="grid-label">用户信息</view>
       </view>
-      <view class="grid-item" bindtap="goAccountManage">
-        <view class="grid-icon">账号</view>
-        <view class="grid-label">账号管理</view>
-      </view>
       <view class="grid-item" bindtap="goCredit">
         <view class="grid-icon">信用</view>
         <view class="grid-label">信用分详情</view>

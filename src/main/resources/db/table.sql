@@ -9,8 +9,6 @@ CREATE TABLE `users` (
                          `nickname` varchar(100) DEFAULT '微信用户' COMMENT '昵称',
                          `avatar_url` varchar(500) DEFAULT NULL COMMENT '头像URL',
                          `phone` varchar(20) DEFAULT NULL COMMENT '手机号',
-                         `game_id` varchar(50) DEFAULT NULL COMMENT '游戏ID（如三角洲/暗区突围ID）',
-                         `game_region` varchar(50) DEFAULT NULL COMMENT '游戏大区',
                          `wechat_id` varchar(100) DEFAULT NULL COMMENT '微信号',
 
     -- 信用体系
@@ -38,26 +36,20 @@ CREATE TABLE `users` (
 
                          PRIMARY KEY (`id`),
                          UNIQUE KEY `uk_openid` (`openid`),
-                         UNIQUE KEY `uk_game_id` (`game_id`, `game_region`),
                          KEY `idx_credit_score` (`credit_score`),
                          KEY `idx_vip_expire` (`vip_expire_time`),
-                         KEY `idx_status` (`status`),
-                         KEY `idx_game_wechat` (`game_id`, `wechat_id`)
+                         KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
 -- 2. 用户游戏账号表（user_game_accounts）
 CREATE TABLE `user_game_accounts` (
                               `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
                               `user_id` bigint(20) NOT NULL COMMENT '用户ID',
-                              `game_type` varchar(20) NOT NULL COMMENT '游戏类型：DELTA/AREA18/TARKOV',
-                              `game_region` varchar(50) NOT NULL COMMENT '游戏大区',
-                              `game_id` varchar(50) NOT NULL COMMENT '游戏ID',
                               `remark` varchar(100) DEFAULT NULL COMMENT '备注',
                               `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                               `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
                               PRIMARY KEY (`id`),
-                              KEY `idx_user` (`user_id`),
-                              UNIQUE KEY `uk_game_unique` (`game_type`, `game_region`, `game_id`)
+                              KEY `idx_user` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户游戏账号表';
 
 -- 3. 契约表（contracts）- 核心业务表
@@ -67,13 +59,9 @@ CREATE TABLE `contracts` (
 
     -- 参与双方
                              `initiator_id` bigint(20) NOT NULL COMMENT '发起人ID',
-                             `initiator_game_id` varchar(50) NOT NULL COMMENT '发起人游戏ID',
                              `receiver_id` bigint(20) DEFAULT NULL COMMENT '接收人ID',
-                             `receiver_game_id` varchar(50) DEFAULT NULL COMMENT '接收人游戏ID',
 
     -- 契约条款
-                             `game_type` varchar(20) NOT NULL COMMENT '游戏类型：DELTA-三角洲，AREA18-暗区，TARKOV-塔科夫',
-                             `game_region` varchar(50) NOT NULL COMMENT '游戏大区',
                              `deposit_amount` decimal(10,2) NOT NULL COMMENT '履约押金金额',
                              `service_fee_amount` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '平台服务费',
                              `penalty_amount` decimal(10,2) DEFAULT NULL COMMENT '违约金金额',
@@ -107,7 +95,6 @@ CREATE TABLE `contracts` (
                              UNIQUE KEY `uk_contract_no` (`contract_no`),
                              KEY `idx_initiator` (`initiator_id`, `status`),
                              KEY `idx_receiver` (`receiver_id`, `status`),
-                             KEY `idx_game_info` (`game_type`, `game_region`),
                              KEY `idx_create_time` (`create_time`),
                              KEY `idx_status_time` (`status`, `create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='契约表';
@@ -138,16 +125,21 @@ CREATE TABLE `payment_orders` (
                                   `unfreeze_transaction_id` varchar(100) DEFAULT NULL COMMENT '微信解冻流水号',
 
     -- 状态
-                                  `payment_status` varchar(20) NOT NULL DEFAULT 'PENDING' COMMENT '支付状态：PENDING-待支付，SUCCESS-成功，FAILED-失败，CLOSED-已关闭',
-                                  `refund_status` varchar(20) DEFAULT 'NONE' COMMENT '退款状态：NONE-无退款，PARTIAL-部分退款，FULL-全额退款',
-                                  `is_settled` tinyint(1) DEFAULT 0 COMMENT '是否已结算给商户',
+                              `payment_status` varchar(20) NOT NULL DEFAULT 'PENDING' COMMENT '支付状态：PENDING-待支付，SUCCESS-成功，FAILED-失败，CLOSED-已关闭',
+                              `refund_status` varchar(20) DEFAULT 'NONE' COMMENT '退款状态：NONE-无退款，PARTIAL-部分退款，FULL-全额退款',
+                              `is_settled` tinyint(1) DEFAULT 0 COMMENT '是否已结算给商户',
+                              `callback_status` varchar(20) DEFAULT 'PENDING' COMMENT '回调状态：PENDING-待回调，SUCCESS-成功，FAILED-失败',
+                              `callback_count` int(11) DEFAULT 0 COMMENT '回调次数',
+                              `last_callback_time` datetime DEFAULT NULL COMMENT '最后回调时间',
+                              `notify_url` varchar(255) DEFAULT NULL COMMENT '异步通知URL',
+                              `business_data` text COMMENT '业务扩展数据(JSON)',
 
     -- 时间
-                                  `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
-                                  `freeze_time` datetime DEFAULT NULL COMMENT '冻结时间',
-                                  `unfreeze_time` datetime DEFAULT NULL COMMENT '解冻时间',
-                                  `refund_time` datetime DEFAULT NULL COMMENT '退款时间',
-                                  `expire_time` datetime DEFAULT NULL COMMENT '订单过期时间',
+                              `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
+                              `freeze_time` datetime DEFAULT NULL COMMENT '冻结时间',
+                              `unfreeze_time` datetime DEFAULT NULL COMMENT '解冻时间',
+                              `refund_time` datetime DEFAULT NULL COMMENT '退款时间',
+                              `expire_time` datetime DEFAULT NULL COMMENT '订单过期时间',
 
                                   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                                   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

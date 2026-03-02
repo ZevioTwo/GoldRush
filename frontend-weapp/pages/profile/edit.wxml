@@ -1,14 +1,6 @@
 <view class="container">
   <view class="card">
     <view class="form-item">
-      <text class="label">游戏ID</text>
-      <input class="input" placeholder="请输入游戏ID" value="{{form.gameId}}" bindinput="onInput" data-field="gameId" />
-    </view>
-    <view class="form-item">
-      <text class="label">游戏大区</text>
-      <input class="input" placeholder="请输入游戏大区" value="{{form.gameRegion}}" bindinput="onInput" data-field="gameRegion" />
-    </view>
-    <view class="form-item">
       <text class="label">微信号（可选）</text>
       <input class="input" placeholder="请输入微信号" value="{{form.wechatId}}" bindinput="onInput" data-field="wechatId" />
     </view>

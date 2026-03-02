@@ -18,20 +18,8 @@ public class Contract {
     @TableField("initiator_id")
     private Long initiatorId;
 
-    @TableField("initiator_game_id")
-    private String initiatorGameId;
-
     @TableField("receiver_id")
     private Long receiverId;
-
-    @TableField("receiver_game_id")
-    private String receiverGameId;
-
-    @TableField("game_type")
-    private String gameType;
-
-    @TableField("game_region")
-    private String gameRegion;
 
     @TableField("deposit_amount")
     private BigDecimal depositAmount;

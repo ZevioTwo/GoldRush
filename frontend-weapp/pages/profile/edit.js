@@ -4,8 +4,6 @@ Page({
   data: {
     loading: false,
     form: {
-      gameId: "",
-      gameRegion: "",
       wechatId: "",
       phone: ""
     }
@@ -23,8 +21,6 @@ Page({
           const data = res.data || {};
           this.setData({
             form: {
-              gameId: data.gameId || "",
-              gameRegion: data.gameRegion || "",
               wechatId: data.wechatId || "",
               phone: data.phone || ""
             }
@@ -42,10 +38,6 @@ Page({
     this.setData({ [`form.${field}`]: e.detail.value });
   },
   validate(form) {
-    if (!form.gameId) return "请填写游戏ID";
-    if (!form.gameRegion) return "请填写游戏大区";
-    if (form.gameId.length > 50) return "游戏ID不能超过50字";
-    if (form.gameRegion.length > 50) return "游戏大区不能超过50字";
     if (form.wechatId && form.wechatId.length > 50) return "微信号不能超过50字";
     if (form.phone && form.phone.length > 20) return "手机号不能超过20字";
     return "";
@@ -64,8 +56,6 @@ Page({
       url: "/api/user/profile/update",
       method: "POST",
       data: {
-        gameId: form.gameId,
-        gameRegion: form.gameRegion,
         wechatId: form.wechatId || undefined,
         phone: form.phone || undefined
       }

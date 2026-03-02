@@ -26,12 +26,6 @@ public class User {
     @TableField("phone")
     private String phone;
 
-    @TableField("game_id")
-    private String gameId;
-
-    @TableField("game_region")
-    private String gameRegion;
-
     @TableField("wechat_id")
     private String wechatId;
 

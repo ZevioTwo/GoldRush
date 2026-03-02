@@ -19,12 +19,9 @@ public class ContractListResponse {
         private String contractId;
         private String contractNo;
         private String title;
-        private String gameType;
-        private String gameRegion;
         private String status;
         private BigDecimal depositAmount;
         private String guaranteeItem;
-        private String opponentGameId;
         private Integer opponentCreditScore;
         private LocalDateTime createTime;
         private LocalDateTime completeTime;

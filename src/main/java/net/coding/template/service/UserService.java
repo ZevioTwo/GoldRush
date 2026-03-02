@@ -114,8 +114,6 @@ public class UserService {
         dto.setCompletedContracts(user.getCompletedContracts());
         dto.setDisputeCount(user.getDisputeCount());
         dto.setViolationCount(user.getViolationCount());
-        dto.setGameId(user.getGameId());
-        dto.setGameRegion(user.getGameRegion());
         dto.setWechatId(user.getWechatId());
         dto.setPhone(user.getPhone());
 
@@ -248,11 +246,11 @@ public class UserService {
     }
 
     /**
-     * 更新用户游戏信息与联系方式
+     * 更新用户联系方式
      */
     @Transactional
-    public void updateProfile(Long userId, String gameId, String gameRegion, String wechatId, String phone) {
-        int rows = userMapper.updateGameInfo(userId, gameId, gameRegion, wechatId, phone);
+    public void updateProfile(Long userId, String wechatId, String phone) {
+        int rows = userMapper.updateContactInfo(userId, wechatId, phone);
         if (rows == 0) {
             throw new RuntimeException("更新用户信息失败");
         }

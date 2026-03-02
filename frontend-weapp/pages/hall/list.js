@@ -7,7 +7,6 @@ Page({
     size: 10,
     keyword: "",
     contractNo: "",
-    initiatorGameId: "",
     loading: false,
     hasMore: true
   },
@@ -35,9 +34,6 @@ Page({
     }
     if (this.data.contractNo) {
       data.contractNo = this.data.contractNo;
-    }
-    if (this.data.initiatorGameId) {
-      data.initiatorGameId = this.data.initiatorGameId;
     }
 
     if (this.data.loading) return;
@@ -74,13 +70,6 @@ Page({
   onContractNoInput(e) {
     this.setData({ contractNo: e.detail.value });
   },
-  onInitiatorInput(e) {
-    this.setData({ initiatorGameId: e.detail.value });
-  },
-  getGameTypeName(code) {
-    const map = { DELTA: "三角洲行动", AREA18: "暗区突围", TARKOV: "逃离塔科夫" };
-    return map[code] || code;
-  },
   onSearch() {
     this.resetAndFetch();
   },
@@ -89,49 +78,22 @@ Page({
     if (!contractId) return;
 
     request({
-      url: "/api/user/game-accounts",
-      method: "GET"
+      url: "/api/contract/accept",
+      method: "POST",
+      data: {
+        contractId
+      }
     })
-      .then((res) => {
-        if (!res || (res.code !== 0 && res.code !== 200)) {
-          wx.showToast({ title: res?.message || "获取账号失败", icon: "none" });
-          return null;
+      .then((resp) => {
+        if (resp && (resp.code === 0 || resp.code === 200)) {
+          wx.showToast({ title: "接单成功", icon: "success" });
+          this.resetAndFetch();
+          return;
         }
-        const accounts = res.data || [];
-        if (accounts.length === 0) {
-          wx.showToast({ title: "请先在账号管理中添加账号", icon: "none" });
-          return null;
-        }
-        const options = accounts.map((item) => `${this.getGameTypeName(item.gameType)} | ${item.gameRegion} | ${item.gameId}`);
-        return new Promise((resolve) => {
-          wx.showActionSheet({
-            itemList: options,
-            success: (sheet) => resolve(accounts[sheet.tapIndex]),
-            fail: () => resolve(null)
-          });
-        });
+        wx.showToast({ title: resp.message || "接单失败", icon: "none" });
       })
-      .then((account) => {
-        if (!account) return;
-        request({
-          url: "/api/contract/accept",
-          method: "POST",
-          data: {
-            contractId,
-            receiverAccountId: account.id
-          }
-        })
-          .then((resp) => {
-            if (resp && (resp.code === 0 || resp.code === 200)) {
-              wx.showToast({ title: "接单成功", icon: "success" });
-              this.fetchList();
-              return;
-            }
-            wx.showToast({ title: resp.message || "接单失败", icon: "none" });
-          })
-          .catch(() => {
-            wx.showToast({ title: "网络错误", icon: "none" });
-          });
+      .catch(() => {
+        wx.showToast({ title: "网络错误", icon: "none" });
       });
   },
   formatDate(value) {

@@ -12,14 +12,13 @@ public class ContractDetailDTO {
     private String contractNo;
     private String status;
     private String phase;
+    private String title;
 
     // 双方信息
     private UserInfo initiator;
     private UserInfo receiver;
 
     // 契约条款
-    private String gameType;
-    private String gameRegion;
     private BigDecimal depositAmount;
     private BigDecimal serviceFeeAmount;
     private String guaranteeItem;
@@ -47,7 +46,6 @@ public class ContractDetailDTO {
         private Long userId;
         private String nickname;
         private String avatarUrl;
-        private String gameId;
         private Integer creditScore;
         private Boolean isVip;
         private Integer completedContracts;

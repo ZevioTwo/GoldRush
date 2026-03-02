@@ -6,9 +6,6 @@
     <view class="form-item">
       <input class="input" placeholder="契约号（模糊匹配）" value="{{contractNo}}" bindinput="onContractNoInput" />
     </view>
-    <view class="form-item">
-      <input class="input" placeholder="发起人游戏ID（精确匹配）" value="{{initiatorGameId}}" bindinput="onInitiatorInput" />
-    </view>
     <button class="btn-outline" bindtap="onSearch">搜索</button>
   </view>
 
@@ -27,10 +24,6 @@
         <view class="row">
           <text class="text-muted">金额</text>
           <text>{{item.depositAmount}}</text>
-        </view>
-        <view class="row">
-          <text class="text-muted">发起人游戏ID</text>
-          <text>{{item.opponentGameId}}</text>
         </view>
         <view class="row">
           <text class="text-muted">创建时间</text>

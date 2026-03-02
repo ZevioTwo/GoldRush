@@ -2,16 +2,10 @@ const { request } = require("../../utils/request");
 
 Page({
   data: {
-    loading: false,
-    editingId: null,
     accounts: [],
-    gameTypeIndex: 0,
-    gameTypeOptions: ["三角洲行动", "暗区突围", "逃离塔科夫"],
-    gameTypeValues: ["DELTA", "AREA18", "TARKOV"],
+    editingId: null,
+    loading: false,
     form: {
-      gameType: "DELTA",
-      gameRegion: "",
-      gameId: "",
       remark: ""
     }
   },
@@ -25,38 +19,20 @@ Page({
     })
       .then((res) => {
         if (res && (res.code === 0 || res.code === 200)) {
-          const list = (res.data || []).map((item) => ({
-            ...item,
-            gameTypeName: this.getGameTypeName(item.gameType)
-          }));
-          this.setData({ accounts: list });
+          this.setData({ accounts: res.data || [] });
           return;
         }
-        wx.showToast({ title: res.message || "获取失败", icon: "none" });
+        wx.showToast({ title: res.message || "获取账号失败", icon: "none" });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
       });
-  },
-  getGameTypeName(code) {
-    const map = { DELTA: "三角洲行动", AREA18: "暗区突围", TARKOV: "逃离塔科夫" };
-    return map[code] || code;
-  },
-  onGameTypeChange(e) {
-    const index = Number(e.detail.value) || 0;
-    this.setData({
-      gameTypeIndex: index,
-      "form.gameType": this.data.gameTypeValues[index]
-    });
   },
   onInput(e) {
     const field = e.currentTarget.dataset.field;
     this.setData({ [`form.${field}`]: e.detail.value });
   },
   validate(form) {
-    if (!form.gameType) return "请选择游戏类型";
-    if (!form.gameRegion) return "请填写游戏大区";
-    if (!form.gameId) return "请填写游戏ID";
     if (form.remark && form.remark.length > 100) return "备注不能超过100字";
     return "";
   },
@@ -71,18 +47,17 @@ Page({
 
     this.setData({ loading: true });
     const isEdit = !!this.data.editingId;
-    const url = isEdit ? `/api/user/game-accounts/${this.data.editingId}` : "/api/user/game-accounts";
-    const method = isEdit ? "PUT" : "POST";
-
     request({
-      url,
-      method,
-      data: form
+      url: isEdit ? `/api/user/game-accounts/${this.data.editingId}` : "/api/user/game-accounts",
+      method: isEdit ? "PUT" : "POST",
+      data: {
+        remark: form.remark || undefined
+      }
     })
       .then((res) => {
         if (res && (res.code === 0 || res.code === 200)) {
           wx.showToast({ title: isEdit ? "更新成功" : "新增成功", icon: "success" });
-          this.resetForm();
+          this.setData({ editingId: null, form: { remark: "" } });
           this.fetchAccounts();
           return;
         }
@@ -97,25 +72,21 @@ Page({
   },
   editAccount(e) {
     const id = e.currentTarget.dataset.id;
-    const item = this.data.accounts.find((acc) => acc.id === id);
+    const item = this.data.accounts.find((account) => account.id === id);
     if (!item) return;
-    const index = this.data.gameTypeValues.indexOf(item.gameType);
     this.setData({
       editingId: item.id,
-      gameTypeIndex: index >= 0 ? index : 0,
       form: {
-        gameType: item.gameType,
-        gameRegion: item.gameRegion,
-        gameId: item.gameId,
         remark: item.remark || ""
       }
     });
   },
   deleteAccount(e) {
     const id = e.currentTarget.dataset.id;
+    if (!id) return;
     wx.showModal({
       title: "确认删除",
-      content: "确定删除该账号吗？",
+      content: "删除后无法恢复",
       success: (res) => {
         if (!res.confirm) return;
         request({
@@ -133,18 +104,6 @@ Page({
           .catch(() => {
             wx.showToast({ title: "网络错误", icon: "none" });
           });
-      }
-    });
-  },
-  resetForm() {
-    this.setData({
-      editingId: null,
-      gameTypeIndex: 0,
-      form: {
-        gameType: "DELTA",
-        gameRegion: "",
-        gameId: "",
-        remark: ""
       }
     });
   }

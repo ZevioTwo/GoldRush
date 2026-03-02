@@ -26,7 +26,6 @@ INSERT INTO `system_configs` (
       ('credit.blacklist_threshold', '30', 'NUMBER', 'CREDIT', '黑名单阈值'),
 
       -- 契约配置
-      ('contract.default_game_type', 'DELTA', 'STRING', 'CONTRACT', '默认游戏类型'),
       ('contract.dispute_timeout_hours', '24', 'NUMBER', 'CONTRACT', '争议举证超时时间(小时)'),
       ('contract.auto_complete_hours', '72', 'NUMBER', 'CONTRACT', '自动完成时间(小时)'),
 

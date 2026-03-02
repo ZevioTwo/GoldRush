@@ -1,20 +1,6 @@
 <view class="container">
   <view class="card">
     <view class="form-item">
-      <text class="label">我的账号</text>
-      <picker mode="selector" range="{{accountOptions}}" bindchange="onAccountChange">
-        <view class="picker">{{accountOptions[accountIndex]}}</view>
-      </picker>
-    </view>
-    <view class="form-item">
-      <text class="label">游戏类型</text>
-      <text class="readonly">{{form.gameTypeName}}</text>
-    </view>
-    <view class="form-item">
-      <text class="label">游戏大区</text>
-      <text class="readonly">{{form.gameRegion}}</text>
-    </view>
-    <view class="form-item">
       <text class="label">标题</text>
       <input class="input" placeholder="请输入契约标题" value="{{form.title}}" bindinput="onInput" data-field="title" />
     </view>
@@ -23,16 +9,8 @@
       <input class="input" type="number" placeholder="请输入保证金" value="{{form.depositAmount}}" bindinput="onInput" data-field="depositAmount" />
     </view>
     <view class="form-item">
-      <text class="label">保底物品</text>
-      <input class="input" placeholder="请输入保底物品" value="{{form.guaranteeItem}}" bindinput="onInput" data-field="guaranteeItem" />
-    </view>
-    <view class="form-item">
-      <text class="label">成功条件</text>
-      <textarea class="textarea" placeholder="请输入成功条件" value="{{form.successCondition}}" bindinput="onInput" data-field="successCondition"></textarea>
-    </view>
-    <view class="form-item">
-      <text class="label">失败条件</text>
-      <textarea class="textarea" placeholder="请输入失败条件" value="{{form.failureCondition}}" bindinput="onInput" data-field="failureCondition"></textarea>
+      <text class="label">契约达成条件</text>
+      <textarea class="textarea" placeholder="请输入契约达成条件" value="{{form.successCondition}}" bindinput="onInput" data-field="successCondition"></textarea>
     </view>
   </view>
 

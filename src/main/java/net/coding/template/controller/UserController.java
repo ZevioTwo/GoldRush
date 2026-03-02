@@ -118,7 +118,7 @@ public class UserController {
     }
 
     /**
-     * 完善资料（游戏ID/大区/微信号/手机号）
+     * 完善资料（微信号/手机号）
      * POST /api/user/profile/update
      */
     @PostMapping("/profile/update")
@@ -135,7 +135,7 @@ public class UserController {
                 throw new BusinessException(401, "token无效或已过期");
             }
 
-            userService.updateProfile(userId, request.getGameId(), request.getGameRegion(), request.getWechatId(), request.getPhone());
+            userService.updateProfile(userId, request.getWechatId(), request.getPhone());
 
             return CommonResponse.success("更新成功", null);
         } catch (BusinessException e) {

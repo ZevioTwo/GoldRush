@@ -15,11 +15,6 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("SELECT * FROM users WHERE openid = #{openid} AND status = 'ACTIVE'")
     User selectByOpenid(@Param("openid") String openid);
 
-    /**
-     * 根据游戏ID和大区查询用户
-     */
-    @Select("SELECT * FROM users WHERE game_id = #{gameId} AND game_region = #{gameRegion} AND status = 'ACTIVE'")
-    User selectByGameInfo(@Param("gameId") String gameId, @Param("gameRegion") String gameRegion);
 
     /**
      * 更新用户信用分
@@ -74,13 +69,10 @@ public interface UserMapper extends BaseMapper<User> {
                          @Param("reason") String reason);
 
     /**
-     * 更新用户游戏信息与联系方式
+     * 更新用户联系方式
      */
-    @Update("UPDATE users SET game_id = #{gameId}, game_region = #{gameRegion}, " +
-            "wechat_id = #{wechatId}, phone = #{phone}, update_time = NOW() WHERE id = #{userId}")
-    int updateGameInfo(@Param("userId") Long userId,
-                       @Param("gameId") String gameId,
-                       @Param("gameRegion") String gameRegion,
-                       @Param("wechatId") String wechatId,
-                       @Param("phone") String phone);
+    @Update("UPDATE users SET wechat_id = #{wechatId}, phone = #{phone}, update_time = NOW() WHERE id = #{userId}")
+    int updateContactInfo(@Param("userId") Long userId,
+                          @Param("wechatId") String wechatId,
+                          @Param("phone") String phone);
 }

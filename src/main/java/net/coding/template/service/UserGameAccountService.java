@@ -29,9 +29,6 @@ public class UserGameAccountService {
     public UserGameAccountResponse create(Long userId, UserGameAccountCreateRequest request) {
         UserGameAccount account = new UserGameAccount();
         account.setUserId(userId);
-        account.setGameType(request.getGameType());
-        account.setGameRegion(request.getGameRegion());
-        account.setGameId(request.getGameId());
         account.setRemark(request.getRemark());
 
         accountMapper.insert(account);
@@ -44,9 +41,6 @@ public class UserGameAccountService {
         if (account == null) {
             throw new RuntimeException("账号不存在或无权限");
         }
-        account.setGameType(request.getGameType());
-        account.setGameRegion(request.getGameRegion());
-        account.setGameId(request.getGameId());
         account.setRemark(request.getRemark());
         accountMapper.updateById(account);
         return toResponse(account);
@@ -63,9 +57,6 @@ public class UserGameAccountService {
     private UserGameAccountResponse toResponse(UserGameAccount account) {
         UserGameAccountResponse resp = new UserGameAccountResponse();
         resp.setId(account.getId());
-        resp.setGameType(account.getGameType());
-        resp.setGameRegion(account.getGameRegion());
-        resp.setGameId(account.getGameId());
         resp.setRemark(account.getRemark());
         resp.setCreateTime(account.getCreateTime());
         resp.setUpdateTime(account.getUpdateTime());

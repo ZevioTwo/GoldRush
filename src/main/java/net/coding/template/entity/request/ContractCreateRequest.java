@@ -7,34 +7,19 @@ import java.math.BigDecimal;
 
 @Data
 public class ContractCreateRequest {
-    private String receiverGameId;
-
-    @NotBlank(message = "游戏大区不能为空")
-    private String gameRegion;
-
-    @NotBlank(message = "游戏类型不能为空")
-    private String gameType; // DELTA, AREA18, TARKOV
-
-    @NotNull(message = "发起方账号ID不能为空")
-    private Long initiatorAccountId;
-
     @NotNull(message = "押金金额不能为空")
-    @DecimalMin(value = "10.00", message = "押金金额不能低于10元")
+    @DecimalMin(value = "0.00", message = "押金金额不能低于0元")
     @DecimalMax(value = "200.00", message = "押金金额不能超过200元")
     private BigDecimal depositAmount;
 
-    @NotBlank(message = "保底物品不能为空")
-    @Size(max = 100, message = "保底物品不能超过100字")
-    private String guaranteeItem;
-
+    @NotBlank(message = "标题不能为空")
     @Size(max = 100, message = "标题不能超过100字")
     private String title;
 
+    @NotBlank(message = "契约达成条件不能为空")
     @Size(max = 500, message = "成功条件不能超过500字")
     private String successCondition;
 
     @Size(max = 500, message = "失败条件不能超过500字")
     private String failureCondition;
-
-    private String receiverWechatId; // 微信号（可选）
 }
