@@ -1,12 +1,14 @@
-<view class="container">
-  <view class="card">
-    <view class="section-title">仲裁服务</view>
-    <view class="text-muted" style="margin-bottom: 16rpx;">在契约详情页可发起仲裁申请，处理进度将展示在此处。</view>
-    <button class="btn-primary" bindtap="goApply">发起仲裁申请</button>
+<view class="container paper-page">
+  <view class="paper-card parchment-card">
+    <view class="paper-title">仲裁服务</view>
+    <view class="paper-divider"></view>
+    <view class="text-muted paper-label" style="margin-bottom: 16rpx;">在契约详情页可发起仲裁申请，处理进度将展示在此处。</view>
+    <button class="btn-primary wax-btn" bindtap="goApply">发起仲裁申请</button>
   </view>
 
-  <view class="card">
-    <view class="section-title">我的仲裁</view>
-    <view class="text-muted" style="text-align:center; margin-top: 24rpx;">暂无仲裁记录</view>
+  <view class="paper-card parchment-card">
+    <view class="paper-title">我的仲裁</view>
+    <view class="paper-divider"></view>
+    <view class="text-muted paper-label" style="text-align:center; margin-top: 24rpx;">暂无仲裁记录</view>
   </view>
 </view>

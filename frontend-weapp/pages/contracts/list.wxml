@@ -1,38 +1,39 @@
-<view class="container list-page">
-  <view class="card">
+<view class="container list-page paper-page">
+  <view class="paper-card parchment-card">
     <view class="list-header-actions">
-      <button class="btn-primary" bindtap="goCreate">创建契约</button>
+      <button class="btn-primary wax-btn" bindtap="goCreate">创建契约</button>
       <view class="row" style="margin: 0; flex: 1;">
-        <text class="text-muted">状态</text>
+        <text class="text-muted paper-label">状态</text>
         <picker mode="selector" range="{{statusOptions}}" bindchange="onStatusChange">
-          <text>{{statusOptions[statusIndex]}}</text>
+          <text class="paper-label">{{statusOptions[statusIndex]}}</text>
         </picker>
       </view>
     </view>
   </view>
 
   <block wx:for="{{list}}" wx:key="contractId">
-    <view class="card" bindtap="goDetail" data-id="{{item.contractId}}">
-      <view style="font-weight: 600; margin-bottom: 12rpx;">契约号：{{item.contractNo}}</view>
+    <view class="paper-card parchment-card" bindtap="goDetail" data-id="{{item.contractId}}">
+      <view class="paper-title" style="margin-bottom: 12rpx;">契约号：{{item.contractNo}}</view>
+      <view class="paper-divider"></view>
       <view class="row">
-        <text class="text-muted">状态</text>
+        <text class="text-muted paper-label">状态</text>
         <text>{{item.status}}</text>
       </view>
       <view class="row">
-        <text class="text-muted">金额</text>
+        <text class="text-muted paper-label">金额</text>
         <text>{{item.depositAmount}}</text>
       </view>
       <view class="row">
-        <text class="text-muted">创建时间</text>
+        <text class="text-muted paper-label">创建时间</text>
         <text>{{item.createTime}}</text>
       </view>
     </view>
   </block>
 
-  <view wx:if="{{list.length === 0}}" class="text-muted" style="text-align:center; margin-top: 48rpx;">
+  <view wx:if="{{list.length === 0}}" class="text-muted paper-label" style="text-align:center; margin-top: 48rpx;">
     暂无数据
   </view>
 
-  <view wx:if="{{loading}}" class="text-muted" style="text-align:center; margin: 24rpx 0;">加载中...</view>
-  <view wx:if="{{!hasMore && list.length > 0}}" class="text-muted" style="text-align:center; margin: 24rpx 0;">没有更多了</view>
+  <view wx:if="{{loading}}" class="text-muted paper-label" style="text-align:center; margin: 24rpx 0;">加载中...</view>
+  <view wx:if="{{!hasMore && list.length > 0}}" class="text-muted paper-label" style="text-align:center; margin: 24rpx 0;">没有更多了</view>
 </view>

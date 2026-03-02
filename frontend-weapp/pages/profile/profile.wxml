@@ -1,12 +1,12 @@
-<view class="container profile-page">
-  <view class="card">
+<view class="container profile-page paper-page">
+  <view class="paper-card parchment-card">
     <view class="profile-header">
       <view class="profile-avatar"></view>
       <view class="profile-name">{{profile.nickname || '未命名用户'}}</view>
     </view>
   </view>
 
-  <view class="card">
+  <view class="paper-card parchment-card">
     <view class="grid">
       <view class="grid-item" bindtap="goUserInfo">
         <view class="grid-icon">信息</view>

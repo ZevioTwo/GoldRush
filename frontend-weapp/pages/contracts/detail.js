@@ -3,11 +3,15 @@ const { request } = require("../../utils/request");
 Page({
   data: {
     id: "",
-    detail: {}
+    detail: {},
+    fromHall: false,
+    stampVisible: false,
+    confirming: false
   },
   onLoad(options) {
     if (options && options.id) {
-      this.setData({ id: options.id }, () => this.fetchDetail());
+      const fromHall = options.from === "hall";
+      this.setData({ id: options.id, fromHall }, () => this.fetchDetail());
     }
   },
   fetchDetail() {
@@ -33,6 +37,34 @@ Page({
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+      });
+  },
+  acceptContract() {
+    if (this.data.confirming) return;
+    const contractId = this.data.id;
+    if (!contractId) return;
+
+    this.setData({ confirming: true, stampVisible: false });
+    request({
+      url: "/api/contract/accept",
+      method: "POST",
+      data: {
+        contractId
+      }
+    })
+      .then((resp) => {
+        if (resp && (resp.code === 0 || resp.code === 200)) {
+          this.setData({ stampVisible: true });
+          wx.showToast({ title: "接单成功", icon: "success" });
+          return;
+        }
+        wx.showToast({ title: resp.message || "接单失败", icon: "none" });
+      })
+      .catch(() => {
+        wx.showToast({ title: "网络错误", icon: "none" });
+      })
+      .finally(() => {
+        setTimeout(() => this.setData({ confirming: false }), 800);
       });
   },
   goDisputeApply() {

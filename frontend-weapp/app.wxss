@@ -1,6 +1,6 @@
 page {
-  background: #f5f7fb;
-  color: #1f2329;
+  background: #f4efe6;
+  color: #3d2b1f;
   font-size: 28rpx;
   line-height: 1.6;
   padding-bottom: 220rpx;
@@ -9,6 +9,60 @@ page {
 
 .container {
   padding: 32rpx;
+}
+
+.paper-page {
+  min-height: 100vh;
+  background: radial-gradient(1200rpx 800rpx at 20% 0%, rgba(255, 251, 242, 0.9), transparent 70%),
+    radial-gradient(900rpx 600rpx at 80% 30%, rgba(255, 245, 224, 0.8), transparent 65%),
+    #f4efe6;
+}
+
+.paper-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 252, 244, 0.98) 0%, rgba(249, 235, 208, 0.98) 100%);
+  border-radius: 22rpx;
+  padding: 30rpx 28rpx;
+  margin-bottom: 26rpx;
+  border: 1rpx solid rgba(109, 78, 47, 0.18);
+  box-shadow: 0 18rpx 36rpx rgba(109, 78, 47, 0.18);
+  overflow: hidden;
+}
+
+.paper-card::before,
+.paper-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 18rpx;
+  background: repeating-linear-gradient(-45deg, rgba(203, 162, 122, 0.35), rgba(203, 162, 122, 0.35) 6rpx, rgba(255, 244, 224, 0.35) 6rpx, rgba(255, 244, 224, 0.35) 12rpx);
+  opacity: 0.4;
+}
+
+.paper-card::before {
+  top: 0;
+}
+
+.paper-card::after {
+  bottom: 0;
+}
+
+.paper-divider {
+  height: 2rpx;
+  background: linear-gradient(90deg, rgba(140, 94, 56, 0), rgba(140, 94, 56, 0.5), rgba(140, 94, 56, 0));
+  margin: 16rpx 0;
+}
+
+.paper-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #4a2f1d;
+  letter-spacing: 2rpx;
+}
+
+.paper-label {
+  color: #7a5a41;
 }
 
 .card {
@@ -48,21 +102,22 @@ button {
   letter-spacing: 1rpx;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: #fff;
-  box-shadow: 0 10rpx 20rpx rgba(37, 99, 235, 0.25);
-  padding: 18rpx 24rpx;
-  border-radius: 999rpx;
-}
+ .btn-primary {
+   background: linear-gradient(135deg, #b67842 0%, #8b4a2b 100%);
+   color: #fff7ea;
+   box-shadow: 0 10rpx 20rpx rgba(139, 74, 43, 0.28);
+   padding: 18rpx 24rpx;
+   border-radius: 999rpx;
+ }
+ 
+ .btn-outline {
+   border: 2rpx solid rgba(139, 74, 43, 0.6);
+   color: #8b4a2b;
+   background: #fffaf2;
+   padding: 16rpx 22rpx;
+   border-radius: 999rpx;
+ }
 
-.btn-outline {
-  border: 2rpx solid #3b82f6;
-  color: #2563eb;
-  background: #fff;
-  padding: 16rpx 22rpx;
-  border-radius: 999rpx;
-}
 
 button[disabled] {
   opacity: 0.55;

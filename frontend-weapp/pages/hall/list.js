@@ -73,28 +73,10 @@ Page({
   onSearch() {
     this.resetAndFetch();
   },
-  acceptContract(e) {
+  goDetail(e) {
     const contractId = e.currentTarget.dataset.id;
     if (!contractId) return;
-
-    request({
-      url: "/api/contract/accept",
-      method: "POST",
-      data: {
-        contractId
-      }
-    })
-      .then((resp) => {
-        if (resp && (resp.code === 0 || resp.code === 200)) {
-          wx.showToast({ title: "接单成功", icon: "success" });
-          this.resetAndFetch();
-          return;
-        }
-        wx.showToast({ title: resp.message || "接单失败", icon: "none" });
-      })
-      .catch(() => {
-        wx.showToast({ title: "网络错误", icon: "none" });
-      });
+    wx.navigateTo({ url: `/pages/contracts/detail?id=${contractId}&from=hall` });
   },
   formatDate(value) {
     if (!value) return "";

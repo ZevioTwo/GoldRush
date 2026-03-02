@@ -1,47 +1,55 @@
-<view class="container">
-  <view class="card">
-    <view class="detail-title">契约号：{{detail.contractNo}}</view>
+<view class="container paper-page">
+  <view class="paper-card parchment-card">
+    <view class="detail-title paper-title">契约号：{{detail.contractNo}}</view>
+    <view class="paper-divider"></view>
     <view class="row">
-      <text class="text-muted">状态</text>
+      <text class="text-muted paper-label">状态</text>
       <text>{{detail.status}}</text>
     </view>
     <view class="row">
-      <text class="text-muted">保证金</text>
+      <text class="text-muted paper-label">保证金</text>
       <text>{{detail.depositAmount}}</text>
     </view>
     <view class="row">
-      <text class="text-muted">服务费</text>
+      <text class="text-muted paper-label">服务费</text>
       <text>{{detail.serviceFeeAmount}}</text>
     </view>
     <view class="row">
-      <text class="text-muted">创建时间</text>
+      <text class="text-muted paper-label">创建时间</text>
       <text>{{detail.createTime}}</text>
     </view>
   </view>
 
-  <view class="card">
-    <view class="section-title">参与方</view>
+  <view class="paper-card parchment-card">
+    <view class="section-title paper-title">参与方</view>
+    <view class="paper-divider"></view>
     <view class="row">
-      <text class="text-muted">发起人</text>
+      <text class="text-muted paper-label">发起人</text>
       <text>{{detail.initiator.nickname}} ({{detail.initiator.userId}})</text>
     </view>
     <view class="row">
-      <text class="text-muted">接收人</text>
+      <text class="text-muted paper-label">接收人</text>
       <text>{{detail.receiver ? (detail.receiver.nickname + ' (' + detail.receiver.userId + ')') : '待接收'}}</text>
     </view>
   </view>
 
-  <view class="card">
-    <view class="section-title">条款</view>
+  <view class="paper-card parchment-card">
+    <view class="section-title paper-title">条款</view>
+    <view class="paper-divider"></view>
     <view class="row">
-      <text class="text-muted">标题</text>
+      <text class="text-muted paper-label">标题</text>
       <text>{{detail.title}}</text>
     </view>
     <view class="row">
-      <text class="text-muted">契约达成条件</text>
+      <text class="text-muted paper-label">契约达成条件</text>
       <text>{{detail.successCondition}}</text>
     </view>
   </view>
 
-  <button class="btn-outline" bindtap="goDisputeApply">申请仲裁</button>
+  <view class="stamp-area" wx:if="{{fromHall}}">
+    <view class="stamp" wx:if="{{stampVisible}}"></view>
+  </view>
+
+  <button class="btn-outline wax-btn" wx:if="{{fromHall}}" bindtap="acceptContract" loading="{{confirming}}">接单确认</button>
+  <button class="btn-outline" wx:if="{{!fromHall}}" bindtap="goDisputeApply">申请仲裁</button>
 </view>

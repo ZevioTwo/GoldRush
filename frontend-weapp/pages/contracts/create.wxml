@@ -1,18 +1,20 @@
-<view class="container">
-  <view class="card">
+<view class="container paper-page">
+  <view class="paper-card parchment-card">
+    <view class="paper-title" style="margin-bottom: 16rpx;">契约条款</view>
+    <view class="paper-divider"></view>
     <view class="form-item">
-      <text class="label">标题</text>
-      <input class="input" placeholder="请输入契约标题" value="{{form.title}}" bindinput="onInput" data-field="title" />
+      <text class="label paper-label">标题</text>
+      <input class="input parchment-input" placeholder="请输入契约标题" value="{{form.title}}" bindinput="onInput" data-field="title" />
     </view>
     <view class="form-item">
-      <text class="label">保证金（10-200）</text>
-      <input class="input" type="number" placeholder="请输入保证金" value="{{form.depositAmount}}" bindinput="onInput" data-field="depositAmount" />
+      <text class="label paper-label">保证金（10-200）</text>
+      <input class="input parchment-input" type="number" placeholder="请输入保证金" value="{{form.depositAmount}}" bindinput="onInput" data-field="depositAmount" />
     </view>
     <view class="form-item">
-      <text class="label">契约达成条件</text>
-      <textarea class="textarea" placeholder="请输入契约达成条件" value="{{form.successCondition}}" bindinput="onInput" data-field="successCondition"></textarea>
+      <text class="label paper-label">契约达成条件</text>
+      <textarea class="textarea parchment-input" placeholder="请输入契约达成条件" value="{{form.successCondition}}" bindinput="onInput" data-field="successCondition"></textarea>
     </view>
   </view>
 
-  <button class="btn-primary" bindtap="submit" loading="{{loading}}">创建契约</button>
+  <button class="btn-primary wax-btn" bindtap="submit" loading="{{loading}}">创建契约</button>
 </view>

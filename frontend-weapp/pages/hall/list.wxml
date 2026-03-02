@@ -1,43 +1,45 @@
-<view class="container hall-page">
-  <view class="card">
+<view class="container hall-page paper-page">
+  <view class="paper-card parchment-card">
+    <view class="paper-title" style="margin-bottom: 16rpx;">契约大厅</view>
+    <view class="paper-divider"></view>
     <view class="form-item">
-      <input class="input" placeholder="搜索标题关键字" value="{{keyword}}" bindinput="onKeywordInput" />
+      <input class="input parchment-input" placeholder="搜索标题关键字" value="{{keyword}}" bindinput="onKeywordInput" />
     </view>
     <view class="form-item">
-      <input class="input" placeholder="契约号（模糊匹配）" value="{{contractNo}}" bindinput="onContractNoInput" />
+      <input class="input parchment-input" placeholder="契约号（模糊匹配）" value="{{contractNo}}" bindinput="onContractNoInput" />
     </view>
-    <button class="btn-outline" bindtap="onSearch">搜索</button>
+    <button class="btn-outline wax-btn" bindtap="onSearch">搜索</button>
   </view>
 
   <view class="list-area">
     <block wx:for="{{list}}" wx:key="contractId">
-      <view class="card">
-        <view style="font-weight: 600; margin-bottom: 12rpx;">{{item.title || '未命名契约'}}</view>
+      <view class="paper-card parchment-card" bindtap="goDetail" data-id="{{item.contractId}}">
+        <view class="paper-title" style="margin-bottom: 12rpx;">{{item.title || '未命名契约'}}</view>
+        <view class="paper-divider"></view>
         <view class="row">
-          <text class="text-muted">契约号</text>
+          <text class="text-muted paper-label">契约号</text>
           <text>{{item.contractNo}}</text>
         </view>
         <view class="row">
-          <text class="text-muted">状态</text>
+          <text class="text-muted paper-label">状态</text>
           <text>{{item.status}}</text>
         </view>
         <view class="row">
-          <text class="text-muted">金额</text>
+          <text class="text-muted paper-label">金额</text>
           <text>{{item.depositAmount}}</text>
         </view>
         <view class="row">
-          <text class="text-muted">创建时间</text>
+          <text class="text-muted paper-label">创建时间</text>
           <text>{{item.createTime}}</text>
         </view>
-        <button class="btn-primary" bindtap="acceptContract" data-id="{{item.contractId}}">接单</button>
       </view>
     </block>
 
-    <view wx:if="{{list.length === 0}}" class="text-muted" style="text-align:center; margin-top: 48rpx;">
+    <view wx:if="{{list.length === 0}}" class="text-muted paper-label" style="text-align:center; margin-top: 48rpx;">
       暂无待接单契约
     </view>
 
-    <view wx:if="{{loading}}" class="text-muted" style="text-align:center; margin: 24rpx 0;">加载中...</view>
-    <view wx:if="{{!hasMore && list.length > 0}}" class="text-muted" style="text-align:center; margin: 24rpx 0;">没有更多了</view>
+    <view wx:if="{{loading}}" class="text-muted paper-label" style="text-align:center; margin: 24rpx 0;">加载中...</view>
+    <view wx:if="{{!hasMore && list.length > 0}}" class="text-muted paper-label" style="text-align:center; margin: 24rpx 0;">没有更多了</view>
   </view>
 </view>

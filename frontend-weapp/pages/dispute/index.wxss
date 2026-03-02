@@ -3,3 +3,7 @@
   margin-bottom: 12rpx;
   color: #1f2329;
 }
+
+.paper-card .paper-title {
+  margin-bottom: 12rpx;
+}
