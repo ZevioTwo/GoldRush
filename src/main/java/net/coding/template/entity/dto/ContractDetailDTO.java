@@ -41,6 +41,12 @@ public class ContractDetailDTO {
     private Boolean canComplete; // 是否可以完成
     private Boolean canDispute;  // 是否可以申请仲裁
 
+    // 新增：签订/完成按钮控制
+    private Boolean canSign;     // 甲方是否可签订
+    private Boolean canFinish;   // 乙方是否可完成
+    private String role;         // INITIATOR / RECEIVER
+    private Boolean depositRequired; // 是否需要保证金
+
     @Data
     public static class UserInfo {
         private Long userId;

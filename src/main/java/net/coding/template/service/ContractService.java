@@ -236,6 +236,14 @@ public class ContractService {
             throw new BusinessException(400, "接单失败");
         }
 
+        // 接单后创建接收方确认记录
+        ContractConfirm receiverConfirm = new ContractConfirm();
+        receiverConfirm.setContractId(contract.getId());
+        receiverConfirm.setUserId(currentUser.getId());
+        receiverConfirm.setUserRole("RECEIVER");
+        receiverConfirm.setConfirmStatus(ConfirmStatus.PENDING.getCode());
+        contractConfirmMapper.insert(receiverConfirm);
+
         // 接单后状态进入已支付待开始
         contractMapper.updateContractStatus(contract.getId(), ContractStatus.PAID.getCode());
     }
@@ -257,8 +265,13 @@ public class ContractService {
         }
 
         // 3. 验证用户是否有权限查看
-        if (!contract.getInitiatorId().equals(currentUser.getId())
-                && !contract.getReceiverId().equals(currentUser.getId())) {
+        boolean isInitiator = contract.getInitiatorId() != null
+                && contract.getInitiatorId().equals(currentUser.getId());
+        boolean isReceiver = contract.getReceiverId() != null
+                && contract.getReceiverId().equals(currentUser.getId());
+        boolean isHallVisible = contract.getReceiverId() == null
+                && net.coding.template.entity.enums.ContractStatus.PENDING.getCode().equals(contract.getStatus());
+        if (!isInitiator && !isReceiver && !isHallVisible) {
             throw new BusinessException(403, "无权查看此契约");
         }
 
@@ -304,7 +317,94 @@ public class ContractService {
         dto.setCanComplete(canCompleteContract(contract, currentUser));
         dto.setCanDispute(canDisputeContract(contract, currentUser));
 
+        // 签订/完成按钮权限
+        dto.setRole(isInitiator ? "INITIATOR" : "RECEIVER");
+        dto.setDepositRequired(contract.getDepositAmount() != null
+                && contract.getDepositAmount().compareTo(java.math.BigDecimal.ZERO) > 0);
+        dto.setCanSign(canSignContract(contract, currentUser));
+        dto.setCanFinish(canFinishContract(contract, currentUser));
+
         return dto;
+    }
+
+    /**
+     * 甲方签订契约（冻结保证金并启动）
+     */
+    @Transactional
+    public net.coding.template.entity.response.ContractSignResponse signContract(
+            net.coding.template.entity.request.ContractSignRequest request, String token) {
+        User currentUser = userService.getCurrentUser(token);
+        if (currentUser == null) {
+            throw new BusinessException(401, "用户未登录");
+        }
+
+        Contract contract = contractMapper.selectContractDetail(request.getContractId());
+        if (contract == null) {
+            throw new BusinessException(404, "契约不存在");
+        }
+
+        if (!contract.getInitiatorId().equals(currentUser.getId())) {
+            throw new BusinessException(403, "仅发起人可签订");
+        }
+
+        if (!ContractStatus.PAID.getCode().equals(contract.getStatus())) {
+            throw new BusinessException(400, "契约状态不允许签订");
+        }
+
+        if (contract.getDepositAmount() != null && contract.getDepositAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            net.coding.template.entity.request.FreezeRequest freezeRequest = new net.coding.template.entity.request.FreezeRequest();
+            freezeRequest.setContractId(contract.getId());
+            freezeRequest.setFreezeAmount(contract.getDepositAmount());
+            paymentService.freezeDeposit(freezeRequest, token);
+        }
+
+        startContractAfterPayment(contract.getId());
+
+        net.coding.template.entity.response.ContractSignResponse response = new net.coding.template.entity.response.ContractSignResponse();
+        response.setContractId(contract.getId());
+        response.setStatus(ContractStatus.ACTIVE.getCode());
+        response.setMessage("签订成功");
+        response.setSignTime(java.time.LocalDateTime.now());
+        return response;
+    }
+
+    /**
+     * 乙方完成契约（解冻并确认）
+     */
+    @Transactional
+    public ContractConfirmResponse finishContract(
+            net.coding.template.entity.request.ContractFinishRequest request,
+            String token,
+            HttpServletRequest httpRequest) {
+        User currentUser = userService.getCurrentUser(token);
+        if (currentUser == null) {
+            throw new BusinessException(401, "用户未登录");
+        }
+
+        Contract contract = contractMapper.selectContractDetail(request.getContractId());
+        if (contract == null) {
+            throw new BusinessException(404, "契约不存在");
+        }
+
+        if (contract.getReceiverId() == null || !contract.getReceiverId().equals(currentUser.getId())) {
+            throw new BusinessException(403, "仅接收方可完成");
+        }
+
+        if (!ContractStatus.ACTIVE.getCode().equals(contract.getStatus())) {
+            throw new BusinessException(400, "契约状态不允许完成");
+        }
+
+        if (contract.getDepositAmount() != null && contract.getDepositAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            net.coding.template.entity.request.UnfreezeRequest unfreezeRequest = new net.coding.template.entity.request.UnfreezeRequest();
+            unfreezeRequest.setContractId(contract.getId());
+            unfreezeRequest.setReason("契约完成解冻");
+            paymentService.unfreezeDeposit(unfreezeRequest);
+        }
+
+        ContractConfirmRequest confirmRequest = new ContractConfirmRequest();
+        confirmRequest.setContractId(contract.getId());
+        confirmRequest.setEndTime(request.getEndTime());
+        return confirmContract(confirmRequest, token, httpRequest);
     }
 
     /**
@@ -326,7 +426,8 @@ public class ContractService {
 
         // 3. 验证用户是否是参与方
         if (!contract.getInitiatorId().equals(currentUser.getId())
-                && !contract.getReceiverId().equals(currentUser.getId())) {
+                && (contract.getReceiverId() == null
+                || !contract.getReceiverId().equals(currentUser.getId()))) {
             throw new BusinessException(403, "无权操作此契约");
         }
 
@@ -540,21 +641,37 @@ public class ContractService {
     private boolean canStartContract(Contract contract, User currentUser) {
         // 双方都可以在PAID状态时开始
         return (contract.getInitiatorId().equals(currentUser.getId())
-                || contract.getReceiverId().equals(currentUser.getId()))
+                || (contract.getReceiverId() != null
+                && contract.getReceiverId().equals(currentUser.getId())))
                 && ContractStatus.PAID.getCode().equals(contract.getStatus());
     }
 
     private boolean canCompleteContract(Contract contract, User currentUser) {
         // 双方都可以在ACTIVE状态时完成
         return (contract.getInitiatorId().equals(currentUser.getId())
-                || contract.getReceiverId().equals(currentUser.getId()))
+                || (contract.getReceiverId() != null
+                && contract.getReceiverId().equals(currentUser.getId())))
+                && ContractStatus.ACTIVE.getCode().equals(contract.getStatus());
+    }
+
+    private boolean canSignContract(Contract contract, User currentUser) {
+        // 仅发起方可在PAID状态签订
+        return contract.getInitiatorId().equals(currentUser.getId())
+                && ContractStatus.PAID.getCode().equals(contract.getStatus());
+    }
+
+    private boolean canFinishContract(Contract contract, User currentUser) {
+        // 仅接收方可在ACTIVE状态完成
+        return contract.getReceiverId() != null
+                && contract.getReceiverId().equals(currentUser.getId())
                 && ContractStatus.ACTIVE.getCode().equals(contract.getStatus());
     }
 
     private boolean canDisputeContract(Contract contract, User currentUser) {
         // 双方都可以在ACTIVE状态时申请仲裁
         return (contract.getInitiatorId().equals(currentUser.getId())
-                || contract.getReceiverId().equals(currentUser.getId()))
+                || (contract.getReceiverId() != null
+                && contract.getReceiverId().equals(currentUser.getId())))
                 && ContractStatus.ACTIVE.getCode().equals(contract.getStatus());
     }
 

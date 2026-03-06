@@ -6,10 +6,13 @@ import net.coding.template.entity.request.ContractCreateRequest;
 import net.coding.template.entity.dto.ContractDetailDTO;
 import net.coding.template.entity.request.ContractListRequest;
 import net.coding.template.entity.request.ContractAcceptRequest;
+import net.coding.template.entity.request.ContractFinishRequest;
+import net.coding.template.entity.request.ContractSignRequest;
 import net.coding.template.entity.response.CommonResponse;
 import net.coding.template.entity.response.ContractConfirmResponse;
 import net.coding.template.entity.response.ContractCreateResponse;
 import net.coding.template.entity.response.ContractListResponse;
+import net.coding.template.entity.response.ContractSignResponse;
 import net.coding.template.exception.BusinessException;
 import net.coding.template.service.ContractService;
 import org.springframework.validation.annotation.Validated;
@@ -135,6 +138,63 @@ ContractCreateResponse response = contractService.createContract(request, access
         } catch (Exception e) {
             log.error("查询契约详情异常", e);
             throw new BusinessException(500, "查询契约详情失败");
+        }
+    }
+
+    /**
+     * 签订契约（甲方发起冻结并启动）
+     * POST /api/contract/sign
+     */
+    @PostMapping("/sign")
+    public CommonResponse<ContractSignResponse> signContract(
+            @Valid @RequestBody ContractSignRequest request,
+            @RequestHeader("Authorization") String token) {
+
+        try {
+            if (token == null || !token.startsWith("Bearer ")) {
+                throw new BusinessException(401, "token格式错误");
+            }
+
+            String accessToken = token.substring(7);
+
+            ContractSignResponse response = contractService.signContract(request, accessToken);
+            return CommonResponse.success("签订成功", response);
+
+        } catch (BusinessException e) {
+            log.warn("签订契约失败: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("签订契约异常", e);
+            throw new BusinessException(500, "签订契约失败");
+        }
+    }
+
+    /**
+     * 乙方完成契约（解冻并确认）
+     * POST /api/contract/finish
+     */
+    @PostMapping("/finish")
+    public CommonResponse<ContractConfirmResponse> finishContract(
+            @Valid @RequestBody ContractFinishRequest request,
+            @RequestHeader("Authorization") String token,
+            HttpServletRequest httpRequest) {
+
+        try {
+            if (token == null || !token.startsWith("Bearer ")) {
+                throw new BusinessException(401, "token格式错误");
+            }
+
+            String accessToken = token.substring(7);
+
+            ContractConfirmResponse response = contractService.finishContract(request, accessToken, httpRequest);
+            return CommonResponse.success("完成确认成功", response);
+
+        } catch (BusinessException e) {
+            log.warn("完成契约失败: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("完成契约异常", e);
+            throw new BusinessException(500, "完成契约失败");
         }
     }
 
