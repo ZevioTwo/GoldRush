@@ -18,6 +18,10 @@
       <text class="text-muted paper-label">创建时间</text>
       <text>{{detail.createTime}}</text>
     </view>
+    <view class="row" wx:if="{{countdownText}}">
+      <text class="text-muted paper-label">接单倒计时</text>
+      <text class="countdown-text">{{countdownText}}</text>
+    </view>
   </view>
 
   <view class="paper-card parchment-card">

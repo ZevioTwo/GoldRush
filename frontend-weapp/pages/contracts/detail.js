@@ -6,7 +6,9 @@ Page({
     detail: {},
     fromHall: false,
     stampVisible: false,
-    confirming: false
+    confirming: false,
+    countdownText: "",
+    countdownTimer: null
   },
   onLoad(options) {
     if (options && options.id) {
@@ -30,7 +32,7 @@ Page({
               endTime: this.formatDate(detail.endTime),
               completeTime: this.formatDate(detail.completeTime)
             }
-          });
+          }, () => this.startCountdown(detail.acceptExpireTime));
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
@@ -56,7 +58,7 @@ Page({
         if (resp && (resp.code === 0 || resp.code === 200)) {
           this.setData({ stampVisible: true });
           wx.showToast({ title: "接单成功", icon: "success" });
-          this.fetchDetail();
+          wx.redirectTo({ url: `/pages/contracts/detail?id=${contractId}` });
           return;
         }
         wx.showToast({ title: resp.message || "接单失败", icon: "none" });
@@ -140,6 +142,57 @@ Page({
     }
     wx.navigateTo({ url: `/pages/dispute/apply?contractId=${this.data.id}` });
   },
+  startCountdown(expireTime) {
+    if (this.data.countdownTimer) {
+      clearInterval(this.data.countdownTimer);
+    }
+    if (!expireTime) {
+      this.setData({ countdownText: "", countdownTimer: null });
+      return;
+    }
+    const expireAt = this.parseToTimestamp(expireTime);
+    if (!expireAt) {
+      this.setData({ countdownText: "", countdownTimer: null });
+      return;
+    }
+    const update = () => {
+      const now = Date.now();
+      const diff = expireAt - now;
+      if (diff <= 0) {
+        this.setData({ countdownText: "已超时", countdownTimer: null });
+        clearInterval(this.data.countdownTimer);
+        return;
+      }
+      const totalSeconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      this.setData({
+        countdownText: `接单后剩余 ${minutes}分${seconds < 10 ? "0" : ""}${seconds}秒`
+      });
+    };
+    update();
+    const timer = setInterval(update, 1000);
+    this.setData({ countdownTimer: timer });
+  },
+  parseToTimestamp(value) {
+    if (!value) return null;
+    if (Array.isArray(value)) {
+      const [y, m, d, hh = 0, mm = 0, ss = 0] = value;
+      if ([y, m, d].every((v) => typeof v === "number")) {
+        return new Date(y, m - 1, d, hh, mm, ss).getTime();
+      }
+    }
+    if (typeof value === "string" && value.includes(",")) {
+      const parts = value.split(",").map((v) => Number(v.trim()));
+      if (parts.length >= 3 && parts.every((v) => !Number.isNaN(v))) {
+        const [y, m, d, hh = 0, mm = 0, ss = 0] = parts;
+        return new Date(y, m - 1, d, hh, mm, ss).getTime();
+      }
+    }
+    const date = new Date(value);
+    const ts = date.getTime();
+    return Number.isNaN(ts) ? null : ts;
+  },
   formatDate(value) {
     if (!value) return "";
     const pad = (n) => (n < 10 ? `0${n}` : `${n}`);
@@ -160,5 +213,10 @@ Page({
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return value;
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  },
+  onUnload() {
+    if (this.data.countdownTimer) {
+      clearInterval(this.data.countdownTimer);
+    }
   }
 });

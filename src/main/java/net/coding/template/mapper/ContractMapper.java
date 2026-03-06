@@ -91,6 +91,13 @@ public interface ContractMapper extends BaseMapper<Contract> {
                        @Param("receiverId") Long receiverId);
 
     /**
+     * 释放接单（超时后回到大厅）
+     */
+    @Update("UPDATE contracts SET receiver_id = NULL, status = 'PENDING', " +
+            "update_time = NOW() WHERE id = #{contractId} AND status = 'PAID'")
+    int releaseContract(@Param("contractId") String contractId);
+
+    /**
      * 统计用户契约数量
      */
     @Select("<script>" +
@@ -195,10 +202,10 @@ public interface ContractMapper extends BaseMapper<Contract> {
     List<Contract> selectPendingConfirmContracts(@Param("userId") Long userId);
 
     /**
-     * 查询超时未开始的契约
+     * 查询超时未开始的契约（接单后30分钟未开始）
      */
-    @Select("SELECT * FROM contracts WHERE status = 'PAID' " +
-            "AND create_time < DATE_SUB(NOW(), INTERVAL 30 MINUTE)")
+    @Select("SELECT * FROM contracts WHERE status = 'PAID' AND receiver_id IS NOT NULL " +
+            "AND update_time < DATE_SUB(NOW(), INTERVAL 30 MINUTE)")
     List<Contract> selectTimeoutContracts();
 
     /**

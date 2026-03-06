@@ -23,36 +23,33 @@ public class ContractTimeoutTask {
     private PaymentService paymentService;
 
     /**
-     * 处理超时未支付的契约（每分钟执行一次）
+     * 处理超时未开始的契约（接单后30分钟未开始，每分钟执行一次）
      */
     @Scheduled(cron = "0 */1 * * * ?")
     @Transactional
     public void handleTimeoutContracts() {
         try {
-            // 查询超时未支付的契约（创建30分钟后）
+            // 查询超时未开始的契约（接单30分钟后）
             List<Contract> timeoutContracts = contractMapper.selectTimeoutContracts();
 
             if (timeoutContracts.isEmpty()) {
                 return;
             }
 
-            log.info("发现超时未支付契约: {}个", timeoutContracts.size());
+            log.info("发现接单超时契约: {}个", timeoutContracts.size());
 
             for (Contract contract : timeoutContracts) {
                 try {
-                    // 更新状态为已取消
-                    contractMapper.cancelContract(contract.getId());
+                    // 释放接单，回到大厅
+                    contractMapper.releaseContract(contract.getId());
 
-                    // 如果有支付记录，进行退款
-                    paymentService.refundIfPaid(contract.getId());
-
-                    log.info("超时契约已取消: {}", contract.getContractNo());
+                    log.info("接单超时已释放: {}", contract.getContractNo());
                 } catch (Exception e) {
-                    log.error("处理超时契约失败: {}", contract.getId(), e);
+                    log.error("处理接单超时契约失败: {}", contract.getId(), e);
                 }
             }
         } catch (Exception e) {
-            log.error("处理超时契约任务异常", e);
+            log.error("处理接单超时任务异常", e);
         }
     }
 

@@ -306,6 +306,10 @@ public class ContractService {
         dto.setStartTime(contract.getStartTime());
         dto.setEndTime(contract.getEndTime());
         dto.setCompleteTime(contract.getCompleteTime());
+        if (ContractStatus.PAID.getCode().equals(contract.getStatus())
+                && contract.getUpdateTime() != null) {
+            dto.setAcceptExpireTime(contract.getUpdateTime().plusMinutes(30));
+        }
 
         // 确认状态
         dto.setConfirmStatus(buildConfirmStatus(confirms));

@@ -17,6 +17,11 @@
   border: 1rpx solid rgba(16, 24, 40, 0.08);
 }
 
+.countdown-text {
+  color: #dc2626;
+  font-weight: 600;
+}
+
 .wax-btn {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #fff;
