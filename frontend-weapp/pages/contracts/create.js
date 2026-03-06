@@ -30,7 +30,7 @@ Page({
     if (this.data.depositRequiredIndex === 0) {
       if (!form.depositAmount) return "请填写保证金";
       const deposit = Number(form.depositAmount);
-      if (Number.isNaN(deposit) || deposit < 10 || deposit > 200) return "保证金需在10-200之间";
+      if (Number.isNaN(deposit) || deposit < 0.1 || deposit > 648) return "保证金需在0.1-648之间";
     }
 
     if (form.successCondition && form.successCondition.length > 500) return "契约达成条件不能超过500字";

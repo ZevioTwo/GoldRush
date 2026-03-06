@@ -86,7 +86,6 @@ public class ContractService {
         // 3. 创建契约记录（接收人由接单时绑定）
         Contract contract = new Contract();
         contract.setId(generateContractId());
-        contract.setContractNo(contractNoGenerator.generate());
         contract.setInitiatorId(currentUser.getId());
         contract.setReceiverId(null);
         contract.setDepositAmount(request.getDepositAmount());
@@ -105,8 +104,19 @@ public class ContractService {
         contract.setPaymentStatus("UNPAID");
         contract.setFreezeStatus("NONE");
 
-        int rows = contractMapper.insert(contract);
-        if (rows == 0) {
+        boolean inserted = false;
+        int attempts = 0;
+        while (!inserted && attempts < 5) {
+            attempts++;
+            contract.setContractNo(contractNoGenerator.generate());
+            try {
+                int rows = contractMapper.insert(contract);
+                inserted = rows > 0;
+            } catch (org.springframework.dao.DuplicateKeyException ex) {
+                log.warn("契约号重复，重试生成: {}", contract.getContractNo());
+            }
+        }
+        if (!inserted) {
             throw new BusinessException(500, "创建契约失败");
         }
 
