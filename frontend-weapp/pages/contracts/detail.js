@@ -33,6 +33,7 @@ Page({
             detail: {
               ...detail,
               canSign,
+              statusLabel: this.getStatusLabel(detail.status),
               createTime: this.formatDate(detail.createTime),
               startTime: this.formatDate(detail.startTime),
               endTime: this.formatDate(detail.endTime),
@@ -198,6 +199,19 @@ Page({
     const date = new Date(value);
     const ts = date.getTime();
     return Number.isNaN(ts) ? null : ts;
+  },
+  getStatusLabel(status) {
+    const map = {
+      PENDING: "待接单",
+      PAID: "待开始",
+      ACTIVE: "进行中",
+      IN_GAME: "进行中",
+      COMPLETED: "已完成",
+      CANCELLED: "已取消",
+      DISPUTE: "争议中",
+      VIOLATED: "已违约"
+    };
+    return map[status] || status || "";
   },
   formatDate(value) {
     if (!value) return "";

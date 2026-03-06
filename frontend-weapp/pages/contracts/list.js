@@ -53,6 +53,7 @@ Page({
           const rawList = res.data?.contracts || [];
           const list = rawList.map((item) => ({
             ...item,
+            statusLabel: this.getStatusLabel(item.status),
             createTime: this.formatDate(item.createTime),
             completeTime: this.formatDate(item.completeTime)
           }));
@@ -90,6 +91,19 @@ Page({
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return value;
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  },
+  getStatusLabel(status) {
+    const map = {
+      PENDING: "待接单",
+      PAID: "待开始",
+      ACTIVE: "进行中",
+      IN_GAME: "进行中",
+      COMPLETED: "已完成",
+      CANCELLED: "已取消",
+      DISPUTE: "争议中",
+      VIOLATED: "已违约"
+    };
+    return map[status] || status || "";
   },
   goDetail(e) {
     const contractId = e.currentTarget.dataset.id;

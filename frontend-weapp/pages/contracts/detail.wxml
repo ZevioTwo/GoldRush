@@ -4,7 +4,7 @@
     <view class="paper-divider"></view>
     <view class="row">
       <text class="text-muted paper-label">状态</text>
-      <text>{{detail.status}}</text>
+      <text>{{detail.statusLabel || detail.status}}</text>
     </view>
     <view class="row">
       <text class="text-muted paper-label">保证金</text>

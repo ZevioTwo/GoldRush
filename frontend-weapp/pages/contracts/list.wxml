@@ -21,7 +21,7 @@
       <view class="paper-divider"></view>
       <view class="contract-row">
         <text class="text-muted paper-label">状态</text>
-        <text class="status-badge">{{item.status}}</text>
+        <text class="status-badge">{{item.statusLabel || item.status}}</text>
       </view>
       <view class="contract-row">
         <text class="text-muted paper-label">金额</text>

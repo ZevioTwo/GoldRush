@@ -22,7 +22,7 @@
         </view>
         <view class="row">
           <text class="text-muted paper-label">状态</text>
-          <text>{{item.status}}</text>
+          <text>{{item.statusLabel || item.status}}</text>
         </view>
         <view class="row">
           <text class="text-muted paper-label">金额</text>
