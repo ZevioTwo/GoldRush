@@ -306,6 +306,7 @@ public class ContractService {
         dto.setStartTime(contract.getStartTime());
         dto.setEndTime(contract.getEndTime());
         dto.setCompleteTime(contract.getCompleteTime());
+        dto.setUpdateTime(contract.getUpdateTime());
         if (ContractStatus.PAID.getCode().equals(contract.getStatus())
                 && contract.getUpdateTime() != null) {
             dto.setAcceptExpireTime(contract.getUpdateTime().plusMinutes(30));
@@ -347,8 +348,10 @@ public class ContractService {
             throw new BusinessException(404, "契约不存在");
         }
 
-        if (!contract.getInitiatorId().equals(currentUser.getId())) {
-            throw new BusinessException(403, "仅发起人可签订");
+        if (!contract.getInitiatorId().equals(currentUser.getId())
+                && (contract.getReceiverId() == null
+                || !contract.getReceiverId().equals(currentUser.getId()))) {
+            throw new BusinessException(403, "仅契约双方可签订");
         }
 
         if (!ContractStatus.PAID.getCode().equals(contract.getStatus())) {
@@ -659,8 +662,10 @@ public class ContractService {
     }
 
     private boolean canSignContract(Contract contract, User currentUser) {
-        // 仅发起方可在PAID状态签订
-        return contract.getInitiatorId().equals(currentUser.getId())
+        // 双方都可在PAID状态签订
+        return (contract.getInitiatorId().equals(currentUser.getId())
+                || (contract.getReceiverId() != null
+                && contract.getReceiverId().equals(currentUser.getId())))
                 && ContractStatus.PAID.getCode().equals(contract.getStatus());
     }
 

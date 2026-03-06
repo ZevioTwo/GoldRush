@@ -30,6 +30,7 @@ public class ContractDetailDTO {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private LocalDateTime completeTime;
+    private LocalDateTime updateTime;
     private LocalDateTime acceptExpireTime; // 接单超时截止时间
 
     // 确认状态

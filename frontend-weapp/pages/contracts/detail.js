@@ -24,15 +24,21 @@ Page({
       .then((res) => {
         if (res && (res.code === 0 || res.code === 200)) {
           const detail = res.data || {};
+          const canSign = detail.canSign ?? (detail.status === "PAID");
+          const expireTime = detail.acceptExpireTime
+            || (detail.status === "PAID" && detail.updateTime
+            ? this.parseToTimestamp(detail.updateTime) + 30 * 60 * 1000
+            : null);
           this.setData({
             detail: {
               ...detail,
+              canSign,
               createTime: this.formatDate(detail.createTime),
               startTime: this.formatDate(detail.startTime),
               endTime: this.formatDate(detail.endTime),
               completeTime: this.formatDate(detail.completeTime)
             }
-          }, () => this.startCountdown(detail.acceptExpireTime));
+          }, () => this.startCountdown(expireTime));
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
