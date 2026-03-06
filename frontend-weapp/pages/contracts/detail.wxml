@@ -56,6 +56,6 @@
 
   <button class="btn-outline wax-btn" wx:if="{{fromHall}}" bindtap="acceptContract" loading="{{confirming}}">接单确认</button>
   <button class="btn-primary" wx:if="{{detail.canSign}}" bindtap="signContract" loading="{{confirming}}">签订契约</button>
-  <button class="btn-primary" wx:if="{{detail.canFinish}}" bindtap="finishContract" loading="{{confirming}}">契约完成</button>
+  <button class="btn-primary" wx:if="{{detail.canFinishBySigner && detail.canFinish}}" bindtap="finishContract" loading="{{confirming}}">契约完成</button>
   <button class="btn-outline spacing-gap" wx:if="{{!fromHall}}" bindtap="goDisputeApply">申请仲裁</button>
 </view>

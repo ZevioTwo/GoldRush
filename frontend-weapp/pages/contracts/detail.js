@@ -29,10 +29,13 @@ Page({
             || (detail.status === "PAID" && detail.updateTime
             ? this.parseToTimestamp(detail.updateTime) + 30 * 60 * 1000
             : null);
+          const canFinishBySigner = detail.canFinishBySigner
+            ?? (detail.signerId ? detail.signerId !== String(detail.currentUserId || "") : false);
           this.setData({
             detail: {
               ...detail,
               canSign,
+              canFinishBySigner,
               statusLabel: this.getStatusLabel(detail.status),
               createTime: this.formatDate(detail.createTime),
               startTime: this.formatDate(detail.startTime),
@@ -93,7 +96,7 @@ Page({
       .then((resp) => {
         if (resp && (resp.code === 0 || resp.code === 200)) {
           wx.showToast({ title: "签订成功", icon: "success" });
-          this.fetchDetail();
+          setTimeout(() => this.fetchDetail(), 300);
           return;
         }
         wx.showToast({ title: resp.message || "签订失败", icon: "none" });

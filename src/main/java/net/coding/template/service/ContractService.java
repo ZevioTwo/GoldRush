@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -338,6 +339,10 @@ public class ContractService {
                 && contract.getDepositAmount().compareTo(java.math.BigDecimal.ZERO) > 0);
         dto.setCanSign(canSignContract(contract, currentUser));
         dto.setCanFinish(canFinishContract(contract, currentUser));
+        Object signerValue = redisService.hget("contract:signer", contract.getId());
+        String signerId = signerValue == null ? null : String.valueOf(signerValue);
+        dto.setSignerId(signerId);
+        dto.setCanFinishBySigner(signerId != null && !signerId.equals(String.valueOf(currentUser.getId())));
 
         return dto;
     }
@@ -376,6 +381,8 @@ public class ContractService {
         }
 
         startContractAfterPayment(contract.getId());
+        redisService.hset("contract:signer", contract.getId(), String.valueOf(currentUser.getId()));
+        redisService.expire("contract:signer", 7, TimeUnit.DAYS);
 
         net.coding.template.entity.response.ContractSignResponse response = new net.coding.template.entity.response.ContractSignResponse();
         response.setContractId(contract.getId());

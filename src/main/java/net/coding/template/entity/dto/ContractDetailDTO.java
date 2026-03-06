@@ -47,6 +47,8 @@ public class ContractDetailDTO {
     private Boolean canSign;     // 甲方是否可签订
     private Boolean canFinish;   // 乙方是否可完成
     private String role;         // INITIATOR / RECEIVER
+    private String signerId;     // 最近签订方
+    private Boolean canFinishBySigner; // 是否为被签订方
     private Boolean depositRequired; // 是否需要保证金
 
     @Data
