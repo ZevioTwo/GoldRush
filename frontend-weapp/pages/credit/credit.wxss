@@ -1,6 +1,6 @@
 .credit-score {
   font-size: 72rpx;
   font-weight: 700;
-  color: #8b4a2b;
-  letter-spacing: 2rpx;
+  color: #2563eb;
+  letter-spacing: 0.6rpx;
 }

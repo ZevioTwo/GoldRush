@@ -3,6 +3,8 @@ const { request } = require("../../utils/request");
 Page({
   data: {
     loading: false,
+    depositRequiredOptions: ["需要", "不需要"],
+    depositRequiredIndex: 0,
     form: {
       title: "",
       depositAmount: "",
@@ -13,12 +15,24 @@ Page({
     const field = e.currentTarget.dataset.field;
     this.setData({ [`form.${field}`]: e.detail.value });
   },
+  onDepositRequiredChange(e) {
+    const index = Number(e.detail.value);
+    const isRequired = index === 0;
+    this.setData({
+      depositRequiredIndex: index,
+      "form.depositAmount": isRequired ? this.data.form.depositAmount : ""
+    });
+  },
   validateForm(form) {
     if (!form.title) return "请填写标题";
     if (form.title.length > 100) return "标题不能超过100字";
-    if (!form.depositAmount) return "请填写保证金";
-    const deposit = Number(form.depositAmount);
-    if (Number.isNaN(deposit) || deposit < 10 || deposit > 200) return "保证金需在10-200之间";
+
+    if (this.data.depositRequiredIndex === 0) {
+      if (!form.depositAmount) return "请填写保证金";
+      const deposit = Number(form.depositAmount);
+      if (Number.isNaN(deposit) || deposit < 10 || deposit > 200) return "保证金需在10-200之间";
+    }
+
     if (form.successCondition && form.successCondition.length > 500) return "契约达成条件不能超过500字";
     return "";
   },
@@ -31,13 +45,15 @@ Page({
       return;
     }
 
+    const depositAmount = this.data.depositRequiredIndex === 0 ? form.depositAmount : 0;
+
     this.setData({ loading: true });
     request({
       url: "/api/contract/create",
       method: "POST",
       data: {
         title: form.title,
-        depositAmount: form.depositAmount,
+        depositAmount,
         successCondition: form.successCondition
       }
     })

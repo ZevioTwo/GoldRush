@@ -4,24 +4,42 @@
   box-sizing: border-box;
 }
 
-.list-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-}
-
 .parchment-card {
-  background: linear-gradient(180deg, rgba(255, 251, 240, 0.98), rgba(245, 228, 198, 0.98));
-  border: 1rpx solid rgba(125, 88, 49, 0.25);
+  background: #ffffff;
+  border: 1rpx solid rgba(16, 24, 40, 0.08);
 }
 
 .wax-btn {
-  background: radial-gradient(circle at 30% 30%, #d8473b, #9b2d24 70%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #fff;
-  border: 2rpx solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 10rpx 20rpx rgba(155, 45, 36, 0.35), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.25);
+  border: none;
+  box-shadow: 0 10rpx 20rpx rgba(37, 99, 235, 0.28);
 }
 
 .wax-btn::after {
   border: none;
+}
+
+.contract-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.contract-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 12rpx;
+}
+
+.contract-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.contract-amount {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #2563eb;
 }

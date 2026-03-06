@@ -2,25 +2,26 @@
   font-weight: 700;
   font-size: 32rpx;
   margin-bottom: 12rpx;
-  letter-spacing: 2rpx;
+  letter-spacing: 0.6rpx;
+  color: #111827;
 }
 
 .section-title {
   font-weight: 700;
   margin-bottom: 12rpx;
-  color: #4a2f1d;
+  color: #111827;
 }
 
 .parchment-card {
-  background: linear-gradient(180deg, rgba(255, 251, 240, 0.98), rgba(245, 228, 198, 0.98));
-  border: 1rpx solid rgba(125, 88, 49, 0.25);
+  background: #ffffff;
+  border: 1rpx solid rgba(16, 24, 40, 0.08);
 }
 
 .wax-btn {
-  background: radial-gradient(circle at 30% 30%, #d8473b, #9b2d24 70%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #fff;
-  border: 2rpx solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 10rpx 20rpx rgba(155, 45, 36, 0.35), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.25);
+  border: none;
+  box-shadow: 0 10rpx 20rpx rgba(37, 99, 235, 0.28);
 }
 
 .wax-btn::after {
@@ -40,8 +41,8 @@
   width: 140rpx;
   height: 140rpx;
   border-radius: 50%;
-  border: 6rpx solid rgba(189, 41, 36, 0.9);
-  color: rgba(189, 41, 36, 0.9);
+  border: 6rpx solid rgba(59, 130, 246, 0.7);
+  color: rgba(59, 130, 246, 0.7);
   font-weight: 700;
   font-size: 26rpx;
   display: flex;
@@ -50,7 +51,7 @@
   transform: rotate(-12deg) scale(0.6);
   opacity: 0;
   animation: stamp 0.6s ease-out forwards;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 244, 244, 0.8), rgba(255, 255, 255, 0.2));
+  background: radial-gradient(circle at 30% 30%, rgba(239, 246, 255, 0.9), rgba(255, 255, 255, 0.2));
 }
 
 .stamp::after {
@@ -71,4 +72,3 @@
     opacity: 1;
   }
 }
-

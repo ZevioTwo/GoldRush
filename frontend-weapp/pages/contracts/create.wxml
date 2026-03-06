@@ -7,6 +7,15 @@
       <input class="input parchment-input" placeholder="请输入契约标题" value="{{form.title}}" bindinput="onInput" data-field="title" />
     </view>
     <view class="form-item">
+      <text class="label paper-label">保证金</text>
+      <picker mode="selector" range="{{depositRequiredOptions}}" bindchange="onDepositRequiredChange">
+        <view class="input parchment-input" style="display:flex;align-items:center;justify-content:space-between;">
+          <text>{{depositRequiredOptions[depositRequiredIndex]}}</text>
+          <text class="paper-subtle">点击选择</text>
+        </view>
+      </picker>
+    </view>
+    <view class="form-item" wx:if="{{depositRequiredIndex === 0}}">
       <text class="label paper-label">保证金（10-200）</text>
       <input class="input parchment-input" type="number" placeholder="请输入保证金" value="{{form.depositAmount}}" bindinput="onInput" data-field="depositAmount" />
     </view>

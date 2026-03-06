@@ -1,8 +1,9 @@
 <view class="container profile-page paper-page">
-  <view class="paper-card parchment-card">
+  <view class="paper-card parchment-card profile-hero">
     <view class="profile-header">
       <view class="profile-avatar"></view>
       <view class="profile-name">{{profile.nickname || '未命名用户'}}</view>
+      <view class="profile-subtitle paper-subtle">守约之人，信誉可鉴</view>
     </view>
   </view>
 
@@ -24,6 +25,6 @@
   </view>
 
   <view class="profile-footer">
-    <button class="btn-outline" bindtap="logout">退出登录</button>
+    <button class="btn-outline profile-logout" bindtap="logout">退出登录</button>
   </view>
 </view>
