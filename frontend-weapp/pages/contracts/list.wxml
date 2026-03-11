@@ -1,47 +1,62 @@
-<view class="container list-page paper-page">
-  <view class="paper-card parchment-card">
-    <view class="toolbar">
-      <view class="toolbar-actions">
-        <button class="btn-primary wax-btn" bindtap="goCreate">创建契约</button>
-      </view>
-      <view class="toolbar-actions">
-        <text class="toolbar-label">状态</text>
-        <picker mode="selector" range="{{statusOptions}}" bindchange="onStatusChange">
-          <view class="toolbar-picker">
-            <text class="paper-label">{{statusOptions[statusIndex]}}</text>
+<view class="container list-page contract-page">
+  <view class="header">
+    <text class="title">我的契约</text>
+    <view class="search-bar">
+      <icon type="search" size="16" color="#999" />
+      <input placeholder="搜索契约编号或对方昵称" placeholder-class="search-placeholder" />
+    </view>
+  </view>
+
+  <view class="action-bar">
+    <view class="tab-group">
+      <view class="tab-item active">进行中</view>
+      <view class="tab-item">历史契约</view>
+    </view>
+    <button class="btn-create" bindtap="goCreate">
+      <icon type="add" size="14" color="#000" />
+      <text>发起契约</text>
+    </button>
+  </view>
+
+  <scroll-view scroll-y class="list-container">
+    <block wx:for="{{list}}" wx:key="contractId">
+      <view class="contract-card" bindtap="goDetail" data-id="{{item.contractId}}">
+        <view class="card-header">
+          <text class="contract-no">#{{item.contractNo}}</text>
+          <text class="status-tag">{{item.statusLabel || item.status}}</text>
+          <text class="detail-link">查看详情 ></text>
+        </view>
+        <view class="card-body">
+          <view class="user-info">
+            <text class="nickname">{{item.counterpartyNickname || '对方用户'}}</text>
           </view>
-        </picker>
+          <view class="credit-row">
+            <text class="label">对方信誉分</text>
+            <text class="value">{{item.counterpartyCreditScore || 0}}</text>
+          </view>
+          <view class="info-row">
+            <view class="info-item">
+              <text class="label">保证金</text>
+              <text class="value">{{item.depositAmount}}</text>
+            </view>
+            <view class="info-item">
+              <text class="label">创建时间</text>
+              <text class="value highlight">{{item.createTime}}</text>
+            </view>
+          </view>
+        </view>
       </view>
+    </block>
+
+    <view wx:if="{{list.length === 0}}" class="empty-state" style="margin-top: 48rpx;">
+      暂无数据
     </view>
-  </view>
 
-  <block wx:for="{{list}}" wx:key="contractId">
-    <view class="paper-card parchment-card contract-card" bindtap="goDetail" data-id="{{item.contractId}}">
-      <view class="contract-title">契约号：{{item.contractNo}}</view>
-      <view class="paper-divider"></view>
-      <view class="contract-row">
-        <text class="text-muted paper-label">状态</text>
-        <text class="status-badge">{{item.statusLabel || item.status}}</text>
-      </view>
-      <view class="contract-row">
-        <text class="text-muted paper-label">金额</text>
-        <text class="contract-amount">{{item.depositAmount}}</text>
-      </view>
-      <view class="contract-row">
-        <text class="text-muted paper-label">创建时间</text>
-        <text class="paper-subtle">{{item.createTime}}</text>
-      </view>
+    <view wx:if="{{loading}}" class="loading-state" style="margin: 24rpx 0;">
+      加载中...
     </view>
-  </block>
-
-  <view wx:if="{{list.length === 0}}" class="empty-state" style="margin-top: 48rpx;">
-    暂无数据
-  </view>
-
-  <view wx:if="{{loading}}" class="loading-state" style="margin: 24rpx 0;">
-    加载中...
-  </view>
-  <view wx:if="{{!hasMore && list.length > 0}}" class="empty-state" style="margin: 24rpx 0;">
-    没有更多了
-  </view>
+    <view wx:if="{{!hasMore && list.length > 0}}" class="empty-state" style="margin: 24rpx 0;">
+      没有更多了
+    </view>
+  </scroll-view>
 </view>
