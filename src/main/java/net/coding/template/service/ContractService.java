@@ -587,15 +587,17 @@ public class ContractService {
         item.setCreateTime(contract.getCreateTime());
         item.setCompleteTime(contract.getCompleteTime());
 
-        User opponent = null;
+        User counterparty = null;
         if (contract.getReceiverId() != null) {
-            opponent = userMapper.selectById(contract.getReceiverId());
+            counterparty = userMapper.selectById(contract.getReceiverId());
         }
-        if (opponent == null) {
-            opponent = userMapper.selectById(contract.getInitiatorId());
+        if (counterparty == null) {
+            counterparty = userMapper.selectById(contract.getInitiatorId());
         }
-        if (opponent != null) {
-            item.setOpponentCreditScore(opponent.getCreditScore());
+        if (counterparty != null) {
+            item.setCounterpartyNickname(counterparty.getNickname());
+            item.setCounterpartyCreditScore(counterparty.getCreditScore());
+            item.setOpponentCreditScore(counterparty.getCreditScore());
         }
 
         return item;
