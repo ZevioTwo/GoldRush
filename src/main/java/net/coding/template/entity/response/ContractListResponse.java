@@ -22,6 +22,8 @@ public class ContractListResponse {
         private String status;
         private BigDecimal depositAmount;
         private String guaranteeItem;
+        private String counterpartyNickname;
+        private Integer counterpartyCreditScore;
         private Integer opponentCreditScore;
         private LocalDateTime createTime;
         private LocalDateTime completeTime;
