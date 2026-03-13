@@ -55,6 +55,9 @@ Page({
   goVipCenter() {
     wx.navigateTo({ url: "/pages/profile/vip" });
   },
+  goAccounts() {
+    wx.navigateTo({ url: "/pages/profile/accounts" });
+  },
   goContracts() {
     wx.navigateTo({ url: "/pages/contracts/list" });
   },

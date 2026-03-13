@@ -22,6 +22,11 @@ Page({
     const index = Number(e.detail.value) || 0;
     this.setData({ statusIndex: index }, () => this.resetAndFetch());
   },
+  onStatusTabChange(e) {
+    const index = Number(e.currentTarget.dataset.index) || 0;
+    if (index === this.data.statusIndex) return;
+    this.setData({ statusIndex: index }, () => this.resetAndFetch());
+  },
   onReachBottom() {
     if (!this.data.hasMore || this.data.loading) return;
     this.setData({ page: this.data.page + 1 }, () => this.fetchList(true));
@@ -55,11 +60,34 @@ Page({
             ...item,
             statusLabel: this.getStatusLabel(item.status),
             createTime: this.formatDate(item.createTime),
-            completeTime: this.formatDate(item.completeTime)
+            completeTime: this.formatDate(item.completeTime),
+            displayName: item.counterpartyNickname || item.receiverNickname || item.initiatorNickname || ""
           }));
           const nextList = append ? this.data.list.concat(list) : list;
           const hasMore = list.length >= this.data.size;
           this.setData({ list: nextList, hasMore });
+
+          const missing = nextList.filter((item) => !item.displayName && item.contractId);
+          if (missing.length) {
+            Promise.all(
+              missing.map((item) =>
+                this.fetchReceiverName(item.contractId).then((name) => ({
+                  contractId: item.contractId,
+                  name
+                }))
+              )
+            ).then((results) => {
+              const nameMap = results.reduce((acc, cur) => {
+                if (cur.name) acc[cur.contractId] = cur.name;
+                return acc;
+              }, {});
+              const patchedList = nextList.map((item) => ({
+                ...item,
+                displayName: item.displayName || nameMap[item.contractId] || "对方用户"
+              }));
+              this.setData({ list: patchedList });
+            });
+          }
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
@@ -70,6 +98,20 @@ Page({
       .finally(() => {
         this.setData({ loading: false });
       });
+  },
+  fetchReceiverName(contractId) {
+    if (!contractId) return Promise.resolve("");
+    return request({
+      url: `/api/contract/${contractId}`,
+      method: "GET"
+    })
+      .then((res) => {
+        if (res && (res.code === 0 || res.code === 200)) {
+          return res.data?.receiver?.nickname || "";
+        }
+        return "";
+      })
+      .catch(() => "");
   },
   formatDate(value) {
     if (!value) return "";

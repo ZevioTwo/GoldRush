@@ -8,7 +8,8 @@ Page({
     keyword: "",
     contractNo: "",
     loading: false,
-    hasMore: true
+    hasMore: true,
+    activeTab: "all"
   },
   onShow() {
     this.resetAndFetch();
@@ -29,10 +30,10 @@ Page({
       page: this.data.page,
       size: this.data.size
     };
-    if (this.data.keyword) {
+    if (this.data.activeTab === "keyword" && this.data.keyword) {
       data.keyword = this.data.keyword;
     }
-    if (this.data.contractNo) {
+    if (this.data.activeTab === "contractNo" && this.data.contractNo) {
       data.contractNo = this.data.contractNo;
     }
 
@@ -70,6 +71,11 @@ Page({
   },
   onContractNoInput(e) {
     this.setData({ contractNo: e.detail.value });
+  },
+  onTabChange(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (!tab || tab === this.data.activeTab) return;
+    this.setData({ activeTab: tab }, () => this.resetAndFetch());
   },
   onSearch() {
     this.resetAndFetch();

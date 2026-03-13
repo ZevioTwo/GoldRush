@@ -1,4 +1,7 @@
 Page({
+  data: {
+    history: []
+  },
   onShow() {
     const tabbar = this.getTabBar && this.getTabBar();
     if (tabbar && tabbar.setSelected) {

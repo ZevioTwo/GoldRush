@@ -1,58 +1,48 @@
 <view class="container">
-  <view class="card">
-    <view class="section-title">契约信息</view>
-    <view class="form-item" wx:if="{{showContractPicker}}">
-      <text class="label">选择契约</text>
-      <picker mode="selector" range="{{contractOptions}}" bindchange="onContractChange">
-        <view class="picker">{{contractOptions[contractIndex]}}</view>
-      </picker>
-    </view>
-    <view class="row">
-      <text class="text-muted">契约号</text>
-      <text>{{contract.contractNo || '-'}}</text>
-    </view>
-    <view class="row">
-      <text class="text-muted">状态</text>
-      <text>{{contract.status || '-'}}</text>
-    </view>
-    <view class="row">
-      <text class="text-muted">金额</text>
-      <text>{{contract.depositAmount || '-'}}</text>
-    </view>
+  <view class="header">
+    <text class="header-title">发起新仲裁</text>
   </view>
 
-  <view class="card">
-    <view class="section-title">仲裁信息</view>
-    <view class="form-item">
-      <text class="label">争议类型</text>
-      <picker mode="selector" range="{{disputeTypeOptions}}" bindchange="onDisputeTypeChange">
-        <view class="picker">{{disputeTypeOptions[disputeTypeIndex]}}</view>
+  <view class="form-card">
+    <view class="form-item" wx:if="{{showContractPicker}}">
+      <text class="form-label">选择关联契约</text>
+      <picker bindchange="onContractChange" value="{{contractIndex}}" range="{{contractOptions}}">
+        <view class="picker">
+          {{contractIndex !== null ? contractOptions[contractIndex] : '请选择需要申诉的契约...'}}
+          <text class="picker-arrow">›</text>
+        </view>
       </picker>
     </view>
+
     <view class="form-item">
-      <text class="label">争议描述</text>
-      <textarea class="textarea" placeholder="请描述争议情况" value="{{form.description}}" bindinput="onInput" data-field="description"></textarea>
+      <text class="form-label">争议描述</text>
+      <textarea class="description-input" placeholder="请详细描述违约情况, 包括时间、地点、具体行为等..." value="{{form.description}}" bindinput="onInput" data-field="description"></textarea>
     </view>
+
     <view class="form-item">
-      <text class="label">证据链接（可选，逗号分隔）</text>
-      <textarea class="textarea" placeholder="http://example.com/a.jpg, http://example.com/b.jpg" value="{{form.evidenceUrls}}" bindinput="onInput" data-field="evidenceUrls"></textarea>
+      <text class="form-label">证据链接</text>
+      <textarea class="description-input" placeholder="http://example.com/a.jpg, http://example.com/b.jpg" value="{{form.evidenceUrls}}" bindinput="onInput" data-field="evidenceUrls"></textarea>
     </view>
+
     <view class="form-item">
-      <text class="label">游戏截图链接（可选，逗号分隔）</text>
-      <textarea class="textarea" placeholder="http://example.com/1.png, http://example.com/2.png" value="{{form.gameScreenshotUrls}}" bindinput="onInput" data-field="gameScreenshotUrls"></textarea>
+      <text class="form-label">游戏截图链接</text>
+      <textarea class="description-input" placeholder="http://example.com/1.png, http://example.com/2.png" value="{{form.gameScreenshotUrls}}" bindinput="onInput" data-field="gameScreenshotUrls"></textarea>
     </view>
+
     <view class="form-item">
-      <text class="label">录屏链接（可选，逗号分隔）</text>
-      <textarea class="textarea" placeholder="http://example.com/v.mp4, http://example.com/v2.mp4" value="{{form.videoLinks}}" bindinput="onInput" data-field="videoLinks"></textarea>
+      <text class="form-label">录屏链接</text>
+      <textarea class="description-input" placeholder="http://example.com/v.mp4, http://example.com/v2.mp4" value="{{form.videoLinks}}" bindinput="onInput" data-field="videoLinks"></textarea>
     </view>
+
     <view class="form-item">
       <view class="row" style="margin: 0;">
-        <text class="label">是否加急</text>
-        <switch checked="{{form.isUrgent}}" bindchange="onUrgentChange" />
+        <text class="form-label">是否加急</text>
+        <switch checked="{{form.isUrgent}}" bindchange="onUrgentChange" color="#FFC107" />
       </view>
       <text class="text-muted">加急可能产生额外费用，请确认后提交</text>
     </view>
-  </view>
 
-  <button class="btn-primary" bindtap="submit" loading="{{loading}}">提交仲裁申请</button>
+    <button class="submit-btn" bindtap="submit" loading="{{loading}}">提交仲裁申请</button>
+    <text class="submit-notice">提交后专家将在24小时内介入调查, 请耐心等待</text>
+  </view>
 </view>

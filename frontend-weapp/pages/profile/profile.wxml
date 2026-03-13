@@ -1,30 +1,76 @@
-<view class="container profile-page paper-page">
-  <view class="paper-card parchment-card profile-hero">
-    <view class="profile-header">
-      <view class="profile-avatar"></view>
-      <view class="profile-name">{{profile.nickname || '未命名用户'}}</view>
-      <view class="profile-subtitle paper-subtle">守约之人，信誉可鉴</view>
+<view class="container">
+  <view class="profile-section">
+    <image class="avatar" src="/images/user_avatar.png" />
+    <text class="name">{{profile.nickname || '未命名用户'}}</text>
+    <text class="user-id">ID: {{profile.userId || '-'}}</text>
+  </view>
+
+  <view class="card credit-card">
+    <view class="credit-header">
+      <text class="credit-label">当前信誉分</text>
+      <navigator url="/pages/ranking/index" class="ranking-link">
+        <text>我的排名: - ></text>
+      </navigator>
+    </view>
+    <view class="credit-score-row">
+      <text class="credit-score">{{creditScore}}</text>
+      <text class="shield-icon">🛡</text>
+      <text class="level-tag">等级: -</text>
+    </view>
+    <progress class="credit-progress" percent="{{creditScore === '-' ? 0 : (creditScore / 1000 * 100)}}" stroke-width="6" activeColor="#FFC107" backgroundColor="#f0f0f0" borderRadius="6"></progress>
+    <view class="credit-actions">
+      <button class="action-btn primary" bindtap="goCredit">信誉分详情</button>
+      <button class="action-btn secondary" bindtap="goAccounts">我的账号</button>
     </view>
   </view>
 
-  <view class="paper-card parchment-card">
-    <view class="grid">
-      <view class="grid-item" bindtap="goUserInfo">
-        <view class="grid-icon">信息</view>
-        <view class="grid-label">用户信息</view>
-      </view>
-      <view class="grid-item" bindtap="goCredit">
-        <view class="grid-icon">信用</view>
-        <view class="grid-label">信用分详情</view>
-      </view>
-      <view class="grid-item" bindtap="goVipCenter">
-        <view class="grid-icon">特权</view>
-        <view class="grid-label">特权中心</view>
-      </view>
+  <view class="card stats-card">
+    <view class="stat-item">
+      <text class="stat-value">-</text>
+      <text class="stat-label">进行中契约</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">-</text>
+      <text class="stat-label">已完成总数</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">-</text>
+      <text class="stat-label">履约胜率</text>
     </view>
   </view>
 
-  <view class="profile-footer">
-    <button class="btn-outline profile-logout" bindtap="logout">退出登录</button>
+  <view class="card menu-card">
+    <view class="menu-item" bindtap="goUserInfo">
+      <view class="menu-item-left">
+        <text class="menu-icon">👤</text>
+        <text class="menu-title">用户信息</text>
+      </view>
+      <text class="arrow-icon">></text>
+    </view>
+    <view class="menu-item" bindtap="goCredit">
+      <view class="menu-item-left">
+        <text class="menu-icon">💳</text>
+        <text class="menu-title">信用分详情</text>
+      </view>
+      <text class="arrow-icon">></text>
+    </view>
+    <view class="menu-item" bindtap="goVipCenter">
+      <view class="menu-item-left">
+        <text class="menu-icon">⭐</text>
+        <text class="menu-title">特权中心</text>
+      </view>
+      <text class="arrow-icon">></text>
+    </view>
+    <view class="menu-item" bindtap="goContracts">
+      <view class="menu-item-left">
+        <text class="menu-icon">📄</text>
+        <text class="menu-title">我的契约</text>
+      </view>
+      <text class="arrow-icon">></text>
+    </view>
+  </view>
+
+  <view class="card logout-card" bindtap="logout">
+    <text class="logout-text">退出当前账号</text>
   </view>
 </view>

@@ -1,19 +1,19 @@
 page {
-  background: #f5f6f8;
-  color: #1f2329;
+  background: #f8f8f8;
+  color: #333;
   font-size: 28rpx;
-  line-height: 1.65;
-  padding-bottom: 220rpx;
+  line-height: 1.6;
+  padding-bottom: 160rpx;
   box-sizing: border-box;
 }
 
 .container {
-  padding: 28rpx;
+  padding: 30rpx;
 }
 
 .paper-page {
   min-height: 100vh;
-  background: #f5f6f8;
+  background: #f8f8f8;
 }
 
 .paper-card {
@@ -176,6 +176,29 @@ button[disabled] {
   color: #991b1b;
   border-color: rgba(153, 27, 27, 0.25);
   background: rgba(254, 226, 226, 0.95);
+}
+
+.status-PENDING {
+  background-color: #FF9800;
+}
+
+.status-PAID,
+.status-ACTIVE,
+.status-IN_GAME {
+  background-color: #4CAF50;
+}
+
+.status-COMPLETED {
+  background-color: #2196F3;
+}
+
+.status-CANCELLED,
+.status-VIOLATED {
+  background-color: #9E9E9E;
+}
+
+.status-DISPUTE {
+  background-color: #F44336;
 }
 
 /* Empty / Loading */

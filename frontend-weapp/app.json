@@ -4,10 +4,12 @@
     "pages/contracts/list",
     "pages/hall/list",
     "pages/dispute/index",
+    "pages/message/index",
+    "pages/profile/profile",
     "pages/contracts/create",
     "pages/contracts/detail",
     "pages/dispute/apply",
-    "pages/profile/profile",
+    "pages/ranking/index",
     "pages/profile/info",
     "pages/profile/vip",
     "pages/profile/edit",
@@ -22,8 +24,8 @@
   },
   "tabBar": {
     "custom": true,
-    "color": "#666666",
-    "selectedColor": "#1677ff",
+    "color": "#999",
+    "selectedColor": "#FFD700",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
@@ -37,7 +39,7 @@
       },
       {
         "pagePath": "pages/dispute/index",
-        "text": "契约仲裁"
+        "text": "仲裁"
       },
       {
         "pagePath": "pages/profile/profile",

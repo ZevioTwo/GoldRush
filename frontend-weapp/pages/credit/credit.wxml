@@ -1,17 +1,21 @@
 <view class="container">
-  <view class="card" style="text-align: center;">
-    <view class="text-muted" style="margin-bottom: 16rpx;">当前信用分</view>
+  <view class="card credit-card">
+    <view class="credit-header">
+      <text class="credit-label">当前信用分</text>
+      <text class="shield-icon">🛡</text>
+    </view>
     <view class="credit-score">{{creditScore}}</view>
+    <progress class="credit-progress" percent="{{creditScore === '-' ? 0 : (creditScore / 1000 * 100)}}" stroke-width="6" activeColor="#FFC107" backgroundColor="#f0f0f0" borderRadius="6"></progress>
   </view>
 
-  <view class="card">
+  <view class="card info-card">
     <view class="row">
       <text class="text-muted">用户ID</text>
-      <text>{{profile.userId}}</text>
+      <text>{{profile.userId || '-'}}</text>
     </view>
     <view class="row">
       <text class="text-muted">昵称</text>
-      <text>{{profile.nickname}}</text>
+      <text>{{profile.nickname || '-'}}</text>
     </view>
     <view class="row">
       <text class="text-muted">最近更新</text>

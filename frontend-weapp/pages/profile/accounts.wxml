@@ -1,6 +1,6 @@
 <view class="container">
   <view class="card">
-    <view style="font-size: 32rpx; font-weight: 600; margin-bottom: 12rpx;">我的账号</view>
+    <view class="section-title">我的账号</view>
     <block wx:for="{{accounts}}" wx:key="id">
       <view class="account-item">
         <view class="row" wx:if="{{item.remark}}">
@@ -8,8 +8,8 @@
           <text>{{item.remark}}</text>
         </view>
         <view class="row actions">
-          <button size="mini" class="btn-outline" bindtap="editAccount" data-id="{{item.id}}">编辑</button>
-          <button size="mini" class="btn-outline" bindtap="deleteAccount" data-id="{{item.id}}">删除</button>
+          <button size="mini" class="action-btn secondary" bindtap="editAccount" data-id="{{item.id}}">编辑</button>
+          <button size="mini" class="action-btn secondary" bindtap="deleteAccount" data-id="{{item.id}}">删除</button>
         </view>
       </view>
     </block>
@@ -17,11 +17,11 @@
   </view>
 
   <view class="card">
-    <view style="font-size: 32rpx; font-weight: 600; margin-bottom: 12rpx;">新增账号</view>
+    <view class="section-title">新增账号</view>
     <view class="form-item">
       <text class="label">备注（可选）</text>
       <input class="input" placeholder="例如：主账号/小号" value="{{form.remark}}" bindinput="onInput" data-field="remark" />
     </view>
-    <button class="btn-primary" bindtap="submit" loading="{{loading}}">保存账号</button>
+    <button class="action-btn primary" bindtap="submit" loading="{{loading}}">保存账号</button>
   </view>
 </view>

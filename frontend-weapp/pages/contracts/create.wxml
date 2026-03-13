@@ -1,29 +1,32 @@
-<view class="container paper-page">
-  <view class="paper-card parchment-card">
-    <view class="paper-title" style="margin-bottom: 16rpx;">契约条款</view>
-    <view class="paper-divider"></view>
-    <view class="form-item">
-      <text class="label paper-label">标题</text>
-      <input class="input parchment-input" placeholder="请输入契约标题" value="{{form.title}}" bindinput="onInput" data-field="title" />
-    </view>
-    <view class="form-item">
-      <text class="label paper-label">保证金</text>
-      <picker mode="selector" range="{{depositRequiredOptions}}" bindchange="onDepositRequiredChange">
-        <view class="input parchment-input" style="display:flex;align-items:center;justify-content:space-between;">
-          <text>{{depositRequiredOptions[depositRequiredIndex]}}</text>
-          <text class="paper-subtle">点击选择</text>
-        </view>
-      </picker>
-    </view>
-    <view class="form-item" wx:if="{{depositRequiredIndex === 0}}">
-      <text class="label paper-label">保证金（0.1-648）</text>
-      <input class="input parchment-input" type="digit" placeholder="请输入保证金" value="{{form.depositAmount}}" bindinput="onInput" data-field="depositAmount" />
-    </view>
-    <view class="form-item">
-      <text class="label paper-label">契约达成条件</text>
-      <textarea class="textarea parchment-input" placeholder="请输入契约达成条件" value="{{form.successCondition}}" bindinput="onInput" data-field="successCondition"></textarea>
-    </view>
+<view class="container">
+  <view class="form-group">
+    <text class="group-title">契约标题</text>
+    <input class="input-field" placeholder="请输入契约标题, 如: 诚信借贷协议" value="{{form.title}}" data-field="title" bindinput="onInput" />
   </view>
 
-  <button class="btn-primary wax-btn" bindtap="submit" loading="{{loading}}">创建契约</button>
+  <view class="form-group">
+    <text class="group-title">是否需要保证金</text>
+    <picker mode="selector" range="{{depositRequiredOptions}}" bindchange="onDepositRequiredChange">
+      <view class="input-field picker-field">
+        {{depositRequiredOptions[depositRequiredIndex]}}
+      </view>
+    </picker>
+  </view>
+
+  <view class="form-group" wx:if="{{depositRequiredIndex === 0}}">
+    <text class="group-title">保证金（0.1-648）</text>
+    <input class="input-field" type="digit" placeholder="100" value="{{form.depositAmount}}" data-field="depositAmount" bindinput="onInput" />
+  </view>
+
+  <view class="form-group">
+    <text class="group-title">契约达成条件</text>
+    <textarea class="textarea-field" placeholder="请详细描述契约内容及双方约定的具体条款内容..." value="{{form.successCondition}}" data-field="successCondition" bindinput="onInput"></textarea>
+  </view>
+
+  <view class="reminder-box">
+    <text class="reminder-icon">⚠️</text>
+    <text class="reminder-text">温馨提示: 契约一经发起并达成, 将具有法律效力并计入摸金信誉档案, 请谨慎填写条款内容。</text>
+  </view>
+
+  <button class="submit-btn" bindtap="submit" loading="{{loading}}">确认发起契约</button>
 </view>

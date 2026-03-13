@@ -1,177 +1,195 @@
-page {
-  background-color: #f5f5f5;
-}
-
-.list-page {
-  min-height: 100vh;
-  box-sizing: border-box;
-  padding-bottom: 120rpx;
-}
-
 .contract-page {
-  background-color: #f5f5f5;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  padding-bottom: 140rpx;
 }
 
 .header {
-  background: #fff;
-  padding: 40rpx 30rpx 24rpx;
-}
-
-.title {
-  font-size: 40rpx;
-  font-weight: 700;
-  color: #111827;
-}
-
-.search-bar {
-  background: #f0f2f5;
-  height: 80rpx;
   display: flex;
-  align-items: center;
-  padding: 0 20rpx;
-  border-radius: 12rpx;
-  margin-top: 20rpx;
-  gap: 12rpx;
-}
-
-.search-placeholder {
-  color: #9ca3af;
-  font-size: 26rpx;
-}
-
-.action-bar {
-  background: #fff;
-  padding: 16rpx 30rpx 24rpx;
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  border-top: 1rpx solid #f1f5f9;
-}
-
-.tab-group {
-  display: flex;
   align-items: center;
-  gap: 16rpx;
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
 }
 
-.tab-item {
+.header-title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.header-button-wrapper {
+  background: linear-gradient(to right, #FFD700, #FFA500);
+  border-radius: 40rpx;
+  padding: 2rpx;
+}
+
+.create-contract-btn {
+  background: transparent;
+  color: #fff;
   font-size: 28rpx;
-  color: #6b7280;
-  padding: 10rpx 20rpx;
-  border-radius: 20rpx;
-  background: #f8fafc;
-}
-
-.tab-item.active {
-  color: #1f2937;
-  background: #fff7cc;
-  font-weight: 700;
-}
-
-.btn-create {
-  background: linear-gradient(90deg, #ffd700, #daa520);
-  color: #333;
-  border-radius: 32rpx;
-  font-size: 26rpx;
-  height: 64rpx;
-  padding: 0 22rpx;
+  padding: 10rpx 25rpx;
+  border-radius: 40rpx;
+  margin: 0;
+  line-height: 1;
+  border: none;
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  box-shadow: 0 10rpx 20rpx rgba(218, 165, 32, 0.25);
+  justify-content: center;
 }
 
-.btn-create::after {
+.create-contract-btn::after {
   border: none;
 }
 
-.list-container {
-  padding: 10rpx 0 30rpx;
+.plus-icon {
+  font-size: 36rpx;
+  margin-right: 10rpx;
+  font-weight: bold;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  margin: 20rpx 30rpx;
+  padding: 15rpx 20rpx;
+  border-radius: 10rpx;
+}
+
+.search-icon {
+  margin-right: 15rpx;
+  color: #999;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+}
+
+.search-placeholder {
+  color: #ccc;
+}
+
+.tab-bar {
+  white-space: nowrap;
+  padding: 20rpx 0;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
+  margin-bottom: 20rpx;
+}
+
+.tab-item {
+  display: inline-block;
+  padding: 0 30rpx;
+  font-size: 30rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #333;
+  font-weight: bold;
+}
+
+.tab-item.active::after {
+  content: '';
+  display: block;
+  width: 50%;
+  height: 6rpx;
+  background-color: #FFD700;
+  position: absolute;
+  bottom: -10rpx;
+  left: 25%;
+  border-radius: 3rpx;
+}
+
+.contract-list {
+  padding: 0 30rpx;
+  padding-bottom: 120rpx;
 }
 
 .contract-card {
-  background: #fff;
-  margin: 20rpx 30rpx;
+  background-color: #fff;
+  border-radius: 15rpx;
   padding: 30rpx;
-  border: 1rpx solid #eee;
-  border-radius: 16rpx;
-  box-shadow: 0 8rpx 18rpx rgba(15, 23, 42, 0.06);
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
 .card-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12rpx;
-  margin-bottom: 18rpx;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
 }
 
-.contract-no {
-  font-size: 26rpx;
-  font-weight: 700;
-  color: #111827;
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.card-header-right {
+  text-align: right;
 }
 
 .status-tag {
-  background: #fff9e6;
-  color: #daa520;
-  font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 14rpx;
+  font-size: 24rpx;
+  padding: 5rpx 15rpx;
+  border-radius: 8rpx;
+  background: #f0f0f0;
+  color: #666;
 }
 
-.detail-link {
-  color: #daa520;
+.contract-id {
   font-size: 24rpx;
+  color: #999;
+}
+
+.deposit-label {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+}
+
+.deposit-amount {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #000;
 }
 
 .card-body {
-  background: #fafafa;
-  border-radius: 12rpx;
-  padding: 20rpx;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 20rpx;
 }
 
-.user-info {
-  margin-bottom: 10rpx;
+.contract-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
 }
 
-.credit-row {
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.footer-info {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8rpx 0 12rpx;
-  border-bottom: 1rpx dashed #e5e7eb;
-  margin-bottom: 12rpx;
 }
 
-.nickname {
+.footer-icon {
   font-size: 28rpx;
-  font-weight: 600;
-  color: #111827;
+  margin-right: 10rpx;
 }
 
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 16rpx;
-}
-
-.info-item {
-  flex: 1;
-}
-
-.label {
-  font-size: 22rpx;
-  color: #94a3b8;
-}
-
-.value {
-  font-size: 26rpx;
-  color: #1f2937;
-  margin-top: 6rpx;
-}
-
-.value.highlight {
-  color: #0f172a;
-  font-weight: 600;
+.detail-link {
+  color: #FFD700;
+  font-size: 28rpx;
 }

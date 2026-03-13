@@ -2,10 +2,30 @@ Component({
   data: {
     selected: "",
     list: [
-      { pagePath: "/pages/contracts/list", text: "我的契约", icon: "契" },
-      { pagePath: "/pages/hall/list", text: "契约大厅", icon: "厅" },
-      { pagePath: "/pages/dispute/index", text: "契约仲裁", icon: "裁" },
-      { pagePath: "/pages/profile/profile", text: "个人中心", icon: "我" }
+      {
+        pagePath: "/pages/contracts/list",
+        text: "我的契约",
+        icon: "/images/contract.png",
+        activeIcon: "/images/contract_active.png"
+      },
+      {
+        pagePath: "/pages/hall/list",
+        text: "契约大厅",
+        icon: "/images/hall.png",
+        activeIcon: "/images/hall_active.png"
+      },
+      {
+        pagePath: "/pages/dispute/index",
+        text: "仲裁",
+        icon: "/images/arbitration.png",
+        activeIcon: "/images/arbitration_active.png"
+      },
+      {
+        pagePath: "/pages/profile/profile",
+        text: "个人中心",
+        icon: "/images/me.png",
+        activeIcon: "/images/me_active.png"
+      }
     ]
   },
   methods: {

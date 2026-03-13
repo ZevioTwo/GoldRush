@@ -1,0 +1,148 @@
+.container {
+  padding: 20rpx 30rpx;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  padding-bottom: 140rpx;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.header-title {
+  font-size: 40rpx;
+  font-weight: bold;
+}
+
+.update-time-card {
+  background-color: #fffbe6;
+  border: 1rpx solid #ffe58f;
+  border-radius: 15rpx;
+  padding: 20rpx 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.update-label {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 5rpx;
+}
+
+.update-time {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.shield-icon {
+  font-size: 40rpx;
+  color: #FFC107;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 30rpx;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 30rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #333;
+  font-weight: bold;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 6rpx;
+  background-color: #FFC107;
+  border-radius: 3rpx;
+}
+
+.ranking-list .list-item {
+  display: flex;
+  align-items: center;
+  padding: 25rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.ranking-list .list-item:last-child {
+  border-bottom: none;
+}
+
+.rank-number {
+  font-size: 28rpx;
+  color: #999;
+  width: 60rpx;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.score {
+  font-size: 30rpx;
+  font-weight: bold;
+}
+
+.yellow-score { color: #FFC107; }
+.red-score { color: #F44336; }
+
+.list-item.top1 {
+  background-color: #fffbe6;
+  border-radius: 15rpx;
+  padding: 20rpx;
+  margin-bottom: 10rpx;
+}
+
+.top1 .rank-number { display: none; }
+
+.top1-tag {
+  background-color: #FFC107;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 5rpx 10rpx;
+  border-radius: 5rpx;
+  margin-right: 10rpx;
+}
+
+.list-item.bottom1 {
+  background-color: #2c3e50;
+  border-radius: 15rpx;
+  padding: 20rpx;
+  margin-bottom: 10rpx;
+}
+
+.bottom1 .rank-number { display: none; }
+.bottom1 .user-name { color: #fff; }
+.bottom1 .score { color: #F44336; }
+
+.bottom1-tag {
+  background-color: #F44336;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 5rpx 10rpx;
+  border-radius: 5rpx;
+  margin-right: 10rpx;
+}

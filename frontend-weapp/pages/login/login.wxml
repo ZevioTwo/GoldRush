@@ -1,7 +1,8 @@
-<view class="container">
-  <view class="card">
-    <view style="font-size: 36rpx; font-weight: 600; margin-bottom: 24rpx;">欢迎登录</view>
-    <view class="text-muted" style="margin-bottom: 32rpx;">使用微信一键登录</view>
-    <button class="btn-primary" open-type="getUserInfo" bindtap="handleLogin">微信登录</button>
+<view class="login-page">
+  <view class="login-card">
+    <image class="login-logo" src="/images/user_avatar.png" mode="aspectFit"></image>
+    <view class="login-title">欢迎登录</view>
+    <view class="login-subtitle">使用微信一键登录</view>
+    <button class="login-btn" open-type="getUserInfo" bindtap="handleLogin">微信登录</button>
   </view>
 </view>

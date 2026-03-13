@@ -1,52 +1,48 @@
-<view class="container paper-page">
-  <view class="paper-card parchment-card">
-    <view class="detail-title paper-title">契约号：{{detail.contractNo}}</view>
-    <view class="paper-divider"></view>
-    <view class="row">
-      <text class="text-muted paper-label">状态</text>
-      <text>{{detail.statusLabel || detail.status}}</text>
+<view class="container">
+  <view class="detail-card">
+    <view class="detail-header">
+      <text class="detail-title">契约号：{{detail.contractNo}}</text>
+      <text class="status-tag status-{{detail.status}}">{{detail.statusLabel || detail.status}}</text>
     </view>
-    <view class="row">
-      <text class="text-muted paper-label">保证金</text>
-      <text>{{detail.depositAmount}}</text>
+    <view class="detail-row">
+      <text class="label">保证金</text>
+      <text class="value">{{detail.depositAmount}}</text>
     </view>
-    <view class="row">
-      <text class="text-muted paper-label">服务费</text>
-      <text>{{detail.serviceFeeAmount}}</text>
+    <view class="detail-row">
+      <text class="label">服务费</text>
+      <text class="value">{{detail.serviceFeeAmount}}</text>
     </view>
-    <view class="row">
-      <text class="text-muted paper-label">创建时间</text>
-      <text>{{detail.createTime}}</text>
+    <view class="detail-row">
+      <text class="label">创建时间</text>
+      <text class="value">{{detail.createTime}}</text>
     </view>
-    <view class="row" wx:if="{{countdownText}}">
-      <text class="text-muted paper-label">接单倒计时</text>
+    <view class="detail-row" wx:if="{{countdownText}}">
+      <text class="label">接单倒计时</text>
       <text class="countdown-text">{{countdownText}}</text>
     </view>
   </view>
 
-  <view class="paper-card parchment-card">
-    <view class="section-title paper-title">参与方</view>
-    <view class="paper-divider"></view>
-    <view class="row">
-      <text class="text-muted paper-label">发起人</text>
-      <text>{{detail.initiator.nickname}} ({{detail.initiator.userId}})</text>
+  <view class="detail-card">
+    <view class="section-title">参与方</view>
+    <view class="detail-row">
+      <text class="label">发起人</text>
+      <text class="value">{{detail.initiator.nickname}} ({{detail.initiator.userId}})</text>
     </view>
-    <view class="row">
-      <text class="text-muted paper-label">接收人</text>
-      <text>{{detail.receiver ? (detail.receiver.nickname + ' (' + detail.receiver.userId + ')') : '待接收'}}</text>
+    <view class="detail-row">
+      <text class="label">接收人</text>
+      <text class="value">{{detail.receiver ? (detail.receiver.nickname + ' (' + detail.receiver.userId + ')') : '待接收'}}</text>
     </view>
   </view>
 
-  <view class="paper-card parchment-card">
-    <view class="section-title paper-title">条款</view>
-    <view class="paper-divider"></view>
-    <view class="row">
-      <text class="text-muted paper-label">标题</text>
-      <text>{{detail.title}}</text>
+  <view class="detail-card">
+    <view class="section-title">条款</view>
+    <view class="detail-row">
+      <text class="label">标题</text>
+      <text class="value">{{detail.title}}</text>
     </view>
-    <view class="row">
-      <text class="text-muted paper-label">契约达成条件</text>
-      <text>{{detail.successCondition}}</text>
+    <view class="detail-row">
+      <text class="label">契约达成条件</text>
+      <text class="value">{{detail.successCondition}}</text>
     </view>
   </view>
 
@@ -54,8 +50,8 @@
     <view class="stamp" wx:if="{{stampVisible}}"></view>
   </view>
 
-  <button class="btn-outline wax-btn" wx:if="{{fromHall}}" bindtap="acceptContract" loading="{{confirming}}">接单确认</button>
-  <button class="btn-primary" wx:if="{{detail.canSign}}" bindtap="signContract" loading="{{confirming}}">签订契约</button>
-  <button class="btn-primary" wx:if="{{detail.canFinishBySigner && detail.canFinish}}" bindtap="finishContract" loading="{{confirming}}">契约完成</button>
-  <button class="btn-outline spacing-gap" wx:if="{{!fromHall}}" bindtap="goDisputeApply">申请仲裁</button>
+  <button class="action-btn primary" wx:if="{{fromHall}}" bindtap="acceptContract" loading="{{confirming}}">接单确认</button>
+  <button class="action-btn primary" wx:if="{{detail.canSign}}" bindtap="signContract" loading="{{confirming}}">签订契约</button>
+  <button class="action-btn primary" wx:if="{{detail.canFinishBySigner && detail.canFinish}}" bindtap="finishContract" loading="{{confirming}}">契约完成</button>
+  <button class="action-btn secondary" wx:if="{{!fromHall}}" bindtap="goDisputeApply">申请仲裁</button>
 </view>

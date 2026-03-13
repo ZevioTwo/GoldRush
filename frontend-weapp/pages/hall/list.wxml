@@ -1,45 +1,58 @@
-<view class="container hall-page paper-page">
-  <view class="paper-card parchment-card">
-    <view class="paper-title" style="margin-bottom: 16rpx;">契约大厅</view>
-    <view class="paper-divider"></view>
-    <view class="form-item">
-      <input class="input parchment-input" placeholder="搜索标题关键字" value="{{keyword}}" bindinput="onKeywordInput" />
+<view class="container">
+  <view class="header">
+    <view class="icon-wrapper">
+      <text class="header-icon">🔍</text>
     </view>
-    <view class="form-item">
-      <input class="input parchment-input" placeholder="契约号（模糊匹配）" value="{{contractNo}}" bindinput="onContractNoInput" />
+    <text class="header-title">契约大厅</text>
+    <view class="icon-wrapper">
+      <text class="header-icon">🔔</text>
     </view>
-    <button class="btn-outline wax-btn" bindtap="onSearch">搜索</button>
   </view>
 
-  <view class="list-area">
+  <scroll-view class="game-tabs" scroll-x="true">
+    <view class="tab-item {{activeTab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="onTabChange">全部</view>
+    <view class="tab-item {{activeTab === 'keyword' ? 'active' : ''}}" data-tab="keyword" bindtap="onTabChange">标题</view>
+    <view class="tab-item {{activeTab === 'contractNo' ? 'active' : ''}}" data-tab="contractNo" bindtap="onTabChange">契约号</view>
+  </scroll-view>
+
+  <view class="search-bar" wx:if="{{activeTab === 'keyword'}}">
+    <icon type="search" size="16" class="search-icon"></icon>
+    <input class="search-input" placeholder="搜索标题关键字" value="{{keyword}}" bindinput="onKeywordInput" />
+  </view>
+
+  <view class="search-bar" wx:if="{{activeTab === 'contractNo'}}">
+    <icon type="search" size="16" class="search-icon"></icon>
+    <input class="search-input" placeholder="契约号（模糊匹配）" value="{{contractNo}}" bindinput="onContractNoInput" />
+  </view>
+
+  <view class="contract-list">
     <block wx:for="{{list}}" wx:key="contractId">
-      <view class="paper-card parchment-card" bindtap="goDetail" data-id="{{item.contractId}}">
-        <view class="paper-title" style="margin-bottom: 12rpx;">{{item.title || '未命名契约'}}</view>
-        <view class="paper-divider"></view>
-        <view class="row">
-          <text class="text-muted paper-label">契约号</text>
-          <text>{{item.contractNo}}</text>
-        </view>
-        <view class="row">
-          <text class="text-muted paper-label">状态</text>
-          <text>{{item.statusLabel || item.status}}</text>
-        </view>
-        <view class="row">
-          <text class="text-muted paper-label">金额</text>
-          <text>{{item.depositAmount}}</text>
-        </view>
-        <view class="row">
-          <text class="text-muted paper-label">创建时间</text>
-          <text>{{item.createTime}}</text>
+      <view class="contract-card" bindtap="goDetail" data-id="{{item.contractId}}">
+        <image class="card-banner" src="/images/card_banner_1.png" mode="aspectFill"></image>
+        <view class="card-content">
+          <view class="card-title-row">
+            <text class="card-title">{{item.title || '未命名契约'}}</text>
+            <text class="status-tag status-{{item.status}}">{{item.statusLabel || item.status}}</text>
+          </view>
+          <view class="card-info-row">
+            <text class="info-text">👤 发起人: {{item.creatorNickname || '未知'}}</text>
+          </view>
+          <view class="card-info-row">
+            <text class="info-text">💰 保证金: {{item.depositAmount}}</text>
+          </view>
+          <view class="card-requirement">
+            <text>契约号: {{item.contractNo}}</text>
+          </view>
+          <button class="details-button" catchtap="goDetail" data-id="{{item.contractId}}">查看详情 ></button>
         </view>
       </view>
     </block>
 
-    <view wx:if="{{list.length === 0}}" class="text-muted paper-label" style="text-align:center; margin-top: 48rpx;">
+    <view wx:if="{{list.length === 0}}" class="empty-state" style="margin-top: 48rpx;">
       暂无待接单契约
     </view>
 
-    <view wx:if="{{loading}}" class="text-muted paper-label" style="text-align:center; margin: 24rpx 0;">加载中...</view>
-    <view wx:if="{{!hasMore && list.length > 0}}" class="text-muted paper-label" style="text-align:center; margin: 24rpx 0;">没有更多了</view>
+    <view wx:if="{{loading}}" class="loading-state" style="margin: 24rpx 0;">加载中...</view>
+    <view wx:if="{{!hasMore && list.length > 0}}" class="empty-state" style="margin: 24rpx 0;">没有更多了</view>
   </view>
 </view>

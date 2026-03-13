@@ -1,5 +1,6 @@
 <view class="container">
   <view class="card">
+    <view class="section-title">编辑资料</view>
     <view class="form-item">
       <text class="label">微信号（可选）</text>
       <input class="input" placeholder="请输入微信号" value="{{form.wechatId}}" bindinput="onInput" data-field="wechatId" />
@@ -10,5 +11,5 @@
     </view>
   </view>
 
-  <button class="btn-primary" bindtap="submit" loading="{{loading}}">保存资料</button>
+  <button class="action-btn primary" bindtap="submit" loading="{{loading}}">保存资料</button>
 </view>

@@ -1,5 +1,48 @@
-.container {
-  padding-top: 200rpx;
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f8f8;
+}
+
+.login-card {
+  width: 640rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 60rpx 40rpx;
+  text-align: center;
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.login-logo {
+  width: 160rpx;
+  height: 160rpx;
+  margin-bottom: 30rpx;
+}
+
+.login-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.login-subtitle {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 40rpx;
+}
+
+.login-btn {
+  background: linear-gradient(to right, #FFD700, #FFA500);
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 40rpx;
+  padding: 18rpx 0;
+}
+
+.login-btn::after {
+  border: none;
 }
 
 button[disabled] {
