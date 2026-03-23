@@ -15,56 +15,63 @@
     <view class="credit-score-row">
       <text class="credit-score">{{creditScore}}</text>
       <text class="shield-icon">🛡</text>
-      <text class="level-tag">等级: -</text>
+      <text class="level-tag">等级: {{profile.userLevel || '-'}}</text>
     </view>
     <progress class="credit-progress" percent="{{creditScore === '-' ? 0 : (creditScore / 1000 * 100)}}" stroke-width="6" activeColor="#FFC107" backgroundColor="#f0f0f0" borderRadius="6"></progress>
     <view class="credit-actions">
-      <button class="action-btn primary" bindtap="goCredit">信誉分详情</button>
-      <button class="action-btn secondary" bindtap="goAccounts">我的账号</button>
+      <button class="action-btn primary" bindtap="goCredit">信誉分充值</button>
+      <button class="action-btn secondary" bindtap="goExchange">积分兑换</button>
     </view>
   </view>
 
   <view class="card stats-card">
     <view class="stat-item">
-      <text class="stat-value">-</text>
+      <text class="stat-value">{{stats.activeContracts}}</text>
       <text class="stat-label">进行中契约</text>
     </view>
     <view class="stat-item">
-      <text class="stat-value">-</text>
+      <text class="stat-value">{{stats.completedContracts}}</text>
       <text class="stat-label">已完成总数</text>
     </view>
     <view class="stat-item">
-      <text class="stat-value">-</text>
+      <text class="stat-value">{{stats.successRate}}</text>
       <text class="stat-label">履约胜率</text>
     </view>
   </view>
 
   <view class="card menu-card">
+    <view class="menu-item" bindtap="goCreditHistory">
+      <view class="menu-item-left">
+        <text class="menu-icon">🧾</text>
+        <text class="menu-title">我的信誉分记录</text>
+      </view>
+      <text class="arrow-icon">></text>
+    </view>
+    <view class="menu-item" bindtap="goContractReport">
+      <view class="menu-item-left">
+        <text class="menu-icon">📊</text>
+        <text class="menu-title">契约统计报表</text>
+      </view>
+      <text class="arrow-icon">></text>
+    </view>
     <view class="menu-item" bindtap="goUserInfo">
       <view class="menu-item-left">
-        <text class="menu-icon">👤</text>
-        <text class="menu-title">用户信息</text>
+        <text class="menu-icon">🔐</text>
+        <text class="menu-title">账号与安全</text>
       </view>
       <text class="arrow-icon">></text>
     </view>
-    <view class="menu-item" bindtap="goCredit">
+    <view class="menu-item" bindtap="goNotifySettings">
       <view class="menu-item-left">
-        <text class="menu-icon">💳</text>
-        <text class="menu-title">信用分详情</text>
+        <text class="menu-icon">🔔</text>
+        <text class="menu-title">消息通知设置</text>
       </view>
       <text class="arrow-icon">></text>
     </view>
-    <view class="menu-item" bindtap="goVipCenter">
+    <view class="menu-item" bindtap="goAbout">
       <view class="menu-item-left">
-        <text class="menu-icon">⭐</text>
-        <text class="menu-title">特权中心</text>
-      </view>
-      <text class="arrow-icon">></text>
-    </view>
-    <view class="menu-item" bindtap="goContracts">
-      <view class="menu-item-left">
-        <text class="menu-icon">📄</text>
-        <text class="menu-title">我的契约</text>
+        <text class="menu-icon">ℹ️</text>
+        <text class="menu-title">关于摸金小窝</text>
       </view>
       <text class="arrow-icon">></text>
     </view>

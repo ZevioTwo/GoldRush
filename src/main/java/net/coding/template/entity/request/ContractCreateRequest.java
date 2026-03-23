@@ -16,6 +16,10 @@ public class ContractCreateRequest {
     @Size(max = 100, message = "标题不能超过100字")
     private String title;
 
+    @NotBlank(message = "游戏类型不能为空")
+    @Size(max = 50, message = "游戏类型不能超过50字")
+    private String gameType;
+
     @NotBlank(message = "契约达成条件不能为空")
     @Size(max = 500, message = "成功条件不能超过500字")
     private String successCondition;

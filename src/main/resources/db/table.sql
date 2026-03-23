@@ -68,6 +68,7 @@ CREATE TABLE `contracts` (
 
     -- 约定条件
                              `title` varchar(100) DEFAULT NULL COMMENT '契约标题',
+                             `game_type` varchar(50) DEFAULT NULL COMMENT '游戏类型',
                              `guarantee_item` varchar(100) DEFAULT NULL COMMENT '保底物品，如：保底出红',
                              `success_condition` varchar(500) DEFAULT NULL COMMENT '成功条件描述',
                              `failure_condition` varchar(500) DEFAULT NULL COMMENT '失败条件描述',
@@ -200,7 +201,7 @@ CREATE TABLE `disputes` (
 CREATE TABLE `credit_history` (
                                   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
                                   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
-                                  `change_type` varchar(20) NOT NULL COMMENT '变动类型：INIT-初始，CONTRACT_COMPLETE-契约完成，VIOLATION-违约，DISPUTE_WIN-争议胜诉，DISPUTE_LOSE-争议败诉，MANUAL_ADJUST-手动调整',
+                                  `change_type` varchar(20) NOT NULL COMMENT '变动类型：INIT-初始，CONTRACT_COMPLETE-契约完成，VIOLATION-违约，DISPUTE_WIN-争议胜诉，DISPUTE_LOSE-争议败诉，MANUAL_ADJUST-手动调整，RECHARGE-充值',
 
     -- 变动信息
                                   `change_amount` int(11) NOT NULL COMMENT '变动值（正负）',

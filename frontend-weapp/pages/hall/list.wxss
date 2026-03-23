@@ -1,5 +1,5 @@
 .container {
-  background-color: #f4f4f4;
+  background-color: #f6f6f6;
   min-height: 100vh;
   padding-bottom: 140rpx;
 }
@@ -8,139 +8,175 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20rpx 30rpx;
-  background-color: #fff;
+  padding: 22rpx 24rpx 16rpx;
+  background-color: #f7f7f7;
 }
 
 .header-title {
   font-size: 34rpx;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .icon-wrapper {
-  width: 60rpx;
-  height: 60rpx;
-  background-color: #f0f0f0;
-  border-radius: 50%;
+  width: 64rpx;
+  height: 64rpx;
+  background-color: #f0f1f4;
+  border-radius: 20rpx;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .header-icon {
-  font-size: 28rpx;
+  font-size: 32rpx;
   color: #333;
-}
-
-.game-tabs {
-  white-space: nowrap;
-  padding: 20rpx 30rpx;
-  background-color: #fff;
-  border-bottom: 1rpx solid #eee;
-}
-
-.tab-item {
-  display: inline-block;
-  padding: 15rpx 30rpx;
-  font-size: 28rpx;
-  color: #666;
-  background-color: #f0f0f0;
-  border-radius: 30rpx;
-  margin-right: 20rpx;
-}
-
-.tab-item.active {
-  background-color: #FFD700;
-  color: #333;
-  font-weight: bold;
 }
 
 .search-bar {
-  padding: 20rpx 30rpx;
-  background-color: #fff;
   display: flex;
   align-items: center;
-  margin: 20rpx 30rpx;
-  border-radius: 10rpx;
+  background-color: #f1f3f6;
+  margin: 10rpx 24rpx 6rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 20rpx;
 }
 
 .search-icon {
-  margin-right: 15rpx;
-  color: #999;
+  margin-right: 10rpx;
+  color: #9aa1ac;
 }
 
 .search-input {
   flex: 1;
-  font-size: 28rpx;
+  font-size: 24rpx;
+  color: #2a2f36;
+}
+
+.game-tabs {
+  white-space: nowrap;
+  padding: 10rpx 24rpx 8rpx;
+  background-color: #f7f7f7;
+  border-bottom: 1rpx solid #f0f1f3;
+}
+
+.tab-item {
+  display: inline-block;
+  padding: 10rpx 22rpx;
+  font-size: 24rpx;
+  color: #8b9098;
+  background-color: #f1f3f6;
+  border-radius: 24rpx;
+  margin-right: 16rpx;
+}
+
+.tab-item.active {
+  background-color: #f4c21a;
+  color: #2a2f36;
+  font-weight: 700;
 }
 
 .contract-list {
-  padding: 20rpx 30rpx;
+  padding: 16rpx 24rpx 30rpx;
 }
 
 .contract-card {
   background-color: #fff;
-  border-radius: 20rpx;
-  margin-bottom: 30rpx;
+  border-radius: 22rpx;
+  margin-bottom: 22rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+  box-shadow: 0 6rpx 16rpx rgba(0,0,0,0.06);
 }
 
 .card-banner {
   width: 100%;
-  height: 240rpx;
+  height: 260rpx;
 }
 
 .card-content {
-  padding: 20rpx 30rpx;
+  padding: 18rpx 24rpx 24rpx;
 }
 
 .card-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15rpx;
+  margin-bottom: 10rpx;
 }
 
 .card-title {
-  font-size: 32rpx;
-  font-weight: bold;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f1f1f;
 }
 
 .status-tag {
-  font-size: 24rpx;
-  padding: 5rpx 15rpx;
-  border-radius: 8rpx;
-  color: #fff;
-  background-color: #4CAF50;
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 10rpx;
+  color: #2f6f3e;
+  background-color: #e6f4ea;
 }
 
-.card-info-row {
-  font-size: 24rpx;
-  color: #999;
-  margin-bottom: 10rpx;
+.card-meta-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  font-size: 24rpx;
+  color: #7d848e;
+  margin-bottom: 6rpx;
+  gap: 10rpx;
+}
+
+.meta-text {
+  font-size: 24rpx;
+}
+
+.meta-divider {
+  color: #c9cdd3;
 }
 
 .card-requirement {
-  font-size: 26rpx;
-  color: #666;
-  margin-top: 20rpx;
-  line-height: 1.5;
+  font-size: 24rpx;
+  color: #5a6069;
+  margin: 10rpx 0 14rpx;
+  line-height: 1.6;
 }
 
 .details-button {
-  background-color: #FFD700;
-  color: #333;
-  font-size: 28rpx;
-  font-weight: bold;
-  border-radius: 40rpx;
-  margin-top: 30rpx;
-  padding: 20rpx 0;
+  background-color: #f4c21a;
+  color: #2a2f36;
+  font-size: 26rpx;
+  font-weight: 700;
+  border-radius: 14rpx;
+  margin-top: 8rpx;
+  padding: 18rpx 0;
   text-align: center;
 }
 
 .details-button::after {
   border: none;
+}
+
+.status-PENDING,
+.status-PAID {
+  color: #3f7f5f;
+  background-color: #e8f5ee;
+}
+
+.status-ACTIVE,
+.status-IN_GAME {
+  color: #2e6aa8;
+  background-color: #e8f1ff;
+}
+
+.status-DISPUTE,
+.status-VIOLATED {
+  color: #c95252;
+  background-color: #ffecec;
+}
+
+.status-COMPLETED,
+.status-CANCELLED {
+  color: #8a9098;
+  background-color: #f1f2f4;
 }

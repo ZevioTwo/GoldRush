@@ -33,6 +33,9 @@ public class Contract {
     @TableField("title")
     private String title;
 
+    @TableField("game_type")
+    private String gameType;
+
     @TableField("guarantee_item")
     private String guaranteeItem;
 

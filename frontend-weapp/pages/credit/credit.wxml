@@ -1,25 +1,20 @@
 <view class="container">
   <view class="card credit-card">
     <view class="credit-header">
-      <text class="credit-label">当前信用分</text>
+      <text class="credit-label">当前信誉分</text>
       <text class="shield-icon">🛡</text>
     </view>
     <view class="credit-score">{{creditScore}}</view>
     <progress class="credit-progress" percent="{{creditScore === '-' ? 0 : (creditScore / 1000 * 100)}}" stroke-width="6" activeColor="#FFC107" backgroundColor="#f0f0f0" borderRadius="6"></progress>
   </view>
 
-  <view class="card info-card">
-    <view class="row">
-      <text class="text-muted">用户ID</text>
-      <text>{{profile.userId || '-'}}</text>
+  <view class="card recharge-card">
+    <view class="recharge-title">信誉分充值</view>
+    <view class="recharge-desc">1元 = 1分信誉分</view>
+    <view class="amount-row">
+      <text class="amount-label">充值金额</text>
+      <input class="amount-input" type="digit" placeholder="请输入金额" value="{{amount}}" bindinput="onAmountInput" />
     </view>
-    <view class="row">
-      <text class="text-muted">昵称</text>
-      <text>{{profile.nickname || '-'}}</text>
-    </view>
-    <view class="row">
-      <text class="text-muted">最近更新</text>
-      <text>{{profile.updatedAt || '-'}}</text>
-    </view>
+    <button class="recharge-btn" bindtap="submitRecharge" loading="{{loading}}">立即充值</button>
   </view>
 </view>

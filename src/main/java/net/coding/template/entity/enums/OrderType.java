@@ -10,6 +10,7 @@ public enum OrderType {
     DEPOSIT_UNFREEZE("DEPOSIT_UNFREEZE", "押金解冻"),
     VIP_PAYMENT("VIP_PAYMENT", "VIP会员支付"),
     ARBITRATION_FEE("ARBITRATION_FEE", "仲裁加急费"),
+    CREDIT_RECHARGE("CREDIT_RECHARGE", "信誉分充值"),
     COMPENSATION("COMPENSATION", "违约赔偿金"),
     REFUND("REFUND", "退款订单");
 
@@ -35,7 +36,8 @@ public enum OrderType {
      */
     public boolean isPaymentType() {
         return this == SERVICE_FEE || this == DEPOSIT_FREEZE ||
-                this == VIP_PAYMENT || this == ARBITRATION_FEE;
+                this == VIP_PAYMENT || this == ARBITRATION_FEE ||
+                this == CREDIT_RECHARGE;
     }
 
     /**

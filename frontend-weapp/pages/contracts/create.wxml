@@ -5,6 +5,15 @@
   </view>
 
   <view class="form-group">
+    <text class="group-title">游戏类型</text>
+    <picker mode="selector" range="{{gameTypeOptions}}" bindchange="onGameTypeChange">
+      <view class="input-field picker-field">
+        {{gameTypeOptions[gameTypeIndex]}}
+      </view>
+    </picker>
+  </view>
+
+  <view class="form-group">
     <text class="group-title">是否需要保证金</text>
     <picker mode="selector" range="{{depositRequiredOptions}}" bindchange="onDepositRequiredChange">
       <view class="input-field picker-field">

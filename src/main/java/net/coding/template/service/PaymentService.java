@@ -9,6 +9,7 @@ import net.coding.template.entity.enums.PaymentStatus;
 import net.coding.template.entity.po.Contract;
 import net.coding.template.entity.po.PaymentOrder;
 import net.coding.template.entity.po.User;
+import net.coding.template.entity.po.CreditHistory;
 import net.coding.template.entity.request.*;
 import net.coding.template.entity.response.DeductResponse;
 import net.coding.template.entity.response.FreezeResponse;
@@ -18,6 +19,7 @@ import net.coding.template.exception.BusinessException;
 import net.coding.template.mapper.ContractMapper;
 import net.coding.template.mapper.PaymentOrderMapper;
 import net.coding.template.mapper.UserMapper;
+import net.coding.template.mapper.CreditHistoryMapper;
 import net.coding.template.util.OrderNoGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +61,9 @@ public class PaymentService {
     private SystemConfigService configService;
 
     @Resource
+    private CreditHistoryMapper creditHistoryMapper;
+
+    @Resource
     private RedisService redisService;
 
     /**
@@ -71,6 +76,11 @@ public class PaymentService {
             User currentUser = userService.getCurrentUser(token);
             if (currentUser == null) {
                 throw new BusinessException(401, "用户未登录");
+            }
+
+            if (OrderType.CREDIT_RECHARGE.getCode().equals(request.getOrderType())
+                    && !StringUtils.hasText(request.getContractId())) {
+                request.setContractId("CREDIT_RECHARGE_" + currentUser.getId());
             }
 
             // 2. 验证请求参数
@@ -424,6 +434,21 @@ public class PaymentService {
             throw new BusinessException(400, "不支持的订单类型");
         }
 
+        // 信用分充值无需契约ID
+        if (OrderType.CREDIT_RECHARGE.getCode().equals(request.getOrderType())) {
+            if (request.getAmount().compareTo(BigDecimal.ONE) < 0) {
+                throw new BusinessException(400, "充值金额不能小于1元");
+            }
+            if (request.getAmount().remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) {
+                throw new BusinessException(400, "充值金额必须为整数");
+            }
+            return;
+        }
+
+        if (!StringUtils.hasText(request.getContractId())) {
+            throw new BusinessException(400, "契约ID不能为空");
+        }
+
         // 如果是契约相关支付，验证契约
         if (StringUtils.hasText(request.getContractId())) {
             Contract contract = contractMapper.selectContractDetail(request.getContractId());
@@ -461,6 +486,11 @@ public class PaymentService {
         order.setOrderType(request.getOrderType());
         order.setAmount(request.getAmount());
         order.setActualAmount(request.getAmount());
+
+        if (OrderType.CREDIT_RECHARGE.getCode().equals(request.getOrderType())
+                && !StringUtils.hasText(order.getContractId())) {
+            order.setContractId("CREDIT_RECHARGE_" + user.getId());
+        }
 
         // 计算手续费（根据不同订单类型）
         BigDecimal feeRate = calculateFeeRate(request.getOrderType());
@@ -530,6 +560,11 @@ public class PaymentService {
                 handleArbitrationFee(order);
                 break;
 
+            case CREDIT_RECHARGE:
+                // 信誉分充值成功
+                handleCreditRecharge(order);
+                break;
+
             default:
                 log.warn("未知订单类型: {}", order.getOrderType());
         }
@@ -555,6 +590,39 @@ public class PaymentService {
     /**
      * 更新契约冻结状态
      */
+    private void handleCreditRecharge(PaymentOrder order) {
+        User user = userMapper.selectById(order.getUserId());
+        if (user == null) {
+            log.warn("充值用户不存在: userId={}", order.getUserId());
+            return;
+        }
+
+        int addScore = order.getAmount().setScale(0, RoundingMode.DOWN).intValue();
+        if (addScore <= 0) {
+            log.warn("充值金额不足以增加信誉分: orderNo={}", order.getOrderNo());
+            return;
+        }
+
+        int beforeScore = user.getCreditScore() == null ? 0 : user.getCreditScore();
+        int afterScore = beforeScore + addScore;
+
+        userMapper.updateCreditScore(user.getId(), afterScore);
+
+        CreditHistory history = new CreditHistory();
+        history.setUserId(user.getId());
+        history.setChangeType("RECHARGE");
+        history.setChangeAmount(addScore);
+        history.setBeforeScore(beforeScore);
+        history.setAfterScore(afterScore);
+        history.setRelatedId(order.getOrderNo());
+        history.setRelatedType("RECHARGE");
+        history.setDescription("信誉分充值");
+        creditHistoryMapper.insert(history);
+
+        log.info("信誉分充值成功: userId={}, addScore={}, afterScore={}",
+                user.getId(), addScore, afterScore);
+    }
+
     private void updateContractFreezeStatus(Contract contract, Long userId) {
         String currentFreezeStatus = contract.getFreezeStatus();
         String newFreezeStatus;
@@ -707,6 +775,8 @@ public class PaymentService {
                 return new BigDecimal("0.006"); // 0.6%
             case ARBITRATION_FEE:
                 return new BigDecimal("0.006"); // 0.6%
+            case CREDIT_RECHARGE:
+                return BigDecimal.ZERO; // 充值不收手续费
             default:
                 return new BigDecimal("0.006"); // 默认0.6%
         }

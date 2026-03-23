@@ -41,6 +41,10 @@
       <text class="value">{{detail.title}}</text>
     </view>
     <view class="detail-row">
+      <text class="label">游戏类型</text>
+      <text class="value">{{detail.gameType || '其他'}}</text>
+    </view>
+    <view class="detail-row">
       <text class="label">契约达成条件</text>
       <text class="value">{{detail.successCondition}}</text>
     </view>

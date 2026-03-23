@@ -58,11 +58,15 @@ public interface ContractMapper extends BaseMapper<Contract> {
             "<if test=\"contractNo != null and contractNo != ''\">" +
             "   AND contract_no LIKE CONCAT('%', #{contractNo}, '%') " +
             "</if>" +
+            "<if test=\"gameType != null and gameType != ''\">" +
+            "   AND game_type = #{gameType} " +
+            "</if>" +
             "ORDER BY create_time DESC " +
             "LIMIT #{offset}, #{limit}" +
             "</script>")
     List<Contract> selectHallContracts(@Param("keyword") String keyword,
                                        @Param("contractNo") String contractNo,
+                                       @Param("gameType") String gameType,
                                        @Param("offset") Integer offset,
                                        @Param("limit") Integer limit);
 
@@ -78,9 +82,13 @@ public interface ContractMapper extends BaseMapper<Contract> {
             "<if test=\"contractNo != null and contractNo != ''\">" +
             "   AND contract_no LIKE CONCAT('%', #{contractNo}, '%') " +
             "</if>" +
+            "<if test=\"gameType != null and gameType != ''\">" +
+            "   AND game_type = #{gameType} " +
+            "</if>" +
             "</script>")
     int countHallContracts(@Param("keyword") String keyword,
-                           @Param("contractNo") String contractNo);
+                           @Param("contractNo") String contractNo,
+                           @Param("gameType") String gameType);
 
     /**
      * 接单绑定接收人

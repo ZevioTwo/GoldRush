@@ -1,6 +1,6 @@
 <view class="container">
   <view class="header">
-    <view class="icon-wrapper">
+    <view class="icon-wrapper" bindtap="onSearchIcon">
       <text class="header-icon">🔍</text>
     </view>
     <text class="header-title">契约大厅</text>
@@ -9,21 +9,29 @@
     </view>
   </view>
 
+  <view class="search-bar" wx:if="{{showSearch}}">
+    <icon type="search" size="16" class="search-icon"></icon>
+    <input
+      class="search-input"
+      placeholder="搜索契约标题"
+      value="{{keyword}}"
+      bindinput="onKeywordInput"
+      confirm-type="search"
+      bindconfirm="onKeywordConfirm"
+    />
+  </view>
+
   <scroll-view class="game-tabs" scroll-x="true">
-    <view class="tab-item {{activeTab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="onTabChange">全部</view>
-    <view class="tab-item {{activeTab === 'keyword' ? 'active' : ''}}" data-tab="keyword" bindtap="onTabChange">标题</view>
-    <view class="tab-item {{activeTab === 'contractNo' ? 'active' : ''}}" data-tab="contractNo" bindtap="onTabChange">契约号</view>
+    <view
+      wx:for="{{gameTabs}}"
+      wx:key="value"
+      class="tab-item {{activeTab === item.value ? 'active' : ''}}"
+      data-tab="{{item.value}}"
+      bindtap="onTabChange"
+    >
+      {{item.label}}
+    </view>
   </scroll-view>
-
-  <view class="search-bar" wx:if="{{activeTab === 'keyword'}}">
-    <icon type="search" size="16" class="search-icon"></icon>
-    <input class="search-input" placeholder="搜索标题关键字" value="{{keyword}}" bindinput="onKeywordInput" />
-  </view>
-
-  <view class="search-bar" wx:if="{{activeTab === 'contractNo'}}">
-    <icon type="search" size="16" class="search-icon"></icon>
-    <input class="search-input" placeholder="契约号（模糊匹配）" value="{{contractNo}}" bindinput="onContractNoInput" />
-  </view>
 
   <view class="contract-list">
     <block wx:for="{{list}}" wx:key="contractId">
@@ -34,14 +42,18 @@
             <text class="card-title">{{item.title || '未命名契约'}}</text>
             <text class="status-tag status-{{item.status}}">{{item.statusLabel || item.status}}</text>
           </view>
-          <view class="card-info-row">
-            <text class="info-text">👤 发起人: {{item.creatorNickname || '未知'}}</text>
+          <view class="card-meta-row">
+            <text class="meta-text">👤 发起人: {{item.initiatorNickname || '未知'}}</text>
+            <text class="meta-divider">|</text>
+            <text class="meta-text">游戏: {{item.gameType || '其他'}}</text>
           </view>
-          <view class="card-info-row">
-            <text class="info-text">💰 保证金: {{item.depositAmount}}</text>
+          <view class="card-meta-row">
+            <text class="meta-text">⭐ 信誉分: {{item.initiatorCreditScore || 0}}</text>
+            <text class="meta-divider">|</text>
+            <text class="meta-text">🕒 创建: {{item.createTime}}</text>
           </view>
           <view class="card-requirement">
-            <text>契约号: {{item.contractNo}}</text>
+            要求：{{item.requirementPreview || '暂无'}}
           </view>
           <button class="details-button" catchtap="goDetail" data-id="{{item.contractId}}">查看详情 ></button>
         </view>

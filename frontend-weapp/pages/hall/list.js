@@ -9,7 +9,38 @@ Page({
     contractNo: "",
     loading: false,
     hasMore: true,
-    activeTab: "all"
+    activeTab: "all",
+    showSearch: false,
+    gameTabs: [
+      { label: "全部", value: "all" },
+      { label: "三角洲行动", value: "三角洲行动" },
+      { label: "和平精英", value: "和平精英" },
+      { label: "王者荣耀", value: "王者荣耀" },
+      { label: "绝地求生", value: "绝地求生" },
+      { label: "无畏契约", value: "无畏契约" },
+      { label: "DNF", value: "dnf" },
+      { label: "穿越火线", value: "穿越火线" },
+      { label: "逃离塔科夫", value: "逃离塔科夫" },
+      { label: "使命召唤", value: "使命召唤" },
+      { label: "APEX 英雄", value: "APEX 英雄" },
+      { label: "英雄联盟", value: "英雄联盟" },
+      { label: "流放之路", value: "流放之路" },
+      { label: "魔兽世界", value: "魔兽世界" },
+      { label: "命运2", value: "命运2" },
+      { label: "逆水寒", value: "逆水寒" },
+      { label: "梦幻西游", value: "梦幻西游" },
+      { label: "原神", value: "原神" },
+      { label: "崩坏", value: "崩坏" },
+      { label: "暗区突围", value: "暗区突围" },
+      { label: "萤火突击", value: "萤火突击" },
+      { label: "灰区行动", value: "灰区行动" },
+      { label: "永劫无间", value: "永劫无间" },
+      { label: "剑网3", value: "剑网3" },
+      { label: "星铁", value: "星铁" },
+      { label: "鸣潮", value: "鸣潮" },
+      { label: "绝区零", value: "绝区零" },
+      { label: "其他", value: "其他" }
+    ]
   },
   onShow() {
     this.resetAndFetch();
@@ -30,11 +61,11 @@ Page({
       page: this.data.page,
       size: this.data.size
     };
-    if (this.data.activeTab === "keyword" && this.data.keyword) {
-      data.keyword = this.data.keyword;
+    if (this.data.activeTab !== "all") {
+      data.gameType = this.data.activeTab;
     }
-    if (this.data.activeTab === "contractNo" && this.data.contractNo) {
-      data.contractNo = this.data.contractNo;
+    if (this.data.keyword) {
+      data.keyword = this.data.keyword;
     }
 
     if (this.data.loading) return;
@@ -50,7 +81,8 @@ Page({
           const list = rawList.map((item) => ({
             ...item,
             statusLabel: this.getStatusLabel(item.status),
-            createTime: this.formatDate(item.createTime)
+            createTime: this.formatDate(item.createTime),
+            requirementPreview: this.truncateRequirement(item.successCondition)
           }));
           const nextList = append ? this.data.list.concat(list) : list;
           const hasMore = list.length >= this.data.size;
@@ -69,6 +101,9 @@ Page({
   onKeywordInput(e) {
     this.setData({ keyword: e.detail.value });
   },
+  onKeywordConfirm() {
+    this.resetAndFetch();
+  },
   onContractNoInput(e) {
     this.setData({ contractNo: e.detail.value });
   },
@@ -79,6 +114,19 @@ Page({
   },
   onSearch() {
     this.resetAndFetch();
+  },
+  onSearchIcon() {
+    this.setData({ showSearch: !this.data.showSearch }, () => {
+      if (this.data.showSearch && !this.data.keyword) {
+        this.resetAndFetch();
+      }
+    });
+  },
+  truncateRequirement(text) {
+    if (!text) return "";
+    const trimmed = String(text).trim();
+    if (trimmed.length <= 30) return trimmed;
+    return `${trimmed.slice(0, 30)}...`;
   },
   goDetail(e) {
     const contractId = e.currentTarget.dataset.id;

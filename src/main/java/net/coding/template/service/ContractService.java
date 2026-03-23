@@ -90,6 +90,7 @@ public class ContractService {
         contract.setInitiatorId(currentUser.getId());
         contract.setReceiverId(null);
         contract.setDepositAmount(request.getDepositAmount());
+        contract.setGameType(request.getGameType());
 
         // 计算服务费（如果是VIP则免费）
         BigDecimal serviceFee = currentUser.getIsVip() ? BigDecimal.ZERO :
@@ -133,6 +134,7 @@ public class ContractService {
         response.setContractNo(contract.getContractNo());
         response.setStatus(contract.getStatus());
         response.setTitle(contract.getTitle());
+        response.setGameType(contract.getGameType());
         response.setDepositAmount(contract.getDepositAmount());
         response.setServiceFeeAmount(contract.getServiceFeeAmount());
         response.setReceiverInfo(null);
@@ -199,12 +201,14 @@ public class ContractService {
         List<Contract> contracts = contractMapper.selectHallContracts(
                 request.getKeyword(),
                 request.getContractNo(),
+                request.getGameType(),
                 offset,
                 request.getSize()
         );
         int total = contractMapper.countHallContracts(
                 request.getKeyword(),
-                request.getContractNo()
+                request.getContractNo(),
+                request.getGameType()
         );
 
         List<ContractListResponse.ContractItem> items = contracts.stream()
@@ -300,6 +304,7 @@ public class ContractService {
         dto.setStatus(contract.getStatus());
         dto.setPhase(contract.getPhase());
         dto.setTitle(contract.getTitle());
+        dto.setGameType(contract.getGameType());
 
         // 用户信息
         dto.setInitiator(buildUserInfo(initiator));
@@ -581,9 +586,11 @@ public class ContractService {
         item.setContractId(contract.getId());
         item.setContractNo(contract.getContractNo());
         item.setTitle(contract.getTitle());
+        item.setGameType(contract.getGameType());
         item.setStatus(contract.getStatus());
         item.setDepositAmount(contract.getDepositAmount());
         item.setGuaranteeItem(contract.getGuaranteeItem());
+        item.setSuccessCondition(contract.getSuccessCondition());
         item.setCreateTime(contract.getCreateTime());
         item.setCompleteTime(contract.getCompleteTime());
 
@@ -598,6 +605,12 @@ public class ContractService {
             item.setCounterpartyNickname(counterparty.getNickname());
             item.setCounterpartyCreditScore(counterparty.getCreditScore());
             item.setOpponentCreditScore(counterparty.getCreditScore());
+        }
+
+        User initiator = userMapper.selectById(contract.getInitiatorId());
+        if (initiator != null) {
+            item.setInitiatorNickname(initiator.getNickname());
+            item.setInitiatorCreditScore(initiator.getCreditScore());
         }
 
         return item;

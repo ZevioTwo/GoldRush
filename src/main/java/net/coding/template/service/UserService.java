@@ -7,6 +7,7 @@ import net.coding.template.entity.po.User;
 import net.coding.template.entity.dto.CreditScoreDTO;
 import net.coding.template.entity.request.LoginRequest;
 import net.coding.template.entity.dto.UserProfileDTO;
+import net.coding.template.entity.dto.UserStatsDTO;
 import net.coding.template.mapper.UserMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -220,6 +221,33 @@ public class UserService {
         if (score >= 70 && contracts >= 3) return "白银打手";
         if (score >= 60) return "青铜打手";
         return "新手学徒";
+    }
+
+    /**
+     * 获取用户统计信息
+     */
+    public UserStatsDTO getUserStats(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        int activeContracts = 0;
+        if (user.getTotalContracts() != null && user.getCompletedContracts() != null) {
+            activeContracts = Math.max(0, user.getTotalContracts() - user.getCompletedContracts());
+        }
+
+        double successRate = 100.0;
+        if (user.getTotalContracts() != null && user.getTotalContracts() > 0) {
+            successRate = (double) user.getCompletedContracts() / user.getTotalContracts() * 100;
+            successRate = Math.round(successRate * 100.0) / 100.0;
+        }
+
+        UserStatsDTO dto = new UserStatsDTO();
+        dto.setActiveContracts(activeContracts);
+        dto.setCompletedContracts(user.getCompletedContracts() == null ? 0 : user.getCompletedContracts());
+        dto.setSuccessRate(successRate);
+        return dto;
     }
 
     /**

@@ -359,6 +359,8 @@ public class WeChatPayService {
                 return "VIP会员购买";
             case "ARBITRATION_FEE":
                 return "仲裁加急费";
+            case "CREDIT_RECHARGE":
+                return "信誉分充值";
             default:
                 return "订单支付";
         }

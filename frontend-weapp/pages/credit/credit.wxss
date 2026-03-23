@@ -42,17 +42,54 @@
   margin-bottom: 10rpx;
 }
 
-.info-card .row {
+.recharge-card {
+  padding: 28rpx 30rpx 34rpx;
+}
+
+.recharge-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f1f1f;
+  margin-bottom: 8rpx;
+}
+
+.recharge-desc {
+  font-size: 24rpx;
+  color: #9aa1ac;
+  margin-bottom: 20rpx;
+}
+
+.amount-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 16rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  background-color: #f6f7f9;
+  border-radius: 14rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 22rpx;
 }
 
-.info-card .row:last-child {
-  border-bottom: none;
+.amount-label {
+  font-size: 26rpx;
+  color: #5a6069;
 }
 
-.text-muted {
-  color: #999;
+.amount-input {
+  flex: 1;
+  text-align: right;
+  font-size: 28rpx;
+  color: #1f1f1f;
+}
+
+.recharge-btn {
+  background-color: #FFC107;
+  color: #fff;
+  font-weight: 700;
+  font-size: 30rpx;
+  border-radius: 14rpx;
+  padding: 18rpx 0;
+}
+
+.recharge-btn::after {
+  border: none;
 }

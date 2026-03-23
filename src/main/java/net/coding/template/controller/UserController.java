@@ -3,6 +3,7 @@ package net.coding.template.controller;
 import net.coding.template.entity.dto.CreditScoreDTO;
 import net.coding.template.entity.request.LoginRequest;
 import net.coding.template.entity.dto.UserProfileDTO;
+import net.coding.template.entity.dto.UserStatsDTO;
 import net.coding.template.entity.response.CommonResponse;
 import net.coding.template.exception.BusinessException;
 import net.coding.template.service.UserService;
@@ -114,6 +115,33 @@ public class UserController {
         } catch (Exception e) {
             log.error("查询信用分失败", e);
             throw new BusinessException(500, "查询信用分失败");
+        }
+    }
+
+    /**
+     * 获取用户中心统计
+     * GET /api/user/stats
+     */
+    @GetMapping("/stats")
+    public CommonResponse<UserStatsDTO> getUserStats(HttpServletRequest request) {
+        try {
+            String token = extractToken(request);
+            if (token == null) {
+                throw new BusinessException(401, "未提供认证token");
+            }
+
+            Long userId = userService.getUserIdByToken(token);
+            if (userId == null) {
+                throw new BusinessException(401, "token无效或已过期");
+            }
+
+            UserStatsDTO stats = userService.getUserStats(userId);
+            return CommonResponse.success(stats);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("获取用户统计失败", e);
+            throw new BusinessException(500, "获取用户统计失败");
         }
     }
 

@@ -13,6 +13,7 @@ public class ContractDetailDTO {
     private String status;
     private String phase;
     private String title;
+    private String gameType;
 
     // 双方信息
     private UserInfo initiator;

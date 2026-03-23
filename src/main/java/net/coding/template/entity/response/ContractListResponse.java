@@ -19,12 +19,16 @@ public class ContractListResponse {
         private String contractId;
         private String contractNo;
         private String title;
+        private String gameType;
         private String status;
         private BigDecimal depositAmount;
         private String guaranteeItem;
+        private String successCondition;
         private String counterpartyNickname;
         private Integer counterpartyCreditScore;
         private Integer opponentCreditScore;
+        private String initiatorNickname;
+        private Integer initiatorCreditScore;
         private LocalDateTime createTime;
         private LocalDateTime completeTime;
     }

@@ -12,6 +12,7 @@ public class ContractCreateResponse {
     private String contractNo;
     private String status;
     private String title;
+    private String gameType;
     private BigDecimal depositAmount;
     private BigDecimal serviceFeeAmount;
     private ContractDetailDTO.UserInfo receiverInfo;
