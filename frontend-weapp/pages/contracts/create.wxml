@@ -1,40 +1,91 @@
-<view class="container">
+<view class="create-page">
+  <view class="header">
+    <button class="back-btn" bindtap="goBack">‹</button>
+    <text class="header-title">发起契约</text>
+    <view class="header-spacer"></view>
+  </view>
+
   <view class="form-group">
     <text class="group-title">契约标题</text>
-    <input class="input-field" placeholder="请输入契约标题, 如: 诚信借贷协议" value="{{form.title}}" data-field="title" bindinput="onInput" />
+    <input class="input-field" placeholder="请输入契约标题，如：诚信借贷协议" value="{{form.title}}" data-field="title" bindinput="onInput" />
   </view>
 
   <view class="form-group">
-    <text class="group-title">游戏类型</text>
-    <picker mode="selector" range="{{gameTypeOptions}}" bindchange="onGameTypeChange">
-      <view class="input-field picker-field">
-        {{gameTypeOptions[gameTypeIndex]}}
+    <text class="group-title">契约类型</text>
+    <view class="dropdown" bindtap="toggleGameDropdown">
+      <view class="dropdown-trigger {{gameDropdownOpen ? 'active' : ''}}">
+        <text class="dropdown-text">{{gameTypeOptions[gameTypeIndex]}}</text>
+        <text class="dropdown-arrow {{gameDropdownOpen ? 'open' : ''}}">⌄</text>
       </view>
-    </picker>
-  </view>
-
-  <view class="form-group">
-    <text class="group-title">是否需要保证金</text>
-    <picker mode="selector" range="{{depositRequiredOptions}}" bindchange="onDepositRequiredChange">
-      <view class="input-field picker-field">
-        {{depositRequiredOptions[depositRequiredIndex]}}
+      <view wx:if="{{gameDropdownOpen}}" class="dropdown-panel">
+        <view class="dropdown-search">
+          <text class="search-icon">🔍</text>
+          <input class="search-input" placeholder="搜索游戏..." value="{{searchTerm}}" bindinput="onGameSearch" />
+        </view>
+        <scroll-view scroll-y="true" class="dropdown-list">
+          <view
+            wx:for="{{filteredGames}}"
+            wx:key="index"
+            class="dropdown-item {{gameTypeOptions[gameTypeIndex] === item ? 'active' : ''}}"
+            data-game="{{item}}"
+            bindtap="selectGame"
+          >
+            {{item}}
+            <text wx:if="{{gameTypeOptions[gameTypeIndex] === item}}" class="check-icon">✓</text>
+          </view>
+        </scroll-view>
       </view>
-    </picker>
-  </view>
-
-  <view class="form-group" wx:if="{{depositRequiredIndex === 0}}">
-    <text class="group-title">保证金（0.1-648）</text>
-    <input class="input-field" type="digit" placeholder="100" value="{{form.depositAmount}}" data-field="depositAmount" bindinput="onInput" />
+    </view>
   </view>
 
   <view class="form-group">
-    <text class="group-title">契约达成条件</text>
+    <view class="toggle-row">
+      <view class="toggle-left">
+        <view class="toggle-icon">🔒</view>
+        <view>
+          <text class="group-title">是否需要押信誉分</text>
+          <text class="toggle-desc">双方达成契约后需冻结相应分值</text>
+        </view>
+      </view>
+      <switch checked="{{depositRequiredIndex === 0}}" bindchange="onDepositToggle" color="#d9a42b" />
+    </view>
+    <view class="form-group inner" wx:if="{{depositRequiredIndex === 0}}">
+      <text class="group-title">押信誉分要求</text>
+      <view class="input-with-unit">
+        <input class="input-field" type="digit" placeholder="100" value="{{form.depositAmount}}" data-field="depositAmount" bindinput="onInput" />
+        <text class="unit">分</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-group">
+    <text class="group-title">契约详情/条款</text>
     <textarea class="textarea-field" placeholder="请详细描述契约内容及双方约定的具体条款内容..." value="{{form.successCondition}}" data-field="successCondition" bindinput="onInput"></textarea>
   </view>
 
+  <view class="form-group">
+    <view class="toggle-row">
+      <view class="toggle-left">
+        <view class="toggle-icon">🛡</view>
+        <view>
+          <text class="group-title">是否需要信誉分</text>
+          <text class="toggle-desc">仅允许达到信用门槛的用户参与</text>
+        </view>
+      </view>
+      <switch checked="{{minCreditRequired}}" bindchange="onMinCreditToggle" color="#d9a42b" />
+    </view>
+    <view class="form-group inner" wx:if="{{minCreditRequired}}">
+      <text class="group-title">最低信誉分要求</text>
+      <view class="input-with-unit">
+        <input class="input-field" type="digit" placeholder="650" value="{{minCredit}}" bindinput="onMinCreditInput" />
+        <text class="unit">分</text>
+      </view>
+    </view>
+  </view>
+
   <view class="reminder-box">
-    <text class="reminder-icon">⚠️</text>
-    <text class="reminder-text">温馨提示: 契约一经发起并达成, 将具有法律效力并计入摸金信誉档案, 请谨慎填写条款内容。</text>
+    <text class="reminder-icon">ℹ️</text>
+    <text class="reminder-text">温馨提示：契约一经发起并达成，将具有法律效力并计入摸金信誉档案，请谨慎填写条款内容。</text>
   </view>
 
   <button class="submit-btn" bindtap="submit" loading="{{loading}}">确认发起契约</button>

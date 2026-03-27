@@ -1,5 +1,25 @@
 const { request } = require("../../utils/request");
 
+const mockDetail = {
+  contractNo: "MJK-001",
+  statusLabel: "进行中",
+  gameType: "三角洲行动",
+  title: "狙击手信条 - 连胜契约",
+  remaining: "02:45:10",
+  credit: 98,
+  depositAmount: 50,
+  desc: "要求：需配合默契，不压力队友，目标今日10连胜，败场由发起人全额赔付。",
+  terms: [
+    "打手必须保证账号安全，不得使用任何外挂插件",
+    "连续两场表现不佳（评分低于6.0）发起人有权单方面解除契约",
+    "完成目标后，契约金将在24小时内通过平台托管释放",
+    "如遇系统断开连接，需在5分钟内重连，否则视为违约"
+  ],
+  bossAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300&auto=format&fit=crop",
+  image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop",
+  initiator: { nickname: "摸金小王" }
+};
+
 Page({
   data: {
     id: "",
@@ -8,13 +28,16 @@ Page({
     stampVisible: false,
     confirming: false,
     countdownText: "",
-    countdownTimer: null
+    countdownTimer: null,
+    activeTab: "terms"
   },
   onLoad(options) {
     if (options && options.id) {
       const fromHall = options.from === "hall";
       this.setData({ id: options.id, fromHall }, () => this.fetchDetail());
+      return;
     }
+    this.setData({ detail: mockDetail });
   },
   fetchDetail() {
     request({
@@ -46,9 +69,11 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
+        this.setData({ detail: mockDetail });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+        this.setData({ detail: mockDetail });
       });
   },
   acceptContract() {
@@ -151,6 +176,14 @@ Page({
       return;
     }
     wx.navigateTo({ url: `/pages/dispute/apply?contractId=${this.data.id}` });
+  },
+  switchTab(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (!tab || tab === this.data.activeTab) return;
+    this.setData({ activeTab: tab });
+  },
+  goBack() {
+    wx.navigateBack({ delta: 1 });
   },
   startCountdown(expireTime) {
     if (this.data.countdownTimer) {

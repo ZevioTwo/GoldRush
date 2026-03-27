@@ -1,0 +1,52 @@
+:root {
+  --background: #f7f8fa;
+  --foreground: #1a1a1e;
+  --card: #ffffff;
+  --card-foreground: #1a1a1e;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1e;
+  --primary: #d9a42b;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f3f5;
+  --secondary-foreground: #1a1a1e;
+  --muted: #f1f3f5;
+  --muted-foreground: #8e9aaf;
+  --accent: #d9a42b;
+  --accent-foreground: #ffffff;
+  --destructive: #fa5252;
+  --destructive-foreground: #ffffff;
+  --border: #e9ecef;
+  --input: #ffffff;
+  --ring: #d9a42b;
+  --radius: 1rem;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #e7bc4e 0%, #d9a42b 100%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

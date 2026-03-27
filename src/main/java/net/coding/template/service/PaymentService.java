@@ -88,6 +88,10 @@ public class PaymentService {
 
             // 3. 创建支付订单记录
             PaymentOrder paymentOrder = createPaymentOrder(request, currentUser);
+            if (request.getPayMethod() != null) {
+                paymentOrder.setPayChannel(request.getPayMethod());
+            }
+            paymentOrderMapper.updateById(paymentOrder);
 
             // 4. 调用微信支付接口生成预支付参数
             Map<String, String> payParams = generatePayParams(paymentOrder, currentUser);

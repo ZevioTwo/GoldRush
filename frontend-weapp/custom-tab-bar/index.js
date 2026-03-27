@@ -15,10 +15,10 @@ Component({
         activeIcon: "/images/hall_active.png"
       },
       {
-        pagePath: "/pages/dispute/index",
-        text: "仲裁",
-        icon: "/images/arbitration.png",
-        activeIcon: "/images/arbitration_active.png"
+        pagePath: "/pages/ranking/index",
+        text: "信誉排行",
+        icon: "/images/ranking.png",
+        activeIcon: "/images/ranking_active.png"
       },
       {
         pagePath: "/pages/profile/profile",

@@ -14,6 +14,15 @@ public class UserGameAccount {
     @TableField("user_id")
     private Long userId;
 
+    @TableField("game_name")
+    private String gameName;
+
+    @TableField("game_uid")
+    private String gameUid;
+
+    @TableField("game_nickname")
+    private String gameNickname;
+
     @TableField("remark")
     private String remark;
 

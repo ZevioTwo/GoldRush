@@ -1,20 +1,71 @@
-<view class="container">
-  <view class="card credit-card">
-    <view class="credit-header">
-      <text class="credit-label">当前信誉分</text>
-      <text class="shield-icon">🛡</text>
-    </view>
-    <view class="credit-score">{{creditScore}}</view>
-    <progress class="credit-progress" percent="{{creditScore === '-' ? 0 : (creditScore / 1000 * 100)}}" stroke-width="6" activeColor="#FFC107" backgroundColor="#f0f0f0" borderRadius="6"></progress>
+<view class="topup-page">
+  <view class="header">
+    <button class="back-btn" bindtap="goBack">‹</button>
+    <text class="header-title">信誉分充值</text>
+    <text class="info-icon">ℹ️</text>
   </view>
 
-  <view class="card recharge-card">
-    <view class="recharge-title">信誉分充值</view>
-    <view class="recharge-desc">1元 = 1分信誉分</view>
-    <view class="amount-row">
-      <text class="amount-label">充值金额</text>
-      <input class="amount-input" type="digit" placeholder="请输入金额" value="{{amount}}" bindinput="onAmountInput" />
+  <view class="info-card">
+    <view class="info-left">
+      <view class="info-icon-box">🛡</view>
+      <view>
+        <text class="info-label">当前信誉等级</text>
+        <view class="info-score-row">
+          <text class="info-score">985 分</text>
+          <text class="info-tag">极好</text>
+        </view>
+      </view>
     </view>
-    <button class="recharge-btn" bindtap="submitRecharge" loading="{{loading}}">立即充值</button>
+    <text class="info-desc">信誉分可作为契约签署时的诚信担保，1分等值于1元人民币。信誉分越高，在契约纠纷仲裁中拥有更高的信任权重。</text>
   </view>
+
+  <view class="section">
+    <view class="section-title">
+      <text class="section-icon">🪙</text>
+      选择充值包
+    </view>
+    <view class="preset-grid">
+      <block wx:for="{{presets}}" wx:key="points">
+        <view class="preset-card {{selectedPreset === index ? 'active' : ''}}" data-index="{{index}}" bindtap="selectPreset">
+          <text class="preset-label">{{item.label}}</text>
+          <view class="preset-points">
+            <text class="preset-value">{{item.points}}</text>
+            <text class="preset-unit">分</text>
+          </view>
+          <text class="preset-price">¥{{item.price}}</text>
+          <view class="preset-bonus">{{item.bonus}}</view>
+          <text wx:if="{{item.popular}}" class="preset-badge">最受欢迎</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">
+      <text class="section-icon">💳</text>
+      支付方式
+    </view>
+    <view class="pay-list">
+      <view class="pay-item {{paymentMethod === 'wechat' ? 'active' : ''}}" data-method="wechat" bindtap="choosePayment">
+        <view class="pay-left">
+          <view class="pay-icon wechat">微</view>
+          <text class="pay-name">微信支付</text>
+        </view>
+        <view class="pay-radio"></view>
+      </view>
+      <view class="pay-item {{paymentMethod === 'alipay' ? 'active' : ''}}" data-method="alipay" bindtap="choosePayment">
+        <view class="pay-left">
+          <view class="pay-icon alipay">支</view>
+          <text class="pay-name">支付宝</text>
+        </view>
+        <view class="pay-radio"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="warning">
+    <text class="warning-text">温馨提示：信誉分充值成功后无法直接提现，仅可用于签署契约时的信誉抵扣或仲裁赔付。请根据实际需求充值。</text>
+  </view>
+
+  <button class="pay-btn" bindtap="submitRecharge">立即支付 ¥{{presets[selectedPreset].price}}</button>
 </view>

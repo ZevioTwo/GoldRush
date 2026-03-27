@@ -1,5 +1,50 @@
 const { request } = require("../../utils/request");
 
+const mockJobs = [
+  {
+    contractId: "MJK-001",
+    title: "狙击手信条 - 连胜契约",
+    game: "三角洲行动",
+    boss: "摸金小王",
+    credit: 98,
+    price: "200.00",
+    deposit: "50",
+    remaining: "02:45:10",
+    desc: "要求：需配合默契，不压力队友，目标今日10连胜，败场由发起人全额赔付。",
+    statusLabel: "进行中",
+    statusClass: "success",
+    image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop"
+  },
+  {
+    contractId: "MJK-002",
+    title: "DNF 团本金牌代打契约",
+    game: "DNF",
+    boss: "凯丽的邻居",
+    credit: 95,
+    price: "150.00",
+    deposit: "30",
+    remaining: "05:12:00",
+    desc: "高端本包通关，若未达成目标，全额退还契约金并额外补偿。",
+    statusLabel: "待开始",
+    statusClass: "warning",
+    image: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=1200&auto=format&fit=crop"
+  },
+  {
+    contractId: "MJK-003",
+    title: "王者荣耀 - 巅峰赛保分",
+    game: "王者荣耀",
+    boss: "野王求带",
+    credit: 92,
+    price: "300.00",
+    deposit: "60",
+    remaining: "01:20:45",
+    desc: "巅峰2000分段求稳健边路，诚信契约，输赢共同承担。",
+    statusLabel: "进行中",
+    statusClass: "success",
+    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop"
+  }
+];
+
 Page({
   data: {
     list: [],
@@ -11,35 +56,27 @@ Page({
     hasMore: true,
     activeTab: "all",
     showSearch: false,
+    dropdownOpen: false,
+    searchTerm: "",
+    filteredGames: [],
+    activeTabLabel: "选择游戏类型",
     gameTabs: [
       { label: "全部", value: "all" },
       { label: "三角洲行动", value: "三角洲行动" },
-      { label: "和平精英", value: "和平精英" },
+      { label: "DNF", value: "DNF" },
       { label: "王者荣耀", value: "王者荣耀" },
+      { label: "和平精英", value: "和平精英" },
       { label: "绝地求生", value: "绝地求生" },
-      { label: "无畏契约", value: "无畏契约" },
-      { label: "DNF", value: "dnf" },
-      { label: "穿越火线", value: "穿越火线" },
-      { label: "逃离塔科夫", value: "逃离塔科夫" },
-      { label: "使命召唤", value: "使命召唤" },
-      { label: "APEX 英雄", value: "APEX 英雄" },
-      { label: "英雄联盟", value: "英雄联盟" },
-      { label: "流放之路", value: "流放之路" },
-      { label: "魔兽世界", value: "魔兽世界" },
-      { label: "命运2", value: "命运2" },
-      { label: "逆水寒", value: "逆水寒" },
-      { label: "梦幻西游", value: "梦幻西游" },
-      { label: "原神", value: "原神" },
-      { label: "崩坏", value: "崩坏" },
-      { label: "暗区突围", value: "暗区突围" },
-      { label: "萤火突击", value: "萤火突击" },
-      { label: "灰区行动", value: "灰区行动" },
       { label: "永劫无间", value: "永劫无间" },
-      { label: "剑网3", value: "剑网3" },
-      { label: "星铁", value: "星铁" },
-      { label: "鸣潮", value: "鸣潮" },
-      { label: "绝区零", value: "绝区零" },
-      { label: "其他", value: "其他" }
+      { label: "英雄联盟", value: "英雄联盟" },
+      { label: "金铲铲之战", value: "金铲铲之战" },
+      { label: "原神", value: "原神" },
+      { label: "无畏契约", value: "无畏契约" },
+      { label: "永劫无间手游", value: "永劫无间手游" },
+      { label: "魔兽世界", value: "魔兽世界" },
+      { label: "CS2", value: "CS2" },
+      { label: "逃离塔科夫", value: "逃离塔科夫" },
+      { label: "暗区突围", value: "暗区突围" }
     ]
   },
   onShow() {
@@ -48,6 +85,7 @@ Page({
     if (tabbar && tabbar.setSelected) {
       tabbar.setSelected("/pages/hall/list");
     }
+    this.setData({ filteredGames: this.data.gameTabs });
   },
   onReachBottom() {
     if (!this.data.hasMore || this.data.loading) return;
@@ -86,13 +124,21 @@ Page({
           }));
           const nextList = append ? this.data.list.concat(list) : list;
           const hasMore = list.length >= this.data.size;
+
+          if (!nextList.length) {
+            this.setData({ list: mockJobs, hasMore: false });
+            return;
+          }
+
           this.setData({ list: nextList, hasMore });
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
+        this.setData({ list: mockJobs, hasMore: false });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+        this.setData({ list: mockJobs, hasMore: false });
       })
       .finally(() => {
         this.setData({ loading: false });
@@ -110,7 +156,12 @@ Page({
   onTabChange(e) {
     const tab = e.currentTarget.dataset.tab;
     if (!tab || tab === this.data.activeTab) return;
-    this.setData({ activeTab: tab }, () => this.resetAndFetch());
+    const current = this.data.gameTabs.find((item) => item.value === tab);
+    this.setData({
+      activeTab: tab,
+      activeTabLabel: current ? current.label : "选择游戏类型",
+      dropdownOpen: false
+    }, () => this.resetAndFetch());
   },
   onSearch() {
     this.resetAndFetch();
@@ -121,6 +172,16 @@ Page({
         this.resetAndFetch();
       }
     });
+  },
+  toggleDropdown() {
+    this.setData({ dropdownOpen: !this.data.dropdownOpen });
+  },
+  onSearchInput(e) {
+    const term = e.detail.value || "";
+    const filtered = this.data.gameTabs.filter((item) =>
+      item.label.toLowerCase().includes(term.toLowerCase())
+    );
+    this.setData({ searchTerm: term, filteredGames: filtered });
   },
   truncateRequirement(text) {
     if (!text) return "";

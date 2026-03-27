@@ -2,7 +2,7 @@
   <view class="tabbar-bg"></view>
   <view class="tabbar-inner">
     <block wx:for="{{list}}" wx:key="pagePath">
-      <view class="tabbar-item" data-path="{{item.pagePath}}" bindtap="switchTab">
+      <view class="tabbar-item {{selected === item.pagePath ? 'is-active' : ''}}" data-path="{{item.pagePath}}" bindtap="switchTab">
         <image
           class="tabbar-icon {{selected === item.pagePath ? 'is-active' : ''}}"
           src="{{selected === item.pagePath ? item.activeIcon : item.icon}}"

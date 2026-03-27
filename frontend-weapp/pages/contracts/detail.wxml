@@ -1,61 +1,81 @@
-<view class="container">
-  <view class="detail-card">
-    <view class="detail-header">
-      <text class="detail-title">契约号：{{detail.contractNo}}</text>
-      <text class="status-tag status-{{detail.status}}">{{detail.statusLabel || detail.status}}</text>
-    </view>
-    <view class="detail-row">
-      <text class="label">保证金</text>
-      <text class="value">{{detail.depositAmount}}</text>
-    </view>
-    <view class="detail-row">
-      <text class="label">服务费</text>
-      <text class="value">{{detail.serviceFeeAmount}}</text>
-    </view>
-    <view class="detail-row">
-      <text class="label">创建时间</text>
-      <text class="value">{{detail.createTime}}</text>
-    </view>
-    <view class="detail-row" wx:if="{{countdownText}}">
-      <text class="label">接单倒计时</text>
-      <text class="countdown-text">{{countdownText}}</text>
+<view class="detail-page">
+  <view class="header-overlay">
+    <button class="back-btn" bindtap="goBack">‹</button>
+    <view class="header-actions">
+      <button class="icon-btn">⤴</button>
     </view>
   </view>
 
-  <view class="detail-card">
-    <view class="section-title">参与方</view>
-    <view class="detail-row">
-      <text class="label">发起人</text>
-      <text class="value">{{detail.initiator.nickname}} ({{detail.initiator.userId}})</text>
-    </view>
-    <view class="detail-row">
-      <text class="label">接收人</text>
-      <text class="value">{{detail.receiver ? (detail.receiver.nickname + ' (' + detail.receiver.userId + ')') : '待接收'}}</text>
+  <view class="banner">
+    <image class="banner-img" src="{{detail.image}}" mode="aspectFill"></image>
+    <view class="banner-mask"></view>
+    <view class="status-badge">{{detail.statusLabel}}</view>
+  </view>
+
+  <view class="content">
+    <view class="detail-card large">
+      <view class="tag-row">
+        <text class="game-tag">{{detail.gameType || '三角洲行动'}}</text>
+        <text class="contract-id">ID: {{detail.contractNo}}</text>
+      </view>
+      <text class="title">{{detail.title}}</text>
+
+      <view class="meta-row">
+        <text class="meta-item">⏱ 剩 {{detail.remaining || '02:45:10'}}</text>
+        <text class="meta-item">🛡 信誉分门槛 {{detail.credit || 98}}</text>
+      </view>
+
+      <view class="risk-banner">
+        <view>
+          <text class="risk-title">契约信用风险抵押</text>
+          <text class="risk-desc">本契约受平台信誉分全额保障</text>
+        </view>
+        <view class="risk-right">
+          <text class="risk-title">需押信誉分</text>
+          <text class="risk-value">{{detail.depositAmount || 50}} 分</text>
+        </view>
+      </view>
+
+      <view class="issuer-card">
+        <view class="issuer-left">
+          <image class="issuer-avatar" src="{{detail.bossAvatar}}" mode="aspectFill"></image>
+          <view>
+            <text class="issuer-name">{{detail.initiator && detail.initiator.nickname ? detail.initiator.nickname : '摸金小王'}}</text>
+            <text class="issuer-sub">✔ 已实名认证 · 信用优秀</text>
+          </view>
+        </view>
+        <button class="issuer-btn">查看空间</button>
+      </view>
+
+      <view class="tabs">
+        <view class="tab {{activeTab === 'terms' ? 'active' : ''}}" data-tab="terms" bindtap="switchTab">契约条款</view>
+        <view class="tab {{activeTab === 'progress' ? 'active' : ''}}" data-tab="progress" bindtap="switchTab">履约历史</view>
+      </view>
+
+      <view class="tab-content" wx:if="{{activeTab === 'terms'}}">
+        <view class="section">
+          <text class="section-title">详细说明</text>
+          <view class="section-body">{{detail.desc || detail.successCondition}}</view>
+        </view>
+        <view class="section">
+          <text class="section-title">契约约束条目</text>
+          <view class="term-item" wx:for="{{detail.terms}}" wx:key="index">
+            <view class="term-dot"></view>
+            <text class="term-text">{{item}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="tab-content" wx:if="{{activeTab === 'progress'}}">
+        <view class="section-body">暂无履约记录</view>
+      </view>
     </view>
   </view>
 
-  <view class="detail-card">
-    <view class="section-title">条款</view>
-    <view class="detail-row">
-      <text class="label">标题</text>
-      <text class="value">{{detail.title}}</text>
-    </view>
-    <view class="detail-row">
-      <text class="label">游戏类型</text>
-      <text class="value">{{detail.gameType || '其他'}}</text>
-    </view>
-    <view class="detail-row">
-      <text class="label">契约达成条件</text>
-      <text class="value">{{detail.successCondition}}</text>
-    </view>
+  <view class="footer-actions">
+    <button class="action-btn primary" wx:if="{{fromHall}}" bindtap="acceptContract" loading="{{confirming}}">接单确认</button>
+    <button class="action-btn primary" wx:if="{{detail.canSign}}" bindtap="signContract" loading="{{confirming}}">签订契约</button>
+    <button class="action-btn primary" wx:if="{{detail.canFinishBySigner && detail.canFinish}}" bindtap="finishContract" loading="{{confirming}}">契约完成</button>
+    <button class="action-btn secondary" wx:if="{{!fromHall}}" bindtap="goDisputeApply">申请仲裁</button>
   </view>
-
-  <view class="stamp-area" wx:if="{{fromHall}}">
-    <view class="stamp" wx:if="{{stampVisible}}"></view>
-  </view>
-
-  <button class="action-btn primary" wx:if="{{fromHall}}" bindtap="acceptContract" loading="{{confirming}}">接单确认</button>
-  <button class="action-btn primary" wx:if="{{detail.canSign}}" bindtap="signContract" loading="{{confirming}}">签订契约</button>
-  <button class="action-btn primary" wx:if="{{detail.canFinishBySigner && detail.canFinish}}" bindtap="finishContract" loading="{{confirming}}">契约完成</button>
-  <button class="action-btn secondary" wx:if="{{!fromHall}}" bindtap="goDisputeApply">申请仲裁</button>
 </view>

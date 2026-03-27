@@ -100,7 +100,11 @@ public class ContractService {
         contract.setTitle(request.getTitle());
         contract.setGuaranteeItem(null);
         contract.setSuccessCondition(request.getSuccessCondition());
-        contract.setFailureCondition(null);
+        contract.setFailureCondition(request.getFailureCondition());
+        contract.setMinCredit(request.getMinCredit());
+        contract.setRequirements(request.getRequirements());
+        contract.setDescription(request.getDescription());
+        contract.setCoverUrl(request.getCoverUrl());
         contract.setStatus(ContractStatus.PENDING.getCode());
         contract.setPhase(ContractPhase.PREPARE.getCode());
         contract.setPaymentStatus("UNPAID");
@@ -314,6 +318,10 @@ public class ContractService {
         dto.setDepositAmount(contract.getDepositAmount());
         dto.setServiceFeeAmount(contract.getServiceFeeAmount());
         dto.setGuaranteeItem(contract.getGuaranteeItem());
+        dto.setMinCredit(contract.getMinCredit());
+        dto.setRequirements(contract.getRequirements());
+        dto.setDescription(contract.getDescription());
+        dto.setCoverUrl(contract.getCoverUrl());
         dto.setSuccessCondition(contract.getSuccessCondition());
         dto.setFailureCondition(contract.getFailureCondition());
 
@@ -590,6 +598,10 @@ public class ContractService {
         item.setStatus(contract.getStatus());
         item.setDepositAmount(contract.getDepositAmount());
         item.setGuaranteeItem(contract.getGuaranteeItem());
+        item.setMinCredit(contract.getMinCredit());
+        item.setRequirements(contract.getRequirements());
+        item.setDescription(contract.getDescription());
+        item.setCoverUrl(contract.getCoverUrl());
         item.setSuccessCondition(contract.getSuccessCondition());
         item.setCreateTime(contract.getCreateTime());
         item.setCompleteTime(contract.getCompleteTime());

@@ -39,6 +39,18 @@ public class Contract {
     @TableField("guarantee_item")
     private String guaranteeItem;
 
+    @TableField("min_credit")
+    private Integer minCredit;
+
+    @TableField("requirements")
+    private String requirements;
+
+    @TableField("description")
+    private String description;
+
+    @TableField("cover_url")
+    private String coverUrl;
+
     @TableField("success_condition")
     private String successCondition;
 

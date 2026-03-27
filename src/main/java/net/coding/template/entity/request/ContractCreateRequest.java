@@ -26,4 +26,17 @@ public class ContractCreateRequest {
 
     @Size(max = 500, message = "失败条件不能超过500字")
     private String failureCondition;
+
+    @DecimalMin(value = "0", message = "最低信誉分不能为负")
+    @DecimalMax(value = "10000", message = "最低信誉分过高")
+    private Integer minCredit;
+
+    @Size(max = 500, message = "要求不能超过500字")
+    private String requirements;
+
+    @Size(max = 2000, message = "描述不能超过2000字")
+    private String description;
+
+    @Size(max = 500, message = "封面URL过长")
+    private String coverUrl;
 }

@@ -1,4 +1,4 @@
-<view class="container">
+<view class="hall-page">
   <view class="header">
     <view class="icon-wrapper" bindtap="onSearchIcon">
       <text class="header-icon">🔍</text>
@@ -6,56 +6,72 @@
     <text class="header-title">契约大厅</text>
     <view class="icon-wrapper">
       <text class="header-icon">🔔</text>
+      <view class="notify-dot"></view>
     </view>
   </view>
 
-  <view class="search-bar" wx:if="{{showSearch}}">
-    <icon type="search" size="16" class="search-icon"></icon>
-    <input
-      class="search-input"
-      placeholder="搜索契约标题"
-      value="{{keyword}}"
-      bindinput="onKeywordInput"
-      confirm-type="search"
-      bindconfirm="onKeywordConfirm"
-    />
-  </view>
-
-  <scroll-view class="game-tabs" scroll-x="true">
-    <view
-      wx:for="{{gameTabs}}"
-      wx:key="value"
-      class="tab-item {{activeTab === item.value ? 'active' : ''}}"
-      data-tab="{{item.value}}"
-      bindtap="onTabChange"
-    >
-      {{item.label}}
+  <view class="dropdown" bindtap="toggleDropdown">
+    <view class="dropdown-trigger {{dropdownOpen ? 'active' : ''}}">
+      <view class="dropdown-left">
+        <text class="dropdown-icon">🎮</text>
+        <text class="dropdown-text">{{activeTabLabel}}</text>
+      </view>
+      <text class="dropdown-arrow {{dropdownOpen ? 'open' : ''}}">⌄</text>
     </view>
-  </scroll-view>
+
+    <view wx:if="{{dropdownOpen}}" class="dropdown-panel">
+      <view class="dropdown-search">
+        <text class="search-icon">🔍</text>
+        <input class="search-input" placeholder="搜索游戏..." value="{{searchTerm}}" bindinput="onSearchInput" />
+      </view>
+      <scroll-view scroll-y="true" class="dropdown-list">
+        <view
+          wx:for="{{filteredGames}}"
+          wx:key="value"
+          class="dropdown-item {{activeTab === item.value ? 'active' : ''}}"
+          data-tab="{{item.value}}"
+          bindtap="onTabChange"
+        >
+          <text>{{item.label}}</text>
+          <text wx:if="{{activeTab === item.value}}" class="check-icon">✓</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
 
   <view class="contract-list">
     <block wx:for="{{list}}" wx:key="contractId">
       <view class="contract-card" bindtap="goDetail" data-id="{{item.contractId}}">
-        <image class="card-banner" src="/images/card_banner_1.png" mode="aspectFill"></image>
+        <view class="card-banner">
+          <image class="banner-img" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="banner-mask"></view>
+        </view>
         <view class="card-content">
           <view class="card-title-row">
-            <text class="card-title">{{item.title || '未命名契约'}}</text>
-            <text class="status-tag status-{{item.status}}">{{item.statusLabel || item.status}}</text>
+            <text class="card-title">{{item.title}}</text>
+            <text class="status-pill {{item.statusClass}}">{{item.statusLabel}}</text>
           </view>
-          <view class="card-meta-row">
-            <text class="meta-text">👤 发起人: {{item.initiatorNickname || '未知'}}</text>
-            <text class="meta-divider">|</text>
-            <text class="meta-text">游戏: {{item.gameType || '其他'}}</text>
+          <view class="card-meta-grid">
+            <view class="meta-item">👤 发起人：{{item.boss}}</view>
+            <view class="meta-item">🎮 游戏：{{item.game}}</view>
+            <view class="meta-item">🛡 信誉分门槛：<text class="meta-highlight">{{item.credit}}</text></view>
+            <view class="meta-item">⏱ 剩 {{item.remaining}}</view>
           </view>
-          <view class="card-meta-row">
-            <text class="meta-text">⭐ 信誉分: {{item.initiatorCreditScore || 0}}</text>
-            <text class="meta-divider">|</text>
-            <text class="meta-text">🕒 创建: {{item.createTime}}</text>
+          <view class="risk-card">
+            <view>
+              <text class="risk-title">契约信用保障</text>
+              <text class="risk-desc">违约即扣除对应信誉分</text>
+            </view>
+            <view class="risk-right">
+              <text class="risk-title">需押信誉分</text>
+              <text class="risk-value">{{item.deposit}} 信誉分</text>
+            </view>
           </view>
-          <view class="card-requirement">
-            要求：{{item.requirementPreview || '暂无'}}
-          </view>
-          <button class="details-button" catchtap="goDetail" data-id="{{item.contractId}}">查看详情 ></button>
+          <view class="card-desc">{{item.desc}}</view>
+          <button class="details-button" catchtap="goDetail" data-id="{{item.contractId}}">
+            查看详情
+            <text class="detail-arrow">›</text>
+          </button>
         </view>
       </view>
     </block>

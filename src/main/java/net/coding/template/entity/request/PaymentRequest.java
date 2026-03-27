@@ -19,6 +19,8 @@ public class PaymentRequest {
     @DecimalMin(value = "0.01", message = "支付金额不能小于0.01元")
     private BigDecimal amount;
 
+    private String payMethod; // WECHAT/ALIPAY
+
     private String returnUrl; // 支付完成后的返回URL
     private String notifyUrl; // 异步通知URL（可选，默认用系统配置）
     private Map<String, Object> extraData; // 扩展数据

@@ -7,34 +7,27 @@ Page({
     depositRequiredIndex: 0,
     gameTypeOptions: [
       "三角洲行动",
-      "和平精英",
+      "DNF",
       "王者荣耀",
+      "和平精英",
       "绝地求生",
-      "无畏契约",
-      "dnf",
-      "穿越火线",
-      "逃离塔科夫",
-      "使命召唤",
-      "APEX 英雄",
-      "英雄联盟",
-      "流放之路",
-      "魔兽世界",
-      "命运2",
-      "逆水寒",
-      "梦幻西游",
-      "原神",
-      "崩坏",
-      "暗区突围",
-      "萤火突击",
-      "灰区行动",
       "永劫无间",
-      "剑网3",
-      "星铁",
-      "鸣潮",
-      "绝区零",
-      "其他"
+      "英雄联盟",
+      "金铲铲之战",
+      "原神",
+      "无畏契约",
+      "永劫无间手游",
+      "魔兽世界",
+      "CS2",
+      "逃离塔科夫",
+      "暗区突围"
     ],
     gameTypeIndex: 0,
+    gameDropdownOpen: false,
+    searchTerm: "",
+    filteredGames: [],
+    minCreditRequired: true,
+    minCredit: "650",
     form: {
       title: "",
       gameType: "三角洲行动",
@@ -42,25 +35,44 @@ Page({
       successCondition: ""
     }
   },
+  onLoad() {
+    this.setData({ filteredGames: this.data.gameTypeOptions });
+  },
   onInput(e) {
     const field = e.currentTarget.dataset.field;
     this.setData({ [`form.${field}`]: e.detail.value });
   },
-  onGameTypeChange(e) {
-    const index = Number(e.detail.value) || 0;
-    const gameType = this.data.gameTypeOptions[index] || this.data.gameTypeOptions[0];
+  toggleGameDropdown() {
+    this.setData({ gameDropdownOpen: !this.data.gameDropdownOpen });
+  },
+  onGameSearch(e) {
+    const term = e.detail.value || "";
+    const filtered = this.data.gameTypeOptions.filter((item) =>
+      item.toLowerCase().includes(term.toLowerCase())
+    );
+    this.setData({ searchTerm: term, filteredGames: filtered });
+  },
+  selectGame(e) {
+    const game = e.currentTarget.dataset.game;
+    const index = this.data.gameTypeOptions.findIndex((item) => item === game);
     this.setData({
-      gameTypeIndex: index,
-      "form.gameType": gameType
+      gameTypeIndex: index >= 0 ? index : 0,
+      gameDropdownOpen: false,
+      "form.gameType": game
     });
   },
-  onDepositRequiredChange(e) {
-    const index = Number(e.detail.value);
-    const isRequired = index === 0;
+  onDepositToggle(e) {
+    const isRequired = e.detail.value;
     this.setData({
-      depositRequiredIndex: index,
+      depositRequiredIndex: isRequired ? 0 : 1,
       "form.depositAmount": isRequired ? this.data.form.depositAmount : ""
     });
+  },
+  onMinCreditToggle(e) {
+    this.setData({ minCreditRequired: e.detail.value });
+  },
+  onMinCreditInput(e) {
+    this.setData({ minCredit: e.detail.value });
   },
   validateForm(form) {
     if (!form.title) return "请填写标题";
@@ -71,6 +83,11 @@ Page({
       if (!form.depositAmount) return "请填写保证金";
       const deposit = Number(form.depositAmount);
       if (Number.isNaN(deposit) || deposit < 0.1 || deposit > 648) return "保证金需在0.1-648之间";
+    }
+
+    if (this.data.minCreditRequired) {
+      const minCredit = Number(this.data.minCredit);
+      if (Number.isNaN(minCredit) || minCredit < 0) return "最低信誉分填写有误";
     }
 
     if (form.successCondition && form.successCondition.length > 500) return "契约达成条件不能超过500字";
@@ -95,6 +112,7 @@ Page({
         title: form.title,
         gameType: form.gameType,
         depositAmount,
+        minCredit: this.data.minCreditRequired ? this.data.minCredit : 0,
         successCondition: form.successCondition
       }
     })
@@ -105,12 +123,17 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "创建失败", icon: "none" });
+        wx.showToast({ title: "后端未就绪，已展示静态页面", icon: "none" });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+        wx.showToast({ title: "后端未就绪，已展示静态页面", icon: "none" });
       })
       .finally(() => {
         this.setData({ loading: false });
       });
+  },
+  goBack() {
+    wx.navigateBack({ delta: 1 });
   }
 });

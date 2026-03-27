@@ -3,6 +3,7 @@ package net.coding.template.entity.po;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -31,6 +32,12 @@ public class User {
 
     @TableField("credit_score")
     private Integer creditScore = 100;
+
+    @TableField("mojin_balance")
+    private BigDecimal mojinBalance = BigDecimal.ZERO;
+
+    @TableField("mojin_locked")
+    private BigDecimal mojinLocked = BigDecimal.ZERO;
 
     @TableField("total_contracts")
     private Integer totalContracts = 0;

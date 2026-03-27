@@ -1,5 +1,48 @@
 const { request } = require("../../utils/request");
 
+const mockContracts = [
+  {
+    contractId: "8829341",
+    contractNo: "8829341",
+    status: "ACTIVE",
+    statusLabel: "进行中",
+    depositAmount: 500,
+    displayName: "张三",
+    remainingTime: "12:45:30",
+    createTime: "2026-10-24 14:30"
+  },
+  {
+    contractId: "8829342",
+    contractNo: "8829342",
+    status: "PENDING",
+    statusLabel: "待生效",
+    depositAmount: 200,
+    displayName: "李四",
+    remainingTime: "--",
+    createTime: "2026-10-24 10:12"
+  },
+  {
+    contractId: "8829345",
+    contractNo: "8829345",
+    status: "DISPUTE",
+    statusLabel: "仲裁中",
+    depositAmount: 1200,
+    displayName: "王五",
+    remainingTime: "--",
+    createTime: "2026-10-20 09:03"
+  },
+  {
+    contractId: "8829301",
+    contractNo: "8829301",
+    status: "COMPLETED",
+    statusLabel: "已完成",
+    depositAmount: 300,
+    displayName: "赵六",
+    remainingTime: "--",
+    createTime: "2026-10-18 16:40"
+  }
+];
+
 Page({
   data: {
     list: [],
@@ -65,6 +108,12 @@ Page({
           }));
           const nextList = append ? this.data.list.concat(list) : list;
           const hasMore = list.length >= this.data.size;
+
+          if (!nextList.length) {
+            this.setData({ list: mockContracts, hasMore: false });
+            return;
+          }
+
           this.setData({ list: nextList, hasMore });
 
           const missing = nextList.filter((item) => !item.displayName && item.contractId);
@@ -91,9 +140,11 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
+        this.setData({ list: mockContracts, hasMore: false });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+        this.setData({ list: mockContracts, hasMore: false });
       })
       .finally(() => {
         this.setData({ loading: false });

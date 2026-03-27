@@ -4,12 +4,21 @@ const { setToken } = require("../../utils/auth");
 Page({
   data: {
     profile: {},
-    creditScore: "-",
+    creditScore: "985",
     stats: {
-      activeContracts: "-",
-      completedContracts: "-",
-      successRate: "-"
-    }
+      activeContracts: "12",
+      completedContracts: "156",
+      successRate: "100%"
+    },
+    checkinRewards: [
+      { label: "2", active: true },
+      { label: "4", active: true },
+      { label: "6", active: true },
+      { label: "8", active: false },
+      { label: "10", active: false },
+      { label: "12", active: false },
+      { label: "?", active: false }
+    ]
   },
   onShow() {
     this.fetchProfile();
@@ -31,9 +40,11 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
+        this.setData({ profile: { nickname: "张晓明", userId: "8888 6666", userLevel: "高保户" } });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+        this.setData({ profile: { nickname: "张晓明", userId: "8888 6666", userLevel: "高保户" } });
       });
   },
   fetchCredit() {
@@ -47,9 +58,11 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
+        this.setData({ creditScore: "985" });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+        this.setData({ creditScore: "985" });
       });
   },
   fetchStats() {
@@ -73,13 +86,18 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
+        this.setData({ stats: { activeContracts: "12", completedContracts: "156", successRate: "100%" } });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
+        this.setData({ stats: { activeContracts: "12", completedContracts: "156", successRate: "100%" } });
       });
   },
   goCredit() {
     wx.navigateTo({ url: "/pages/credit/credit" });
+  },
+  goArbitration() {
+    wx.navigateTo({ url: "/pages/dispute/index" });
   },
   goUserInfo() {
     wx.navigateTo({ url: "/pages/profile/info" });

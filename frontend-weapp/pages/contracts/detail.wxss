@@ -1,126 +1,301 @@
-.container {
-  background-color: #f8f8f8;
+.detail-page {
+  background: var(--color-background);
   min-height: 100vh;
-  padding-bottom: 140rpx;
+  padding-bottom: 200rpx;
 }
 
-.detail-card {
-  background-color: #fff;
-  border-radius: 15rpx;
-  padding: 30rpx;
+.header-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx 20rpx;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
+}
+
+.back-btn,
+.icon-btn {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  border: 1rpx solid rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12rpx;
+}
+
+.banner {
+  height: 420rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.banner-img {
+  width: 100%;
+  height: 100%;
+}
+
+.banner-mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 200rpx;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);
+}
+
+.status-badge {
+  position: absolute;
+  left: 32rpx;
+  bottom: 32rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 900;
+  color: #fff;
+  background: #22c55e;
+  letter-spacing: 2rpx;
+}
+
+.content {
+  padding: 0 24rpx;
+  margin-top: -80rpx;
+}
+
+.detail-card.large {
+  background: #fff;
+  border-radius: 48rpx;
+  padding: 36rpx;
+  box-shadow: 0 -20rpx 60rpx rgba(0,0,0,0.08);
+  border: 1rpx solid rgba(0,0,0,0.05);
+}
+
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.game-tag {
+  background: #fcf8e8;
+  color: #d9a42b;
+  padding: 6rpx 14rpx;
+  border-radius: 16rpx;
+  font-size: 20rpx;
+  font-weight: 900;
+  border: 1rpx solid rgba(217, 164, 43, 0.1);
+}
+
+.contract-id {
+  font-size: 20rpx;
+  color: rgba(142, 154, 175, 0.4);
+  font-weight: 700;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: var(--color-foreground);
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
-.detail-header {
+.meta-row {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
+  font-size: 22rpx;
+  color: var(--color-muted-foreground);
+  font-weight: 700;
+}
+
+.risk-banner {
+  background: rgba(252, 248, 232, 0.4);
+  border: 1rpx solid rgba(217, 164, 43, 0.1);
+  border-radius: 36rpx;
+  padding: 24rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.risk-title {
+  font-size: 20rpx;
+  color: rgba(217, 164, 43, 0.6);
+  font-weight: 900;
+  letter-spacing: 2rpx;
+}
+
+.risk-desc {
+  font-size: 24rpx;
+  color: var(--color-muted-foreground);
+  font-weight: 700;
+}
+
+.risk-right {
+  text-align: right;
+}
+
+.risk-value {
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #d9a42b;
+}
+
+.issuer-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(252, 248, 232, 0.3);
+  border: 1rpx solid rgba(217, 164, 43, 0.05);
+  border-radius: 32rpx;
+  padding: 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.issuer-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.issuer-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 24rpx;
+  border: 2rpx solid #fff;
+}
+
+.issuer-name {
+  font-size: 28rpx;
+  font-weight: 900;
+  color: var(--color-foreground);
+}
+
+.issuer-sub {
+  font-size: 20rpx;
+  color: #d9a42b;
+  font-weight: 700;
+}
+
+.issuer-btn {
+  background: #fff;
+  color: #d9a42b;
+  border: 1rpx solid rgba(217, 164, 43, 0.1);
+  border-radius: 16rpx;
+  padding: 14rpx 20rpx;
+  font-size: 20rpx;
+  font-weight: 900;
+}
+
+.tabs {
+  display: flex;
+  gap: 12rpx;
+  background: #f8f9fa;
+  border-radius: 24rpx;
+  padding: 8rpx;
   margin-bottom: 20rpx;
 }
 
-.detail-title {
-  font-weight: 700;
-  font-size: 32rpx;
-  color: #111827;
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: 900;
+  color: rgba(142, 154, 175, 0.7);
+}
+
+.tab.active {
+  background: #fff;
+  color: #d9a42b;
+  box-shadow: 0 6rpx 16rpx rgba(0,0,0,0.06);
+}
+
+.section {
+  margin-bottom: 20rpx;
 }
 
 .section-title {
-  font-weight: 700;
-  margin-bottom: 12rpx;
-  color: #111827;
-}
-
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12rpx;
-  color: #666;
-}
-
-.label {
-  color: #999;
-}
-
-.value {
-  color: #333;
-}
-
-.status-tag {
   font-size: 24rpx;
-  padding: 5rpx 15rpx;
-  border-radius: 8rpx;
-  background: #f0f0f0;
-  color: #666;
+  font-weight: 900;
+  color: var(--color-foreground);
+  margin-bottom: 12rpx;
 }
 
-.countdown-text {
-  color: #dc2626;
-  font-weight: 600;
+.section-body {
+  background: #f8f9fa;
+  border-radius: 32rpx;
+  padding: 20rpx;
+  font-size: 24rpx;
+  color: var(--color-muted-foreground);
+  border: 1rpx solid rgba(0,0,0,0.03);
+}
+
+.term-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.term-dot {
+  width: 12rpx;
+  height: 12rpx;
+  background: #fcf8e8;
+  border-radius: 50%;
+  margin-top: 10rpx;
+}
+
+.term-text {
+  font-size: 24rpx;
+  color: var(--color-muted-foreground);
+  flex: 1;
+}
+
+.footer-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24rpx 32rpx 40rpx;
+  background: #fff;
+  border-top: 1rpx solid rgba(0,0,0,0.05);
 }
 
 .action-btn {
   width: 100%;
-  border-radius: 10rpx;
-  font-size: 30rpx;
-  margin-top: 16rpx;
+  border-radius: 28rpx;
+  font-size: 28rpx;
+  margin-top: 12rpx;
+  font-weight: 900;
 }
 
 .action-btn.primary {
-  background-color: #FFC107;
-  color: #333;
+  background-color: #d9a42b;
+  color: #fff;
+  box-shadow: 0 12rpx 30rpx rgba(217, 164, 43, 0.2);
 }
 
 .action-btn.secondary {
-  background-color: #f0f0f0;
-  color: #666;
+  background-color: #f1f3f5;
+  color: #868e96;
 }
 
 .action-btn::after {
   border: none;
-}
-
-.stamp-area {
-  position: relative;
-  height: 120rpx;
-  margin: 8rpx 0 16rpx;
-}
-
-.stamp {
-  position: absolute;
-  right: 30rpx;
-  top: 10rpx;
-  width: 140rpx;
-  height: 140rpx;
-  border-radius: 50%;
-  border: 6rpx solid rgba(255, 193, 7, 0.7);
-  color: rgba(255, 193, 7, 0.7);
-  font-weight: 700;
-  font-size: 26rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(-12deg) scale(0.6);
-  opacity: 0;
-  animation: stamp 0.6s ease-out forwards;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 251, 230, 0.9), rgba(255, 255, 255, 0.2));
-}
-
-.stamp::after {
-  content: "已盖章";
-}
-
-@keyframes stamp {
-  0% {
-    transform: translateY(-40rpx) rotate(-12deg) scale(0.2);
-    opacity: 0;
-  }
-  60% {
-    transform: translateY(0) rotate(-12deg) scale(1.1);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(0) rotate(-12deg) scale(1);
-    opacity: 1;
-  }
 }

@@ -1,4 +1,4 @@
-<view class="container">
+<view class="dispute-page">
   <view class="header">
     <text class="header-title">仲裁中心</text>
     <button class="apply-btn" bindtap="goApply">申请仲裁</button>
@@ -6,20 +6,10 @@
 
   <view class="history-section">
     <view class="section-title">
-      <text class="title-icon">⚖️</text>
+      <text class="title-icon">🕒</text>
       <text>仲裁历史</text>
     </view>
     <view class="timeline">
-      <view class="timeline-item" wx:if="{{history.length === 0}}">
-        <view class="timeline-dot inProgress"></view>
-        <view class="timeline-content">
-          <view class="history-card">
-            <view class="card-row">
-              <text class="label">暂无仲裁记录</text>
-            </view>
-          </view>
-        </view>
-      </view>
       <block wx:for="{{history}}" wx:key="id">
         <view class="timeline-item">
           <view class="timeline-dot {{item.statusType}}"></view>
@@ -27,7 +17,7 @@
             <view class="history-card">
               <view class="card-row">
                 <text class="label">契约ID: {{item.contractId}}</text>
-                <text class="status-tag status-{{item.statusType}}">{{item.status}}</text>
+                <text class="status-tag {{item.statusType}}">{{item.status}}</text>
               </view>
               <view class="card-row">
                 <text class="label">违约方: {{item.party}}</text>
@@ -37,13 +27,43 @@
               </view>
               <view class="card-divider"></view>
               <view class="card-row result-row">
-                <text class="result-label">结果: </text>
+                <text class="result-label">结果：</text>
                 <text class="result-text {{item.statusType}}">{{item.result}}</text>
               </view>
             </view>
           </view>
         </view>
       </block>
+      <view wx:if="{{history.length === 0}}" class="empty-state">暂无仲裁记录</view>
+    </view>
+  </view>
+
+  <view class="new-apply">
+    <view class="section-title">
+      <text class="title-icon">➕</text>
+      <text>发起新仲裁</text>
+    </view>
+    <view class="form-card">
+      <view class="form-item">
+        <text class="label">选择关联契约</text>
+        <picker mode="selector" range="{{contractOptions}}" bindchange="onContractPick">
+          <view class="picker">{{contractOptions[contractIndex]}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="label">违约描述</text>
+        <textarea class="textarea" placeholder="请详细描述违约情况，包括时间、地点、具体行为等..." />
+      </view>
+      <view class="form-item">
+        <text class="label">证据上传</text>
+        <view class="upload-grid">
+          <view class="upload-item">截图/图片</view>
+          <view class="upload-item">录屏/视频</view>
+        </view>
+        <input class="input" placeholder="可粘贴外部证据链接 (如网盘/网页)" />
+      </view>
+      <button class="submit-btn">提交仲裁申请</button>
+      <text class="form-tip">提交后专家将在24小时内介入调查，请耐心等待</text>
     </view>
   </view>
 </view>

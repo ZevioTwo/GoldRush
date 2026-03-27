@@ -9,6 +9,8 @@ public class UserProfileDTO {
     private String nickname;
     private String avatarUrl;
     private Integer creditScore;
+    private java.math.BigDecimal mojinBalance;
+    private java.math.BigDecimal mojinLocked;
     private Boolean isVip;
     private LocalDateTime vipExpireTime;
     private Integer totalContracts;

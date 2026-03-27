@@ -23,6 +23,10 @@ public class ContractListResponse {
         private String status;
         private BigDecimal depositAmount;
         private String guaranteeItem;
+        private Integer minCredit;
+        private String requirements;
+        private String description;
+        private String coverUrl;
         private String successCondition;
         private String counterpartyNickname;
         private Integer counterpartyCreditScore;

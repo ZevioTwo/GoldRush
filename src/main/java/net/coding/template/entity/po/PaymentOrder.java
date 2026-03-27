@@ -39,6 +39,9 @@ public class PaymentOrder {
     @TableField("payment_method")
     private String paymentMethod;
 
+    @TableField("pay_channel")
+    private String payChannel;
+
     @TableField("wx_prepay_id")
     private String wxPrepayId;
 

@@ -109,6 +109,8 @@ public class UserService {
         dto.setNickname(user.getNickname());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setCreditScore(user.getCreditScore());
+        dto.setMojinBalance(user.getMojinBalance());
+        dto.setMojinLocked(user.getMojinLocked());
         dto.setIsVip(user.getIsVip());
         dto.setVipExpireTime(user.getVipExpireTime());
         dto.setTotalContracts(user.getTotalContracts());

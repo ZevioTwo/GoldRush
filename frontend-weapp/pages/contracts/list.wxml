@@ -1,19 +1,18 @@
-<view class="container contract-page">
+<view class="contract-page">
   <view class="header">
     <text class="header-title">我的契约</text>
-    <view class="header-button-wrapper">
-      <button class="create-contract-btn" bindtap="goCreate">
-        <text class="plus-icon">+</text>发起契约
-      </button>
-    </view>
+    <button class="create-contract-btn" bindtap="goCreate">
+      <text class="plus-icon">+</text>
+      <text>发起契约</text>
+    </button>
   </view>
 
   <view class="search-bar">
-    <icon type="search" size="16" class="search-icon"></icon>
-    <input class="search-input" placeholder="搜索契约编号或对方昵称" placeholder-class="search-placeholder" />
+    <text class="search-icon">🔍</text>
+    <input class="search-input" placeholder="搜索契约ID或对手昵称" placeholder-class="search-placeholder" />
   </view>
 
-  <scroll-view scroll-x="true" class="tab-bar">
+  <scroll-view scroll-x="true" class="tab-bar no-scrollbar">
     <view
       wx:for="{{statusOptions}}"
       wx:key="index"
@@ -22,6 +21,7 @@
       bindtap="onStatusTabChange"
     >
       {{item}}
+      <view wx:if="{{statusIndex === index}}" class="tab-underline"></view>
     </view>
   </scroll-view>
 
@@ -31,30 +31,34 @@
         <view class="card-header">
           <view class="card-header-left">
             <text class="status-tag status-{{item.status}}">{{item.statusLabel || item.status}}</text>
-            <text class="contract-id">#{{item.contractNo}}</text>
+            <view class="credit-tag">
+              <text class="credit-label">高保户</text>
+            </view>
+            <text class="contract-id">ID: {{item.contractNo}}</text>
           </view>
-          <view class="card-header-right">
-            <text class="deposit-label">保证金</text>
-            <text class="deposit-amount">{{item.depositAmount}}</text>
-          </view>
+          <text class="deposit-label">押信誉分</text>
         </view>
 
         <view class="card-body">
-          <text class="contract-title">与 {{item.displayName}} 的契约</text>
+          <text class="contract-title">与 <text class="opponent">{{item.displayName}}</text> 的契约</text>
+          <text class="deposit-amount">{{item.depositAmount}} 信誉分</text>
         </view>
 
         <view class="card-footer">
           <view class="footer-info">
             <text class="footer-icon">⏱</text>
-            <text>创建时间: {{item.createTime}}</text>
+            <text>剩余时间: {{item.remainingTime || '12:45:30'}}</text>
           </view>
-          <text class="detail-link">查看详情 ></text>
+          <view class="detail-link">
+            查看详情
+            <text class="detail-arrow">›</text>
+          </view>
         </view>
       </view>
     </block>
 
     <view wx:if="{{list.length === 0}}" class="empty-state" style="margin-top: 48rpx;">
-      暂无数据
+      暂无相关契约记录
     </view>
 
     <view wx:if="{{loading}}" class="loading-state" style="margin: 24rpx 0;">

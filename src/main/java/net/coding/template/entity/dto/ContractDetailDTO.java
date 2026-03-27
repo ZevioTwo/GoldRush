@@ -23,6 +23,10 @@ public class ContractDetailDTO {
     private BigDecimal depositAmount;
     private BigDecimal serviceFeeAmount;
     private String guaranteeItem;
+    private Integer minCredit;
+    private String requirements;
+    private String description;
+    private String coverUrl;
     private String successCondition;
     private String failureCondition;
 

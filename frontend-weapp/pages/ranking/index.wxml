@@ -1,6 +1,7 @@
-<view class="container">
+<view class="ranking-page">
   <view class="header">
     <text class="header-title">信誉排行榜</text>
+    <text class="header-icon">ℹ️</text>
   </view>
 
   <view class="update-time-card">
@@ -8,43 +9,48 @@
       <text class="update-label">更新时间</text>
       <text class="update-time">{{updateTime}}</text>
     </view>
-    <text class="shield-icon">🛡</text>
+    <view class="shield-icon">🛡</view>
   </view>
 
-  <view class="tabs">
-    <view class="tab-item {{activeTab === 'red' ? 'active' : ''}}" data-tab="red" bindtap="switchTab">
-      <text class="tab-icon">🔥</text> 红榜
-    </view>
-    <view class="tab-item {{activeTab === 'black' ? 'active' : ''}}" data-tab="black" bindtap="switchTab">
-      <text class="tab-icon">⚠️</text> 黑榜
-    </view>
-  </view>
-
-  <view class="ranking-list-container">
-    <view class="ranking-list red-list" hidden="{{activeTab !== 'red'}}">
-      <block wx:for="{{redList}}" wx:key="rank">
-        <view class="list-item {{item.rank === 1 ? 'top1' : ''}}">
-          <view class="rank-number">{{item.rank < 10 ? '0' + item.rank : item.rank}}</view>
-          <view class="user-info">
-            <text wx:if="{{item.rank === 1}}" class="top1-tag">TOP 1</text>
+  <view class="ranking-grid">
+    <view class="ranking-col">
+      <view class="col-title red">
+        <text class="col-icon">🔥</text>
+        红榜
+      </view>
+      <view class="ranking-list">
+        <block wx:for="{{redList}}" wx:key="rank">
+          <view class="list-item {{item.rank === 1 ? 'top1' : ''}}">
+            <view class="row">
+              <text class="rank-number">{{item.rank === 1 ? 'TOP 1' : (item.rank < 10 ? '0' + item.rank : item.rank)}}</text>
+              <text class="score yellow-score">{{item.score}}分</text>
+            </view>
             <text class="user-name">{{item.name}}</text>
           </view>
-          <view class="score yellow-score">{{item.score}}分</view>
-        </view>
-      </block>
+        </block>
+      </view>
     </view>
 
-    <view class="ranking-list black-list" hidden="{{activeTab !== 'black'}}">
-      <block wx:for="{{blackList}}" wx:key="rank">
-        <view class="list-item {{item.rank === 1 ? 'bottom1' : ''}}">
-          <view class="rank-number">{{item.rank < 10 ? '0' + item.rank : item.rank}}</view>
-          <view class="user-info">
-            <text wx:if="{{item.rank === 1}}" class="bottom1-tag">垫底 1</text>
-            <text class="user-name">{{item.name}}</text>
+    <view class="divider"></view>
+
+    <view class="ranking-col">
+      <view class="col-title black">
+        <text class="col-icon">⚠️</text>
+        黑榜
+      </view>
+      <view class="ranking-list">
+        <block wx:for="{{blackList}}" wx:key="rank">
+          <view class="list-item {{item.rank === 1 ? 'bottom1' : ''}}">
+            <view class="row">
+              <text class="rank-number {{item.rank === 1 ? 'danger' : ''}}">{{item.rank === 1 ? '垫底 1' : (item.rank < 10 ? '0' + item.rank : item.rank)}}</text>
+              <text class="score red-score">{{item.score}}分</text>
+            </view>
+            <text class="user-name {{item.rank === 1 ? 'light' : ''}}">{{item.name}}</text>
           </view>
-          <view class="score red-score">{{item.score}}分</view>
-        </view>
-      </block>
+        </block>
+      </view>
     </view>
   </view>
+
+  <view class="footnote">诚信分由多维度契约达成率、用户评价及官方核查综合评定</view>
 </view>
