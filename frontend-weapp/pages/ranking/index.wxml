@@ -1,7 +1,8 @@
-<view class="ranking-page">
+<view class="ranking-page page-shell">
+  <view class="page-orb page-orb--gold"></view>
   <view class="header">
     <text class="header-title">信誉排行榜</text>
-    <text class="header-icon">ℹ️</text>
+    <view class="header-icon">ℹ</view>
   </view>
 
   <view class="update-time-card">

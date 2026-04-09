@@ -9,7 +9,7 @@
   <view class="banner">
     <image class="banner-img" src="{{detail.image}}" mode="aspectFill"></image>
     <view class="banner-mask"></view>
-    <view class="status-badge">{{detail.statusLabel}}</view>
+    <view class="status-badge {{detail.statusClass}}">{{detail.statusLabel}}</view>
   </view>
 
   <view class="content">
@@ -72,7 +72,8 @@
     </view>
   </view>
 
-  <view class="footer-actions">
+  <view class="footer-actions soft-panel">
+    <view wx:if="{{countdownText}}" class="countdown-chip">{{countdownText}}</view>
     <button class="action-btn primary" wx:if="{{fromHall}}" bindtap="acceptContract" loading="{{confirming}}">接单确认</button>
     <button class="action-btn primary" wx:if="{{detail.canSign}}" bindtap="signContract" loading="{{confirming}}">签订契约</button>
     <button class="action-btn primary" wx:if="{{detail.canFinishBySigner && detail.canFinish}}" bindtap="finishContract" loading="{{confirming}}">契约完成</button>

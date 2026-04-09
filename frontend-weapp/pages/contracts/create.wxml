@@ -1,4 +1,4 @@
-<view class="create-page">
+<view class="create-page page-shell page-shell--white">
   <view class="header">
     <button class="back-btn" bindtap="goBack">‹</button>
     <text class="header-title">发起契约</text>
@@ -60,7 +60,12 @@
 
   <view class="form-group">
     <text class="group-title">契约详情/条款</text>
-    <textarea class="textarea-field" placeholder="请详细描述契约内容及双方约定的具体条款内容..." value="{{form.successCondition}}" data-field="successCondition" bindinput="onInput"></textarea>
+    <textarea class="textarea-field" placeholder="请详细描述契约内容及双方约定的具体条款内容..." value="{{form.termsText}}" data-field="termsText" bindinput="onInput"></textarea>
+  </view>
+
+  <view class="form-group">
+    <text class="group-title">契约达成条件</text>
+    <textarea class="textarea-field short" placeholder="请说明在何种情况下此契约视为正式达成生效" value="{{form.successCondition}}" data-field="successCondition" bindinput="onInput"></textarea>
   </view>
 
   <view class="form-group">

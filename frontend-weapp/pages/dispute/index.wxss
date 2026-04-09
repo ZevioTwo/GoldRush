@@ -1,8 +1,5 @@
 .dispute-page {
-  background-color: var(--color-background);
-  padding: 32rpx;
-  min-height: 100vh;
-  padding-bottom: 180rpx;
+  overflow: hidden;
 }
 
 .header {
@@ -10,6 +7,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 32rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .header-title {
@@ -19,7 +18,7 @@
 }
 
 .apply-btn {
-  background-color: #fa5252;
+  background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
   color: #fff;
   font-size: 24rpx;
   border-radius: 999rpx;
@@ -83,9 +82,9 @@
 
 .history-card {
   background-color: #fff;
-  border-radius: 24rpx;
+  border-radius: 28rpx;
   padding: 24rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.03);
+  box-shadow: 0 12rpx 28rpx rgba(0,0,0,0.03);
   border: 1rpx solid rgba(0,0,0,0.05);
 }
 
@@ -175,7 +174,7 @@
 
 .submit-btn {
   width: 100%;
-  background: #22c55e;
+  background: linear-gradient(135deg, #2bd36f 0%, #22c55e 100%);
   color: #fff;
   border-radius: 24rpx;
   padding: 20rpx 0;

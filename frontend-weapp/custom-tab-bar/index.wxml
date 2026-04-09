@@ -3,11 +3,13 @@
   <view class="tabbar-inner">
     <block wx:for="{{list}}" wx:key="pagePath">
       <view class="tabbar-item {{selected === item.pagePath ? 'is-active' : ''}}" data-path="{{item.pagePath}}" bindtap="switchTab">
-        <image
-          class="tabbar-icon {{selected === item.pagePath ? 'is-active' : ''}}"
-          src="{{selected === item.pagePath ? item.activeIcon : item.icon}}"
-          mode="aspectFit"
-        />
+        <view class="tabbar-icon-wrap {{selected === item.pagePath ? 'is-active' : ''}}">
+          <image
+            class="tabbar-icon {{selected === item.pagePath ? 'is-active' : ''}}"
+            src="{{selected === item.pagePath ? item.activeIcon : item.icon}}"
+            mode="aspectFit"
+          />
+        </view>
         <text class="tabbar-text {{selected === item.pagePath ? 'is-active' : ''}}">{{item.text}}</text>
       </view>
     </block>

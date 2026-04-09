@@ -1,4 +1,5 @@
-<view class="topup-page">
+<view class="topup-page page-shell">
+  <view class="page-orb page-orb--gold"></view>
   <view class="header">
     <button class="back-btn" bindtap="goBack">‹</button>
     <text class="header-title">信誉分充值</text>

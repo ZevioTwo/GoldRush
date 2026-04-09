@@ -37,7 +37,7 @@ Page({
       this.setData({ id: options.id, fromHall }, () => this.fetchDetail());
       return;
     }
-    this.setData({ detail: mockDetail });
+    this.setData({ detail: this.normalizeDetail(mockDetail) });
   },
   fetchDetail() {
     request({
@@ -55,26 +55,49 @@ Page({
           const canFinishBySigner = detail.canFinishBySigner
             ?? (detail.signerId ? detail.signerId !== String(detail.currentUserId || "") : false);
           this.setData({
-            detail: {
+            detail: this.normalizeDetail({
               ...detail,
               canSign,
               canFinishBySigner,
-              statusLabel: this.getStatusLabel(detail.status),
               createTime: this.formatDate(detail.createTime),
               startTime: this.formatDate(detail.startTime),
               endTime: this.formatDate(detail.endTime),
               completeTime: this.formatDate(detail.completeTime)
-            }
+            })
           }, () => this.startCountdown(expireTime));
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        this.setData({ detail: mockDetail });
+        this.setData({ detail: this.normalizeDetail(mockDetail) });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ detail: mockDetail });
+        this.setData({ detail: this.normalizeDetail(mockDetail) });
       });
+  },
+  normalizeDetail(detail) {
+    const statusMap = {
+      PENDING: { label: "待接单", className: "info" },
+      PAID: { label: "待开始", className: "info" },
+      ACTIVE: { label: "进行中", className: "success" },
+      IN_GAME: { label: "进行中", className: "success" },
+      COMPLETED: { label: "已完成", className: "success" },
+      CANCELLED: { label: "已取消", className: "warning" },
+      DISPUTE: { label: "仲裁中", className: "danger" },
+      VIOLATED: { label: "已违约", className: "danger" }
+    };
+    const mapped = statusMap[detail.status] || {
+      label: detail.statusLabel || detail.status || "进行中",
+      className: "warning"
+    };
+    return {
+      ...detail,
+      image: detail.image || mockDetail.image,
+      bossAvatar: detail.bossAvatar || detail.initiator?.avatar || mockDetail.bossAvatar,
+      statusLabel: detail.statusLabel || mapped.label,
+      statusClass: detail.statusClass || mapped.className,
+      terms: Array.isArray(detail.terms) && detail.terms.length ? detail.terms : mockDetail.terms
+    };
   },
   acceptContract() {
     if (this.data.confirming) return;

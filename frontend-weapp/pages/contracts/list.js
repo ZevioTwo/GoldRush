@@ -5,52 +5,53 @@ const mockContracts = [
     contractId: "8829341",
     contractNo: "8829341",
     status: "ACTIVE",
-    statusLabel: "进行中",
     depositAmount: 500,
     displayName: "张三",
     remainingTime: "12:45:30",
-    createTime: "2026-10-24 14:30"
+    createTime: "2026-10-24 14:30",
+    creditPoints: 1200
   },
   {
     contractId: "8829342",
     contractNo: "8829342",
     status: "PENDING",
-    statusLabel: "待生效",
     depositAmount: 200,
     displayName: "李四",
     remainingTime: "--",
-    createTime: "2026-10-24 10:12"
+    createTime: "2026-10-24 10:12",
+    creditPoints: 85
   },
   {
     contractId: "8829345",
     contractNo: "8829345",
     status: "DISPUTE",
-    statusLabel: "仲裁中",
     depositAmount: 1200,
     displayName: "王五",
     remainingTime: "--",
-    createTime: "2026-10-20 09:03"
+    createTime: "2026-10-20 09:03",
+    creditPoints: 450
   },
   {
     contractId: "8829301",
     contractNo: "8829301",
     status: "COMPLETED",
-    statusLabel: "已完成",
     depositAmount: 300,
     displayName: "赵六",
     remainingTime: "--",
-    createTime: "2026-10-18 16:40"
+    createTime: "2026-10-18 16:40",
+    creditPoints: 960
   }
 ];
 
 Page({
   data: {
     list: [],
+    rawList: [],
     page: 1,
     size: 10,
     statusIndex: 0,
-    statusOptions: ["全部", "我发起", "我接单"],
-    statusValues: ["ALL", "INITIATED", "RECEIVED"],
+    statusTabs: ["全部", "进行中", "待生效", "已完成", "仲裁中"],
+    keyword: "",
     loading: false,
     hasMore: true
   },
@@ -61,33 +62,29 @@ Page({
       tabbar.setSelected("/pages/contracts/list");
     }
   },
-  onStatusChange(e) {
-    const index = Number(e.detail.value) || 0;
-    this.setData({ statusIndex: index }, () => this.resetAndFetch());
+  onKeywordInput(e) {
+    this.setData({ keyword: e.detail.value || "" }, () => this.applyFilters());
+  },
+  onKeywordConfirm() {
+    this.applyFilters();
   },
   onStatusTabChange(e) {
     const index = Number(e.currentTarget.dataset.index) || 0;
     if (index === this.data.statusIndex) return;
-    this.setData({ statusIndex: index }, () => this.resetAndFetch());
+    this.setData({ statusIndex: index }, () => this.applyFilters());
   },
   onReachBottom() {
     if (!this.data.hasMore || this.data.loading) return;
     this.setData({ page: this.data.page + 1 }, () => this.fetchList(true));
   },
   resetAndFetch() {
-    this.setData({ page: 1, list: [], hasMore: true }, () => this.fetchList());
+    this.setData({ page: 1, list: [], rawList: [], hasMore: true }, () => this.fetchList());
   },
   fetchList(append = false) {
-    const filter = this.data.statusValues[this.data.statusIndex];
     const data = {
       page: this.data.page,
-      size: this.data.size,
-      scope: filter
+      size: this.data.size
     };
-
-    if (data.scope === "ALL") {
-      delete data.scope;
-    }
 
     if (this.data.loading) return;
     this.setData({ loading: true });
@@ -99,24 +96,24 @@ Page({
       .then((res) => {
         if (res && (res.code === 0 || res.code === 200)) {
           const rawList = res.data?.contracts || [];
-          const list = rawList.map((item) => ({
+          const list = rawList.map((item) => this.normalizeContract({
             ...item,
-            statusLabel: this.getStatusLabel(item.status),
             createTime: this.formatDate(item.createTime),
             completeTime: this.formatDate(item.completeTime),
             displayName: item.counterpartyNickname || item.receiverNickname || item.initiatorNickname || ""
           }));
-          const nextList = append ? this.data.list.concat(list) : list;
+          const nextRawList = append ? this.data.rawList.concat(list) : list;
           const hasMore = list.length >= this.data.size;
 
-          if (!nextList.length) {
-            this.setData({ list: mockContracts, hasMore: false });
+          if (!nextRawList.length) {
+            const fallbackList = mockContracts.map((item) => this.normalizeContract(item));
+            this.setData({ rawList: fallbackList, hasMore: false }, () => this.applyFilters(fallbackList));
             return;
           }
 
-          this.setData({ list: nextList, hasMore });
+          this.setData({ rawList: nextRawList, hasMore }, () => this.applyFilters(nextRawList));
 
-          const missing = nextList.filter((item) => !item.displayName && item.contractId);
+          const missing = nextRawList.filter((item) => !item.displayName && item.contractId);
           if (missing.length) {
             Promise.all(
               missing.map((item) =>
@@ -130,25 +127,151 @@ Page({
                 if (cur.name) acc[cur.contractId] = cur.name;
                 return acc;
               }, {});
-              const patchedList = nextList.map((item) => ({
-                ...item,
-                displayName: item.displayName || nameMap[item.contractId] || "对方用户"
-              }));
-              this.setData({ list: patchedList });
+              const patchedRawList = nextRawList.map((item) =>
+                this.normalizeContract({
+                  ...item,
+                  displayName: item.displayName || nameMap[item.contractId] || "对方用户"
+                })
+              );
+              this.setData({ rawList: patchedRawList }, () => this.applyFilters(patchedRawList));
             });
           }
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        this.setData({ list: mockContracts, hasMore: false });
+        const fallbackList = mockContracts.map((item) => this.normalizeContract(item));
+        this.setData({ rawList: fallbackList, hasMore: false }, () => this.applyFilters(fallbackList));
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ list: mockContracts, hasMore: false });
+        const fallbackList = mockContracts.map((item) => this.normalizeContract(item));
+        this.setData({ rawList: fallbackList, hasMore: false }, () => this.applyFilters(fallbackList));
       })
       .finally(() => {
         this.setData({ loading: false });
       });
+  },
+  applyFilters(sourceList) {
+    const targetList = sourceList || this.data.rawList || [];
+    const activeGroup = ["all", "ongoing", "pending", "completed", "arbitration"][this.data.statusIndex] || "all";
+    const keyword = (this.data.keyword || "").trim().toLowerCase();
+
+    const filtered = targetList.filter((item) => {
+      const matchedGroup = activeGroup === "all" ? true : item.statusGroup === activeGroup;
+      if (!matchedGroup) return false;
+      if (!keyword) return true;
+      const haystack = [
+        item.contractNo,
+        item.contractId,
+        item.displayName,
+        item.statusLabel
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(keyword);
+    });
+
+    this.setData({ list: filtered });
+  },
+  normalizeContract(item) {
+    const statusInfo = this.getStatusInfo(item.status);
+    const creditInfo = this.getCreditInfo(item.creditPoints ?? item.credit ?? item.minCredit ?? 650);
+    return {
+      ...item,
+      contractNo: item.contractNo || item.contractId || "",
+      displayName: item.displayName || item.counterpartyNickname || item.receiverNickname || item.initiatorNickname || "对方用户",
+      depositAmount: Number(item.depositAmount || item.deposit || 0),
+      remainingTime: item.remainingTime || item.remaining || "12:45:30",
+      statusLabel: statusInfo.label,
+      statusGroup: statusInfo.group,
+      statusClass: statusInfo.className,
+      footerLabel: statusInfo.footerLabel(item),
+      footerIcon: statusInfo.footerIcon,
+      creditTag: creditInfo.label,
+      creditClass: creditInfo.className
+    };
+  },
+  getStatusInfo(status) {
+    const defaultFooter = (item) => item.remainingTime || item.remaining || "12:45:30";
+    const config = {
+      PENDING: {
+        group: "pending",
+        label: "待生效",
+        className: "status-info",
+        footerIcon: "👤",
+        footerLabel: () => "等待对方确认"
+      },
+      PAID: {
+        group: "pending",
+        label: "待生效",
+        className: "status-info",
+        footerIcon: "👤",
+        footerLabel: () => "等待双方开始履约"
+      },
+      ACTIVE: {
+        group: "ongoing",
+        label: "进行中",
+        className: "status-warning",
+        footerIcon: "⏱",
+        footerLabel: (item) => `剩余时间: ${defaultFooter(item)}`
+      },
+      IN_GAME: {
+        group: "ongoing",
+        label: "进行中",
+        className: "status-warning",
+        footerIcon: "⏱",
+        footerLabel: (item) => `剩余时间: ${defaultFooter(item)}`
+      },
+      COMPLETED: {
+        group: "completed",
+        label: "已完成",
+        className: "status-neutral",
+        footerIcon: "✓",
+        footerLabel: () => "契约已圆满结束"
+      },
+      CANCELLED: {
+        group: "completed",
+        label: "已取消",
+        className: "status-neutral",
+        footerIcon: "•",
+        footerLabel: () => "契约已取消"
+      },
+      DISPUTE: {
+        group: "arbitration",
+        label: "仲裁中",
+        className: "status-danger",
+        footerIcon: "⚖",
+        footerLabel: () => "官方正在介入处理"
+      },
+      VIOLATED: {
+        group: "arbitration",
+        label: "仲裁中",
+        className: "status-danger",
+        footerIcon: "⚖",
+        footerLabel: () => "违约争议待平台裁定"
+      }
+    };
+    return config[status] || {
+      group: "ongoing",
+      label: status || "进行中",
+      className: "status-warning",
+      footerIcon: "⏱",
+      footerLabel: (item) => `剩余时间: ${defaultFooter(item)}`
+    };
+  },
+  getCreditInfo(score) {
+    const value = Number(score);
+    if (!Number.isFinite(value) || value <= 0) {
+      return { label: "无保户", className: "credit-none" };
+    }
+    if (value < 100) {
+      return { label: "低保户", className: "credit-low" };
+    }
+    if (value < 1000) {
+      return { label: "高保户", className: "credit-high" };
+    }
+    return { label: "特保户", className: "credit-special" };
   },
   fetchReceiverName(contractId) {
     if (!contractId) return Promise.resolve("");
@@ -184,19 +307,6 @@ Page({
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return value;
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-  },
-  getStatusLabel(status) {
-    const map = {
-      PENDING: "待接单",
-      PAID: "待开始",
-      ACTIVE: "进行中",
-      IN_GAME: "进行中",
-      COMPLETED: "已完成",
-      CANCELLED: "已取消",
-      DISPUTE: "争议中",
-      VIOLATED: "已违约"
-    };
-    return map[status] || status || "";
   },
   goDetail(e) {
     const contractId = e.currentTarget.dataset.id;

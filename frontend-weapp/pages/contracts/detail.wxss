@@ -69,6 +69,22 @@
   letter-spacing: 2rpx;
 }
 
+.status-badge.warning {
+  background: #d9a42b;
+}
+
+.status-badge.info {
+  background: #339af0;
+}
+
+.status-badge.success {
+  background: #22c55e;
+}
+
+.status-badge.danger {
+  background: #fa5252;
+}
+
 .content {
   padding: 0 24rpx;
   margin-top: -80rpx;
@@ -273,8 +289,20 @@
   right: 0;
   bottom: 0;
   padding: 24rpx 32rpx 40rpx;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.92);
   border-top: 1rpx solid rgba(0,0,0,0.05);
+}
+
+.countdown-chip {
+  margin-bottom: 12rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 20rpx;
+  background: #fff9db;
+  color: #d9a42b;
+  border: 1rpx solid rgba(217, 164, 43, 0.16);
+  font-size: 22rpx;
+  font-weight: 800;
+  text-align: center;
 }
 
 .action-btn {
@@ -286,7 +314,7 @@
 }
 
 .action-btn.primary {
-  background-color: #d9a42b;
+  background: linear-gradient(135deg, #e3b447 0%, #d9a42b 100%);
   color: #fff;
   box-shadow: 0 12rpx 30rpx rgba(217, 164, 43, 0.2);
 }

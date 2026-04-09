@@ -1,7 +1,8 @@
-<view class="hall-page">
+<view class="hall-page page-shell">
+  <view class="page-orb page-orb--gold"></view>
   <view class="header">
     <view class="icon-wrapper" bindtap="onSearchIcon">
-      <text class="header-icon">🔍</text>
+      <text class="header-icon">⌕</text>
     </view>
     <text class="header-title">契约大厅</text>
     <view class="icon-wrapper">
@@ -41,7 +42,7 @@
 
   <view class="contract-list">
     <block wx:for="{{list}}" wx:key="contractId">
-      <view class="contract-card" bindtap="goDetail" data-id="{{item.contractId}}">
+      <view class="contract-card floating-card" bindtap="goDetail" data-id="{{item.contractId}}">
         <view class="card-banner">
           <image class="banner-img" src="{{item.image}}" mode="aspectFill"></image>
           <view class="banner-mask"></view>
@@ -67,7 +68,7 @@
               <text class="risk-value">{{item.deposit}} 信誉分</text>
             </view>
           </view>
-          <view class="card-desc">{{item.desc}}</view>
+          <view class="card-desc">{{item.requirementPreview || item.desc}}</view>
           <button class="details-button" catchtap="goDetail" data-id="{{item.contractId}}">
             查看详情
             <text class="detail-arrow">›</text>
@@ -76,11 +77,11 @@
       </view>
     </block>
 
-    <view wx:if="{{list.length === 0}}" class="empty-state" style="margin-top: 48rpx;">
+    <view wx:if="{{list.length === 0 && !loading}}" class="empty-card">
       暂无待接单契约
     </view>
 
-    <view wx:if="{{loading}}" class="loading-state" style="margin: 24rpx 0;">加载中...</view>
-    <view wx:if="{{!hasMore && list.length > 0}}" class="empty-state" style="margin: 24rpx 0;">没有更多了</view>
+    <view wx:if="{{loading}}" class="loading-state">加载中...</view>
+    <view wx:if="{{!hasMore && list.length > 0}}" class="list-end">没有更多了</view>
   </view>
 </view>

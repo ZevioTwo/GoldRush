@@ -26,7 +26,7 @@ const mockJobs = [
     remaining: "05:12:00",
     desc: "高端本包通关，若未达成目标，全额退还契约金并额外补偿。",
     statusLabel: "待开始",
-    statusClass: "warning",
+    statusClass: "info",
     image: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=1200&auto=format&fit=crop"
   },
   {
@@ -116,7 +116,7 @@ Page({
       .then((res) => {
         if (res && (res.code === 0 || res.code === 200)) {
           const rawList = res.data?.contracts || [];
-          const list = rawList.map((item) => ({
+          const list = rawList.map((item) => this.normalizeJob({
             ...item,
             statusLabel: this.getStatusLabel(item.status),
             createTime: this.formatDate(item.createTime),
@@ -143,6 +143,30 @@ Page({
       .finally(() => {
         this.setData({ loading: false });
       });
+  },
+  normalizeJob(item) {
+    const statusMap = {
+      ACTIVE: "success",
+      IN_GAME: "success",
+      PENDING: "warning",
+      PAID: "info",
+      COMPLETED: "success",
+      CANCELLED: "danger",
+      DISPUTE: "danger",
+      VIOLATED: "danger"
+    };
+    return {
+      ...item,
+      title: item.title || item.contractTitle || "未命名契约",
+      game: item.game || item.gameType || "未分类",
+      boss: item.boss || item.initiatorNickname || item.publisherNickname || "匿名发起人",
+      credit: item.credit || item.minCredit || 0,
+      deposit: item.deposit || item.depositAmount || 0,
+      remaining: item.remaining || item.remainingTime || "02:45:10",
+      desc: item.desc || item.requirementPreview || item.successCondition || "暂无详细要求说明",
+      image: item.image || item.coverImage || mockJobs[0].image,
+      statusClass: item.statusClass || statusMap[item.status] || "warning"
+    };
   },
   onKeywordInput(e) {
     this.setData({ keyword: e.detail.value });

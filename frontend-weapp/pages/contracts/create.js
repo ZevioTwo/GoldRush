@@ -32,6 +32,7 @@ Page({
       title: "",
       gameType: "三角洲行动",
       depositAmount: "",
+      termsText: "",
       successCondition: ""
     }
   },
@@ -78,6 +79,7 @@ Page({
     if (!form.title) return "请填写标题";
     if (form.title.length > 100) return "标题不能超过100字";
     if (!form.gameType) return "请选择游戏类型";
+    if (!form.termsText) return "请填写契约详情";
 
     if (this.data.depositRequiredIndex === 0) {
       if (!form.depositAmount) return "请填写保证金";
@@ -90,6 +92,7 @@ Page({
       if (Number.isNaN(minCredit) || minCredit < 0) return "最低信誉分填写有误";
     }
 
+    if (form.termsText && form.termsText.length > 500) return "契约详情不能超过500字";
     if (form.successCondition && form.successCondition.length > 500) return "契约达成条件不能超过500字";
     return "";
   },
@@ -103,6 +106,7 @@ Page({
     }
 
     const depositAmount = this.data.depositRequiredIndex === 0 ? form.depositAmount : 0;
+    const successCondition = this.buildSuccessCondition(form);
 
     this.setData({ loading: true });
     request({
@@ -113,7 +117,7 @@ Page({
         gameType: form.gameType,
         depositAmount,
         minCredit: this.data.minCreditRequired ? this.data.minCredit : 0,
-        successCondition: form.successCondition
+        successCondition
       }
     })
       .then((res) => {
@@ -132,6 +136,16 @@ Page({
       .finally(() => {
         this.setData({ loading: false });
       });
+  },
+  buildSuccessCondition(form) {
+    const sections = [];
+    if (form.termsText) {
+      sections.push(`契约详情：${form.termsText}`);
+    }
+    if (form.successCondition) {
+      sections.push(`达成条件：${form.successCondition}`);
+    }
+    return sections.join("\n\n");
   },
   goBack() {
     wx.navigateBack({ delta: 1 });

@@ -1,16 +1,24 @@
 :root {
   --color-background: #f7f8fa;
+  --color-background-strong: #f3f4f7;
   --color-foreground: #1a1a1e;
   --color-card: #ffffff;
   --color-card-foreground: #1a1a1e;
   --color-primary: #d9a42b;
+  --color-primary-strong: #fcc419;
   --color-primary-foreground: #ffffff;
   --color-secondary: #f1f3f5;
   --color-muted: #f1f3f5;
   --color-muted-foreground: #8e9aaf;
   --color-accent: #d9a42b;
   --color-destructive: #fa5252;
+  --color-success: #22c55e;
+  --color-info: #339af0;
   --color-border: #e9ecef;
+  --color-soft-gold: #fcf8e8;
+  --color-soft-danger: #fff5f5;
+  --color-soft-success: #e7f9ee;
+  --color-soft-info: #e7f5ff;
   --radius-xs: 12rpx;
   --radius-sm: 16rpx;
   --radius-md: 24rpx;
@@ -19,14 +27,17 @@
   --shadow-card: 0 8rpx 40rpx rgba(0, 0, 0, 0.04);
   --shadow-soft: 0 6rpx 20rpx rgba(0, 0, 0, 0.03);
   --shadow-gold: 0 10rpx 30rpx rgba(217, 164, 43, 0.2);
+  --shadow-floating: 0 18rpx 45rpx rgba(15, 23, 42, 0.08);
 }
 
 page {
-  background: var(--color-background);
+  background:
+    linear-gradient(180deg, #fbfbfc 0%, var(--color-background) 180rpx),
+    var(--color-background);
   color: var(--color-foreground);
   font-size: 28rpx;
   line-height: 1.6;
-  padding-bottom: 160rpx;
+  padding-bottom: 188rpx;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
@@ -38,6 +49,43 @@ page {
 .page-root {
   min-height: 100vh;
   background: var(--color-background);
+}
+
+.page-shell {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 188rpx;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.page-shell--white {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fafbfc 260rpx),
+    #ffffff;
+}
+
+.page-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(26rpx);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.page-orb--gold {
+  width: 260rpx;
+  height: 260rpx;
+  top: -90rpx;
+  right: -70rpx;
+  background: rgba(252, 196, 25, 0.14);
+}
+
+.page-orb--soft {
+  width: 180rpx;
+  height: 180rpx;
+  top: 200rpx;
+  left: -90rpx;
+  background: rgba(255, 255, 255, 0.65);
 }
 
 .page-section {
@@ -80,6 +128,26 @@ page {
   padding: 28rpx;
   border: 1rpx solid rgba(0, 0, 0, 0.05);
   box-shadow: var(--shadow-soft);
+}
+
+.floating-card {
+  background: var(--color-card);
+  border-radius: 40rpx;
+  border: 1rpx solid rgba(15, 23, 42, 0.05);
+  box-shadow: var(--shadow-floating);
+}
+
+.soft-panel {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(18rpx);
+  -webkit-backdrop-filter: blur(18rpx);
+}
+
+.soft-block {
+  background: #f8f9fa;
+  border-radius: 28rpx;
+  border: 1rpx solid rgba(15, 23, 42, 0.03);
 }
 
 .g-card--xl {
@@ -128,6 +196,12 @@ page {
   border-color: rgba(250, 82, 82, 0.2);
 }
 
+.g-badge--info {
+  background: var(--color-soft-info);
+  color: var(--color-info);
+  border-color: rgba(51, 154, 240, 0.18);
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -152,7 +226,7 @@ button {
 }
 
 .btn-primary {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, #e3b447 0%, var(--color-primary) 100%);
   color: var(--color-primary-foreground);
   box-shadow: var(--shadow-gold);
   padding: 18rpx 28rpx;
@@ -236,6 +310,57 @@ button[disabled] {
   color: var(--color-primary);
   border-color: rgba(217, 164, 43, 0.25);
   background: #fff9db;
+}
+
+.status-badge--info {
+  color: var(--color-info);
+  border-color: rgba(51, 154, 240, 0.2);
+  background: var(--color-soft-info);
+}
+
+.title-xl {
+  font-size: 48rpx;
+  line-height: 1.1;
+  font-weight: 900;
+  color: var(--color-foreground);
+  letter-spacing: -1rpx;
+}
+
+.title-lg {
+  font-size: 34rpx;
+  line-height: 1.2;
+  font-weight: 900;
+  color: var(--color-foreground);
+}
+
+.eyebrow {
+  font-size: 18rpx;
+  font-weight: 900;
+  color: rgba(142, 154, 175, 0.7);
+  letter-spacing: 3rpx;
+  text-transform: uppercase;
+}
+
+.icon-circle {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-soft-gold);
+  color: var(--color-primary);
+  border: 1rpx solid rgba(217, 164, 43, 0.08);
+  box-shadow: 0 8rpx 18rpx rgba(217, 164, 43, 0.08);
+}
+
+.empty-card {
+  padding: 42rpx 32rpx;
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1rpx dashed rgba(142, 154, 175, 0.18);
+  color: rgba(142, 154, 175, 0.85);
+  text-align: center;
 }
 
 .status-badge--danger {

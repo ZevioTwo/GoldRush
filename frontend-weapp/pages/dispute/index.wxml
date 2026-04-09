@@ -1,4 +1,5 @@
-<view class="dispute-page">
+<view class="dispute-page page-shell">
+  <view class="page-orb page-orb--gold"></view>
   <view class="header">
     <text class="header-title">仲裁中心</text>
     <button class="apply-btn" bindtap="goApply">申请仲裁</button>
@@ -34,7 +35,7 @@
           </view>
         </view>
       </block>
-      <view wx:if="{{history.length === 0}}" class="empty-state">暂无仲裁记录</view>
+    <view wx:if="{{history.length === 0}}" class="empty-card">暂无仲裁记录</view>
     </view>
   </view>
 

@@ -1,6 +1,6 @@
 App({
   globalData: {
-    baseUrl: "http://8.163.41.74:8080",
+    baseUrl: "http://81.71.88.97:8080",
     token: ""
   },
   onLaunch() {

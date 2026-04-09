@@ -1,4 +1,5 @@
-<view class="profile-page">
+<view class="profile-page page-shell">
+  <view class="page-orb page-orb--gold"></view>
   <view class="profile-section">
     <view class="avatar-wrap">
       <image class="avatar" src="/images/user_avatar.png" />
@@ -43,8 +44,8 @@
     </view>
 
     <view class="credit-actions">
-      <button class="action-btn primary" bindtap="goCredit">摸金充值</button>
-      <button class="action-btn secondary" bindtap="goExchange">金兑信誉</button>
+      <button class="action-btn primary" bindtap="goCredit">↗ 摸金充值</button>
+      <button class="action-btn secondary" bindtap="goExchange">⇄ 金兑信誉</button>
     </view>
   </view>
 
@@ -127,6 +128,6 @@
   </view>
 
   <view class="logout-card" bindtap="logout">
-    <text class="logout-text">退出当前账号</text>
+    <text class="logout-text">⟵ 退出当前账号</text>
   </view>
 </view>
