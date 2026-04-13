@@ -8,7 +8,7 @@
   <view class="update-time-card">
     <view>
       <text class="update-label">更新时间</text>
-      <text class="update-time">{{updateTime}}</text>
+      <text class="update-time">{{updateTime || (loading ? '加载中...' : '暂无更新')}}</text>
     </view>
     <view class="shield-icon">🛡</view>
   </view>
@@ -20,15 +20,21 @@
         红榜
       </view>
       <view class="ranking-list">
-        <block wx:for="{{redList}}" wx:key="rank">
-          <view class="list-item {{item.rank === 1 ? 'top1' : ''}}">
-            <view class="row">
-              <text class="rank-number">{{item.rank === 1 ? 'TOP 1' : (item.rank < 10 ? '0' + item.rank : item.rank)}}</text>
-              <text class="score yellow-score">{{item.score}}分</text>
+        <block wx:if="{{redList.length > 0}}">
+          <block wx:for="{{redList}}" wx:key="rank">
+            <view class="list-item {{item.rank === 1 ? 'top1' : ''}}">
+              <view class="row">
+                <text class="rank-number">{{item.rank === 1 ? 'TOP 1' : (item.rank < 10 ? '0' + item.rank : item.rank)}}</text>
+                <text class="score yellow-score">{{item.score}}分</text>
+              </view>
+              <view class="user-row">
+                <image class="user-avatar" src="{{item.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+                <text class="user-name">{{item.name}}</text>
+              </view>
             </view>
-            <text class="user-name">{{item.name}}</text>
-          </view>
+          </block>
         </block>
+        <view wx:elif="{{!loading}}" class="col-empty">暂无数据</view>
       </view>
     </view>
 
@@ -40,18 +46,26 @@
         黑榜
       </view>
       <view class="ranking-list">
-        <block wx:for="{{blackList}}" wx:key="rank">
-          <view class="list-item {{item.rank === 1 ? 'bottom1' : ''}}">
-            <view class="row">
-              <text class="rank-number {{item.rank === 1 ? 'danger' : ''}}">{{item.rank === 1 ? '垫底 1' : (item.rank < 10 ? '0' + item.rank : item.rank)}}</text>
-              <text class="score red-score">{{item.score}}分</text>
+        <block wx:if="{{blackList.length > 0}}">
+          <block wx:for="{{blackList}}" wx:key="rank">
+            <view class="list-item {{item.rank === 1 ? 'bottom1' : ''}}">
+              <view class="row">
+                <text class="rank-number {{item.rank === 1 ? 'danger' : ''}}">{{item.rank === 1 ? '垫底 1' : (item.rank < 10 ? '0' + item.rank : item.rank)}}</text>
+                <text class="score red-score">{{item.score}}分</text>
+              </view>
+              <view class="user-row">
+                <image class="user-avatar" src="{{item.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+                <text class="user-name {{item.rank === 1 ? 'light' : ''}}">{{item.name}}</text>
+              </view>
             </view>
-            <text class="user-name {{item.rank === 1 ? 'light' : ''}}">{{item.name}}</text>
-          </view>
+          </block>
         </block>
+        <view wx:elif="{{!loading}}" class="col-empty">暂无数据</view>
       </view>
     </view>
   </view>
+
+  <view wx:if="{{loading}}" class="status-card">加载中...</view>
 
   <view class="footnote">诚信分由多维度契约达成率、用户评价及官方核查综合评定</view>
 </view>

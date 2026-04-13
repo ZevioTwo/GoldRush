@@ -3,6 +3,8 @@ package net.coding.template.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import net.coding.template.entity.dto.CreditRankingDTO;
+import net.coding.template.entity.dto.CreditRankingItemDTO;
 import net.coding.template.entity.po.User;
 import net.coding.template.entity.dto.CreditScoreDTO;
 import net.coding.template.entity.request.LoginRequest;
@@ -191,6 +193,22 @@ public class UserService {
     }
 
     /**
+     * 获取信誉排行榜
+     */
+    public CreditRankingDTO getCreditRanking(Integer limit) {
+        int safeLimit = limit == null ? 10 : Math.max(1, Math.min(limit, 20));
+
+        List<CreditRankingItemDTO> redList = normalizeRanking(userMapper.selectTopCreditRanking(safeLimit));
+        List<CreditRankingItemDTO> blackList = normalizeRanking(userMapper.selectBottomCreditRanking(safeLimit));
+
+        CreditRankingDTO dto = new CreditRankingDTO();
+        dto.setUpdateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm")));
+        dto.setRedList(redList);
+        dto.setBlackList(blackList);
+        return dto;
+    }
+
+    /**
      * 内部工具方法：生成token
      */
     private String generateToken(User user) {
@@ -227,6 +245,21 @@ public class UserService {
         if (score >= 70 && contracts >= 3) return "白银打手";
         if (score >= 60) return "青铜打手";
         return "新手学徒";
+    }
+
+    private List<CreditRankingItemDTO> normalizeRanking(List<CreditRankingItemDTO> source) {
+        List<CreditRankingItemDTO> list = source == null ? new ArrayList<>() : source;
+        for (int i = 0; i < list.size(); i++) {
+            CreditRankingItemDTO item = list.get(i);
+            item.setRank(i + 1);
+            if (item.getName() == null || item.getName().trim().isEmpty()) {
+                item.setName(item.getUserId() == null ? "匿名用户" : "用户" + item.getUserId());
+            }
+            if (item.getScore() == null) {
+                item.setScore(0);
+            }
+        }
+        return list;
     }
 
     /**

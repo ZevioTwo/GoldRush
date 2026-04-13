@@ -1,10 +1,12 @@
 package net.coding.template.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import net.coding.template.entity.dto.CreditRankingItemDTO;
 import net.coding.template.entity.po.User;
 import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
@@ -75,4 +77,38 @@ public interface UserMapper extends BaseMapper<User> {
     int updateContactInfo(@Param("userId") Long userId,
                           @Param("wechatId") String wechatId,
                           @Param("phone") String phone);
+
+    /**
+     * 查询信誉红榜
+     */
+    @Select("SELECT " +
+            "id AS userId, " +
+            "COALESCE(NULLIF(TRIM(nickname), ''), CONCAT('用户', id)) AS name, " +
+            "avatar_url AS avatarUrl, " +
+            "credit_score AS score, " +
+            "status AS status, " +
+            "total_contracts AS totalContracts, " +
+            "completed_contracts AS completedContracts, " +
+            "violation_count AS violationCount " +
+            "FROM users " +
+            "ORDER BY credit_score DESC, completed_contracts DESC, total_contracts DESC, id ASC " +
+            "LIMIT #{limit}")
+    List<CreditRankingItemDTO> selectTopCreditRanking(@Param("limit") int limit);
+
+    /**
+     * 查询信誉黑榜
+     */
+    @Select("SELECT " +
+            "id AS userId, " +
+            "COALESCE(NULLIF(TRIM(nickname), ''), CONCAT('用户', id)) AS name, " +
+            "avatar_url AS avatarUrl, " +
+            "credit_score AS score, " +
+            "status AS status, " +
+            "total_contracts AS totalContracts, " +
+            "completed_contracts AS completedContracts, " +
+            "violation_count AS violationCount " +
+            "FROM users " +
+            "ORDER BY credit_score ASC, violation_count DESC, total_contracts DESC, id ASC " +
+            "LIMIT #{limit}")
+    List<CreditRankingItemDTO> selectBottomCreditRanking(@Param("limit") int limit);
 }

@@ -1,11 +1,29 @@
 const { request } = require("../../utils/request");
 
+const DEFAULT_GAME_TYPES = [
+  "三角洲行动",
+  "DNF",
+  "王者荣耀",
+  "和平精英",
+  "绝地求生",
+  "永劫无间",
+  "英雄联盟",
+  "金铲铲之战",
+  "原神",
+  "无畏契约",
+  "永劫无间手游",
+  "魔兽世界",
+  "CS2",
+  "逃离塔科夫",
+  "暗区突围"
+];
+
 Page({
   data: {
     loading: false,
     depositRequiredOptions: ["需要", "不需要"],
     depositRequiredIndex: 0,
-    gameTypeOptions: [],
+    gameTypeOptions: DEFAULT_GAME_TYPES,
     gameTypeIndex: 0,
     gameDropdownOpen: false,
     searchTerm: "",
@@ -14,21 +32,26 @@ Page({
     minCredit: "",
     form: {
       title: "",
-      gameType: "",
+      gameType: DEFAULT_GAME_TYPES[0],
       depositAmount: "",
       termsText: "",
       successCondition: ""
     }
   },
   onLoad() {
-    this.setData({ filteredGames: [] });
+    this.setData({ filteredGames: this.data.gameTypeOptions });
   },
   onInput(e) {
     const field = e.currentTarget.dataset.field;
     this.setData({ [`form.${field}`]: e.detail.value });
   },
   toggleGameDropdown() {
-    this.setData({ gameDropdownOpen: !this.data.gameDropdownOpen });
+    const gameDropdownOpen = !this.data.gameDropdownOpen;
+    this.setData({
+      gameDropdownOpen,
+      searchTerm: gameDropdownOpen ? "" : this.data.searchTerm,
+      filteredGames: gameDropdownOpen ? this.data.gameTypeOptions : this.data.filteredGames
+    });
   },
   onGameSearch(e) {
     const term = e.detail.value || "";
@@ -43,6 +66,8 @@ Page({
     this.setData({
       gameTypeIndex: index >= 0 ? index : 0,
       gameDropdownOpen: false,
+      searchTerm: "",
+      filteredGames: this.data.gameTypeOptions,
       "form.gameType": game
     });
   },

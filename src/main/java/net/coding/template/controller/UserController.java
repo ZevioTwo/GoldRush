@@ -1,5 +1,6 @@
 package net.coding.template.controller;
 
+import net.coding.template.entity.dto.CreditRankingDTO;
 import net.coding.template.entity.dto.CreditScoreDTO;
 import net.coding.template.entity.request.LoginRequest;
 import net.coding.template.entity.dto.UserProfileDTO;
@@ -115,6 +116,26 @@ public class UserController {
         } catch (Exception e) {
             log.error("查询信用分失败", e);
             throw new BusinessException(500, "查询信用分失败");
+        }
+    }
+
+    /**
+     * 获取信誉排行榜
+     * GET /api/user/ranking
+     */
+    @GetMapping("/ranking")
+    public CommonResponse<CreditRankingDTO> getCreditRanking(
+            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
+        try {
+            CreditRankingDTO ranking = userService.getCreditRanking(limit);
+            log.info("获取信誉排行榜成功: limit={}, redCount={}, blackCount={}",
+                    limit,
+                    ranking.getRedList().size(),
+                    ranking.getBlackList().size());
+            return CommonResponse.success(ranking);
+        } catch (Exception e) {
+            log.error("获取信誉排行榜失败", e);
+            throw new BusinessException(500, "获取信誉排行榜失败");
         }
     }
 
