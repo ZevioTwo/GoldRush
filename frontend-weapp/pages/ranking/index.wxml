@@ -28,7 +28,14 @@
                 <text class="score yellow-score">{{item.score}}分</text>
               </view>
               <view class="user-row">
-                <image class="user-avatar" src="{{item.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+                <image
+                  class="user-avatar"
+                  src="{{item.avatarUrl || defaultAvatar}}"
+                  mode="aspectFill"
+                  data-list="redList"
+                  data-index="{{index}}"
+                  binderror="onAvatarError"
+                />
                 <text class="user-name">{{item.name}}</text>
               </view>
             </view>
@@ -54,7 +61,14 @@
                 <text class="score red-score">{{item.score}}分</text>
               </view>
               <view class="user-row">
-                <image class="user-avatar" src="{{item.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+                <image
+                  class="user-avatar"
+                  src="{{item.avatarUrl || defaultAvatar}}"
+                  mode="aspectFill"
+                  data-list="blackList"
+                  data-index="{{index}}"
+                  binderror="onAvatarError"
+                />
                 <text class="user-name {{item.rank === 1 ? 'light' : ''}}">{{item.name}}</text>
               </view>
             </view>

@@ -56,7 +56,7 @@ public class UserService {
             user.setOpenid(openid);
             user.setUnionid(wechatResult.get("unionid"));
             user.setNickname("微信用户" + System.currentTimeMillis() % 10000);
-            user.setAvatarUrl("https://default-avatar.com/avatar.png");
+            user.setAvatarUrl("");
             user.setCreateTime(LocalDateTime.now());
             user.setUpdateTime(LocalDateTime.now());
 
@@ -254,6 +254,9 @@ public class UserService {
             item.setRank(i + 1);
             if (item.getName() == null || item.getName().trim().isEmpty()) {
                 item.setName(item.getUserId() == null ? "匿名用户" : "用户" + item.getUserId());
+            }
+            if (item.getAvatarUrl() != null && item.getAvatarUrl().contains("default-avatar.com")) {
+                item.setAvatarUrl("");
             }
             if (item.getScore() == null) {
                 item.setScore(0);

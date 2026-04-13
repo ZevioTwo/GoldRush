@@ -4,47 +4,48 @@
   padding-bottom: 200rpx;
 }
 
-.header-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24rpx 32rpx 20rpx;
-  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
-}
-
-.back-btn,
-.icon-btn {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  border: 1rpx solid rgba(255,255,255,0.2);
-  color: #fff;
-  font-size: 32rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12rpx;
-}
-
 .banner {
-  height: 420rpx;
+  height: 340rpx;
   position: relative;
   overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(252, 196, 25, 0.2), transparent 35%),
+    linear-gradient(180deg, #f7f2e2 0%, #ddd9cf 100%);
+}
+
+.banner--placeholder {
+  background:
+    radial-gradient(circle at top right, rgba(252, 196, 25, 0.22), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.75), transparent 30%),
+    linear-gradient(180deg, #f3efe6 0%, #d7d1c5 100%);
 }
 
 .banner-img {
   width: 100%;
   height: 100%;
+}
+
+.banner-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+}
+
+.banner-fallback-icon {
+  width: 132rpx;
+  height: 132rpx;
+  opacity: 0.9;
+}
+
+.banner-fallback-game {
+  font-size: 24rpx;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 3rpx;
 }
 
 .banner-mask {
@@ -87,7 +88,7 @@
 
 .content {
   padding: 0 24rpx;
-  margin-top: -80rpx;
+  margin-top: -72rpx;
 }
 
 .detail-card.large {
@@ -103,6 +104,7 @@
   align-items: center;
   gap: 12rpx;
   margin-bottom: 16rpx;
+  flex-wrap: wrap;
 }
 
 .game-tag {
@@ -126,6 +128,7 @@
   font-weight: 900;
   color: var(--color-foreground);
   margin-bottom: 20rpx;
+  line-height: 1.25;
 }
 
 .meta-row {
@@ -135,6 +138,7 @@
   font-size: 22rpx;
   color: var(--color-muted-foreground);
   font-weight: 700;
+  flex-wrap: wrap;
 }
 
 .risk-banner {
@@ -186,6 +190,8 @@
   display: flex;
   align-items: center;
   gap: 16rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .issuer-avatar {
@@ -193,18 +199,29 @@
   height: 80rpx;
   border-radius: 24rpx;
   border: 2rpx solid #fff;
+  background: #f1f3f5;
+  flex-shrink: 0;
+}
+
+.issuer-copy {
+  min-width: 0;
 }
 
 .issuer-name {
   font-size: 28rpx;
   font-weight: 900;
   color: var(--color-foreground);
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .issuer-sub {
   font-size: 20rpx;
   color: #d9a42b;
   font-weight: 700;
+  display: block;
 }
 
 .issuer-btn {
@@ -215,6 +232,12 @@
   padding: 14rpx 20rpx;
   font-size: 20rpx;
   font-weight: 900;
+  flex-shrink: 0;
+}
+
+.issuer-btn::after,
+.action-btn::after {
+  border: none;
 }
 
 .tabs {
@@ -260,6 +283,8 @@
   font-size: 24rpx;
   color: var(--color-muted-foreground);
   border: 1rpx solid rgba(0,0,0,0.03);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .term-item {

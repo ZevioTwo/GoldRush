@@ -4,6 +4,8 @@ Page({
   data: {
     id: "",
     detail: {},
+    defaultBanner: "/images/contract.png",
+    defaultAvatar: "/images/user_avatar.png",
     fromHall: false,
     stampVisible: false,
     confirming: false,
@@ -72,12 +74,42 @@ Page({
     };
     return {
       ...detail,
-      image: detail.image || "",
-      bossAvatar: detail.bossAvatar || detail.initiator?.avatar || "",
+      title: detail.title || "未命名契约",
+      image: this.normalizeImageUrl(detail.coverUrl || detail.image || ""),
+      bossAvatar: this.normalizeImageUrl(detail.bossAvatar || detail.initiator?.avatarUrl || detail.initiator?.avatar || ""),
+      credit: detail.credit ?? detail.minCredit ?? 0,
+      desc: detail.description || detail.requirements || detail.desc || detail.successCondition || "暂无详细说明",
       statusLabel: detail.statusLabel || mapped.label,
       statusClass: detail.statusClass || mapped.className,
-      terms: Array.isArray(detail.terms) && detail.terms.length ? detail.terms : []
+      terms: this.buildTerms(detail)
     };
+  },
+  normalizeImageUrl(url) {
+    const value = typeof url === "string" ? url.trim() : "";
+    if (!value || value.includes("default-avatar.com")) {
+      return "";
+    }
+    return value;
+  },
+  buildTerms(detail) {
+    if (Array.isArray(detail.terms) && detail.terms.length) {
+      return detail.terms;
+    }
+
+    const sections = [
+      detail.requirements ? `契约要求：${detail.requirements}` : "",
+      detail.successCondition ? `达成条件：${detail.successCondition}` : "",
+      detail.failureCondition ? `违约说明：${detail.failureCondition}` : "",
+      detail.guaranteeItem ? `保底条目：${detail.guaranteeItem}` : ""
+    ].filter(Boolean);
+
+    return sections;
+  },
+  onBannerError() {
+    this.setData({ "detail.image": "" });
+  },
+  onAvatarError() {
+    this.setData({ "detail.bossAvatar": this.data.defaultAvatar });
   },
   acceptContract() {
     if (this.data.confirming) return;

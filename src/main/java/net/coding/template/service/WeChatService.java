@@ -64,7 +64,7 @@ public class WeChatService {
         // 为了简化，这里返回模拟数据
         JSONObject userInfo = new JSONObject();
         userInfo.put("nickName", "微信用户");
-        userInfo.put("avatarUrl", "https://default-avatar.com/avatar.png");
+        userInfo.put("avatarUrl", "");
         return userInfo;
     }
 }

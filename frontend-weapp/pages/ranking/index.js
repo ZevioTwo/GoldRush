@@ -49,8 +49,24 @@ Page({
     return (Array.isArray(list) ? list : []).map((item, index) => ({
       rank: Number(item.rank) || index + 1,
       name: item.name || `用户${item.userId || index + 1}`,
-      avatarUrl: item.avatarUrl || "",
+      avatarUrl: this.normalizeAvatarUrl(item.avatarUrl),
       score: typeof item.score === "number" ? item.score : Number(item.score) || 0
     }));
+  },
+  normalizeAvatarUrl(avatarUrl) {
+    const value = typeof avatarUrl === "string" ? avatarUrl.trim() : "";
+    if (!value || value.includes("default-avatar.com")) {
+      return "";
+    }
+    return value;
+  },
+  onAvatarError(e) {
+    const listName = e.currentTarget.dataset.list;
+    const index = Number(e.currentTarget.dataset.index);
+    if (!listName || Number.isNaN(index) || index < 0) return;
+
+    this.setData({
+      [`${listName}[${index}].avatarUrl`]: this.data.defaultAvatar
+    });
   }
 });

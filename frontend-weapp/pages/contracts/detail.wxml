@@ -1,13 +1,10 @@
 <view class="detail-page">
-  <view class="header-overlay">
-    <button class="back-btn" bindtap="goBack">‹</button>
-    <view class="header-actions">
-      <button class="icon-btn">⤴</button>
+  <view class="banner {{detail.image ? '' : 'banner--placeholder'}}">
+    <image wx:if="{{detail.image}}" class="banner-img" src="{{detail.image}}" mode="aspectFill" binderror="onBannerError"></image>
+    <view wx:else class="banner-fallback">
+      <image class="banner-fallback-icon" src="{{defaultBanner}}" mode="aspectFit"></image>
+      <text class="banner-fallback-game">{{detail.gameType || '契约详情'}}</text>
     </view>
-  </view>
-
-  <view class="banner">
-    <image class="banner-img" src="{{detail.image}}" mode="aspectFill"></image>
     <view class="banner-mask"></view>
     <view class="status-badge {{detail.statusClass}}">{{detail.statusLabel}}</view>
   </view>
@@ -38,8 +35,8 @@
 
       <view class="issuer-card">
         <view class="issuer-left">
-          <image class="issuer-avatar" src="{{detail.bossAvatar}}" mode="aspectFill"></image>
-          <view>
+          <image class="issuer-avatar" src="{{detail.bossAvatar || defaultAvatar}}" mode="aspectFill" binderror="onAvatarError"></image>
+          <view class="issuer-copy">
             <text class="issuer-name">{{detail.initiator && detail.initiator.nickname ? detail.initiator.nickname : '摸金小王'}}</text>
             <text class="issuer-sub">✔ 已实名认证 · 信用优秀</text>
           </view>
