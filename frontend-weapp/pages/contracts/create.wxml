@@ -1,10 +1,4 @@
 <view class="create-page page-shell page-shell--white">
-  <view class="header">
-    <button class="back-btn" bindtap="goBack">‹</button>
-    <text class="header-title">发起契约</text>
-    <view class="header-spacer"></view>
-  </view>
-
   <view class="form-group">
     <text class="group-title">契约标题</text>
     <input class="input-field" placeholder="请输入契约标题，如：诚信借贷协议" value="{{form.title}}" data-field="title" bindinput="onInput" />

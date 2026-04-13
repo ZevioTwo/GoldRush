@@ -3,6 +3,7 @@ package net.coding.template.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import net.coding.template.configuration.WeChatPayConfig;
 import net.coding.template.entity.enums.ContractStatus;
 import net.coding.template.entity.enums.OrderType;
 import net.coding.template.entity.enums.PaymentStatus;
@@ -29,6 +30,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +40,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class PaymentService {
+
+    private static final Map<String, Integer> CREDIT_RECHARGE_SCORE_MAP = new HashMap<>();
+
+    static {
+        CREDIT_RECHARGE_SCORE_MAP.put("100.00", 105);
+        CREDIT_RECHARGE_SCORE_MAP.put("488.00", 530);
+        CREDIT_RECHARGE_SCORE_MAP.put("958.00", 1080);
+        CREDIT_RECHARGE_SCORE_MAP.put("1888.00", 2200);
+    }
 
     @Resource
     private PaymentOrderMapper paymentOrderMapper;
@@ -66,6 +77,9 @@ public class PaymentService {
     @Resource
     private RedisService redisService;
 
+    @Resource
+    private WeChatPayConfig weChatPayConfig;
+
     /**
      * 1. 生成支付预订单
      */
@@ -88,10 +102,6 @@ public class PaymentService {
 
             // 3. 创建支付订单记录
             PaymentOrder paymentOrder = createPaymentOrder(request, currentUser);
-            if (request.getPayMethod() != null) {
-                paymentOrder.setPayChannel(request.getPayMethod());
-            }
-            paymentOrderMapper.updateById(paymentOrder);
 
             // 4. 调用微信支付接口生成预支付参数
             Map<String, String> payParams = generatePayParams(paymentOrder, currentUser);
@@ -120,6 +130,57 @@ public class PaymentService {
             log.error("生成预支付订单异常", e);
             throw new BusinessException(500, "生成预支付订单失败");
         }
+    }
+
+    /**
+     * 1.5 查询支付状态
+     */
+    @Transactional
+    public Map<String, Object> getPaymentStatus(String orderNo, String token) {
+        User currentUser = userService.getCurrentUser(token);
+        if (currentUser == null) {
+            throw new BusinessException(401, "用户未登录");
+        }
+
+        PaymentOrder paymentOrder = paymentOrderMapper.selectByOrderNo(orderNo);
+        if (paymentOrder == null) {
+            throw new BusinessException(404, "支付订单不存在");
+        }
+        if (!paymentOrder.getUserId().equals(currentUser.getId())) {
+            throw new BusinessException(403, "无权查看该支付订单");
+        }
+
+        String currentStatus = paymentOrder.getPaymentStatus();
+        if (PaymentStatus.SUCCESS.getCode().equals(currentStatus)
+                || PaymentStatus.CLOSED.getCode().equals(currentStatus)
+                || PaymentStatus.FAILED.getCode().equals(currentStatus)) {
+            return buildPaymentStatusResult(paymentOrder, currentStatus, null);
+        }
+
+        if (!StringUtils.hasText(paymentOrder.getWxOutTradeNo())) {
+            return buildPaymentStatusResult(paymentOrder, currentStatus, "未生成微信商户订单号");
+        }
+
+        JSONObject queryResult = weChatPayService.queryOrderByOutTradeNo(paymentOrder.getWxOutTradeNo());
+        String tradeState = queryResult.getString("trade_state");
+        String tradeStateDesc = queryResult.getString("trade_state_desc");
+
+        if ("SUCCESS".equals(tradeState)) {
+            markOrderPaid(
+                    paymentOrder,
+                    queryResult.getString("transaction_id"),
+                    parseWeChatPayTime(queryResult.getString("success_time"))
+            );
+            handleSuccessfulPayment(paymentOrder);
+        } else if ("CLOSED".equals(tradeState) || "REVOKED".equals(tradeState)) {
+            paymentOrder.setPaymentStatus(PaymentStatus.CLOSED.getCode());
+            paymentOrderMapper.updateById(paymentOrder);
+        } else if ("PAYERROR".equals(tradeState)) {
+            paymentOrder.setPaymentStatus(PaymentStatus.FAILED.getCode());
+            paymentOrderMapper.updateById(paymentOrder);
+        }
+
+        return buildPaymentStatusResult(paymentOrder, tradeState, tradeStateDesc);
     }
 
     /**
@@ -172,11 +233,7 @@ public class PaymentService {
             // 5. 更新订单状态
             if ("SUCCESS".equals(tradeState)) {
                 // 支付成功
-                paymentOrder.setPaymentStatus(PaymentStatus.SUCCESS.getCode());
-                paymentOrder.setWxTransactionId(transactionId);
-                paymentOrder.setPayTime(LocalDateTime.parse(successTime.replace("+", "")));
-                paymentOrder.setCallbackStatus("PENDING");
-                paymentOrderMapper.updateById(paymentOrder);
+                markOrderPaid(paymentOrder, transactionId, parseWeChatPayTime(successTime));
 
                 // 6. 处理订单支付成功逻辑
                 handleSuccessfulPayment(paymentOrder);
@@ -433,9 +490,17 @@ public class PaymentService {
         }
 
         // 验证订单类型
-        OrderType orderType = OrderType.fromCode(request.getOrderType());
-        if (orderType == null) {
-            throw new BusinessException(400, "不支持的订单类型");
+        resolveOrderType(request.getOrderType());
+
+        String payMethod = StringUtils.hasText(request.getPayMethod())
+                ? request.getPayMethod().trim().toUpperCase()
+                : "WECHAT";
+        request.setPayMethod(payMethod);
+        if (!"WECHAT".equals(payMethod)) {
+            throw new BusinessException(400, "当前仅支持微信支付");
+        }
+        if (!StringUtils.hasText(user.getOpenid())) {
+            throw new BusinessException(400, "未获取到微信用户标识，请重新登录");
         }
 
         // 信用分充值无需契约ID
@@ -445,6 +510,9 @@ public class PaymentService {
             }
             if (request.getAmount().remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) {
                 throw new BusinessException(400, "充值金额必须为整数");
+            }
+            if (resolveRechargeScore(request.getAmount()) == null) {
+                throw new BusinessException(400, "不支持的充值档位");
             }
             return;
         }
@@ -490,6 +558,9 @@ public class PaymentService {
         order.setOrderType(request.getOrderType());
         order.setAmount(request.getAmount());
         order.setActualAmount(request.getAmount());
+        order.setPaymentStatus(PaymentStatus.PENDING.getCode());
+        order.setPaymentMethod(request.getPayMethod());
+        order.setPayChannel(request.getPayMethod());
 
         if (OrderType.CREDIT_RECHARGE.getCode().equals(request.getOrderType())
                 && !StringUtils.hasText(order.getContractId())) {
@@ -513,12 +584,20 @@ public class PaymentService {
         if (StringUtils.hasText(request.getNotifyUrl())) {
             order.setNotifyUrl(request.getNotifyUrl());
         } else {
-            order.setNotifyUrl(configService.getString("wechat.pay.notify-url"));
+            order.setNotifyUrl(weChatPayConfig.getNotifyUrl());
+        }
+
+        Map<String, Object> businessData = new HashMap<>();
+        if (request.getExtraData() != null && !request.getExtraData().isEmpty()) {
+            businessData.putAll(request.getExtraData());
+        }
+        if (OrderType.CREDIT_RECHARGE.getCode().equals(request.getOrderType())) {
+            businessData.put("rechargeScore", resolveRechargeScore(request.getAmount()));
         }
 
         // 存储扩展数据
-        if (request.getExtraData() != null && !request.getExtraData().isEmpty()) {
-            order.setBusinessData(JSON.toJSONString(request.getExtraData()));
+        if (!businessData.isEmpty()) {
+            order.setBusinessData(JSON.toJSONString(businessData));
         }
 
         paymentOrderMapper.insert(order);
@@ -601,7 +680,18 @@ public class PaymentService {
             return;
         }
 
-        int addScore = order.getAmount().setScale(0, RoundingMode.DOWN).intValue();
+        Integer presetScore = null;
+        if (StringUtils.hasText(order.getBusinessData())) {
+            try {
+                presetScore = JSON.parseObject(order.getBusinessData()).getInteger("rechargeScore");
+            } catch (Exception e) {
+                log.warn("解析充值档位扩展数据失败: orderNo={}", order.getOrderNo(), e);
+            }
+        }
+
+        int addScore = presetScore != null
+                ? presetScore
+                : order.getAmount().setScale(0, RoundingMode.DOWN).intValue();
         if (addScore <= 0) {
             log.warn("充值金额不足以增加信誉分: orderNo={}", order.getOrderNo());
             return;
@@ -625,6 +715,58 @@ public class PaymentService {
 
         log.info("信誉分充值成功: userId={}, addScore={}, afterScore={}",
                 user.getId(), addScore, afterScore);
+    }
+
+    private void markOrderPaid(PaymentOrder paymentOrder, String transactionId, LocalDateTime payTime) {
+        paymentOrder.setPaymentStatus(PaymentStatus.SUCCESS.getCode());
+        paymentOrder.setWxTransactionId(transactionId);
+        paymentOrder.setPayTime(payTime == null ? LocalDateTime.now() : payTime);
+        paymentOrder.setCallbackStatus("SUCCESS");
+        paymentOrder.setLastCallbackTime(LocalDateTime.now());
+        paymentOrderMapper.updateById(paymentOrder);
+    }
+
+    private LocalDateTime parseWeChatPayTime(String successTime) {
+        if (!StringUtils.hasText(successTime)) {
+            return LocalDateTime.now();
+        }
+        try {
+            return OffsetDateTime.parse(successTime).toLocalDateTime();
+        } catch (Exception e) {
+            log.warn("解析微信支付时间失败，使用当前时间兜底: {}", successTime, e);
+            return LocalDateTime.now();
+        }
+    }
+
+    private Map<String, Object> buildPaymentStatusResult(PaymentOrder paymentOrder, String tradeState, String tradeStateDesc) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("orderNo", paymentOrder.getOrderNo());
+        result.put("orderType", paymentOrder.getOrderType());
+        result.put("amount", paymentOrder.getAmount());
+        result.put("paymentStatus", paymentOrder.getPaymentStatus());
+        result.put("tradeState", tradeState);
+        result.put("tradeStateDesc", tradeStateDesc);
+        result.put("transactionId", paymentOrder.getWxTransactionId());
+        result.put("payTime", paymentOrder.getPayTime());
+        result.put("paid", PaymentStatus.SUCCESS.getCode().equals(paymentOrder.getPaymentStatus()));
+        return result;
+    }
+
+    private OrderType resolveOrderType(String orderTypeCode) {
+        for (OrderType orderType : OrderType.values()) {
+            if (orderType.getCode().equals(orderTypeCode)) {
+                return orderType;
+            }
+        }
+        throw new BusinessException(400, "不支持的订单类型");
+    }
+
+    private Integer resolveRechargeScore(BigDecimal amount) {
+        if (amount == null) {
+            return null;
+        }
+        String amountKey = amount.setScale(2, RoundingMode.HALF_UP).toPlainString();
+        return CREDIT_RECHARGE_SCORE_MAP.get(amountKey);
     }
 
     private void updateContractFreezeStatus(Contract contract, Long userId) {

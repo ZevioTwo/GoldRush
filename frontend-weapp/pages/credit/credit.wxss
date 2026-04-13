@@ -99,6 +99,12 @@
   color: var(--color-foreground);
 }
 
+.info-score-unit {
+  font-size: 20rpx;
+  margin-left: 6rpx;
+  color: rgba(142, 154, 175, 0.7);
+}
+
 .info-tag {
   background: #e7f9ee;
   color: #22c55e;
@@ -235,6 +241,12 @@
   gap: 12rpx;
 }
 
+.pay-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
 .pay-icon {
   width: 64rpx;
   height: 64rpx;
@@ -262,6 +274,11 @@
   color: #212529;
 }
 
+.pay-desc {
+  font-size: 20rpx;
+  color: rgba(142, 154, 175, 0.9);
+}
+
 .pay-radio {
   width: 28rpx;
   height: 28rpx;
@@ -272,6 +289,20 @@
 .pay-item.active .pay-radio {
   background: #d9a42b;
   border-color: #d9a42b;
+}
+
+.pay-item.disabled {
+  opacity: 0.72;
+}
+
+.pay-disabled-tag {
+  font-size: 20rpx;
+  color: rgba(142, 154, 175, 0.9);
+  background: #fff;
+  border: 1rpx solid rgba(142, 154, 175, 0.2);
+  border-radius: 999rpx;
+  padding: 6rpx 16rpx;
+  font-weight: 800;
 }
 
 .warning {

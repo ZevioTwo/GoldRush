@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
+import org.springframework.util.StringUtils;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
@@ -33,11 +34,13 @@ public class WeChatPayConfig {
     private String apiV3Key; // API v3密钥
     private String privateKeyPath; // 商户私钥路径
     private String privateKey; // 商户私钥内容
+    private String platformPublicKeyPath; // 微信支付平台公钥路径
+    private String platformPublicKey; // 微信支付平台公钥内容
 
     @Bean
     public CloseableHttpClient wechatPayHttpClient() throws Exception {
-        if (certPath == null || certPath.isBlank()) {
-            log.warn("wechat.pay.cert-path 未配置，使用默认HttpClient启动（微信支付将不可用）");
+        // 微信支付 API v3 的 JSAPI 下单/查单使用商户私钥签名即可，不强依赖 p12 客户端证书。
+        if (!StringUtils.hasText(certPath)) {
             return HttpClients.createDefault();
         }
 

@@ -1,5 +1,6 @@
 package net.coding.template.controller;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import net.coding.template.entity.request.*;
 import net.coding.template.entity.response.*;
@@ -61,11 +62,13 @@ public class PaymentController {
      */
     @PostMapping("/notify")
     public Map<String, String> handlePaymentNotify(
-            @RequestBody PaymentNotifyRequest request,
+            @RequestBody String requestBody,
             HttpServletRequest httpRequest) {
 
         Map<String, String> result = new HashMap<>();
         try {
+            PaymentNotifyRequest request = JSON.parseObject(requestBody, PaymentNotifyRequest.class);
+
             // 从请求头获取签名信息
             String timestamp = httpRequest.getHeader("Wechatpay-Timestamp");
             String nonce = httpRequest.getHeader("Wechatpay-Nonce");
@@ -78,6 +81,7 @@ public class PaymentController {
             request.setTimestamp(timestamp);
             request.setNonce(nonce);
             request.setSignature(signature);
+            request.setBody(requestBody);
 
             // 处理回调
             paymentService.handlePaymentNotify(request);
@@ -213,10 +217,14 @@ public class PaymentController {
      * GET /api/payment/status/{orderNo}
      */
     @GetMapping("/status/{orderNo}")
-    public CommonResponse<Map<String, Object>> getPaymentStatus(@PathVariable String orderNo) {
+    public CommonResponse<Map<String, Object>> getPaymentStatus(
+            @PathVariable String orderNo,
+            @RequestHeader("Authorization") String token) {
         try {
-            // TODO: 实现查询逻辑
-            return CommonResponse.success("查询成功", null);
+            return CommonResponse.success("查询成功", paymentService.getPaymentStatus(orderNo, token));
+        } catch (BusinessException e) {
+            log.warn("查询支付状态失败: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
             log.error("查询支付状态异常", e);
             throw new BusinessException(500, "查询支付状态失败");

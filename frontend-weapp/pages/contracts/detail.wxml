@@ -23,13 +23,16 @@
       </view>
 
       <view class="risk-banner">
-        <view>
+        <view class="risk-copy">
           <text class="risk-title">契约信用风险抵押</text>
           <text class="risk-desc">本契约受平台信誉分全额保障</text>
         </view>
         <view class="risk-right">
-          <text class="risk-title">需押信誉分</text>
-          <text class="risk-value">{{detail.depositAmount || 50}} 分</text>
+          <text class="risk-label">需押信誉分</text>
+          <view class="risk-score">
+            <text class="risk-value">{{detail.depositAmount || 50}}</text>
+            <text class="risk-unit">分</text>
+          </view>
         </view>
       </view>
 

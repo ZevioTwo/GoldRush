@@ -73,10 +73,14 @@ wechat:
     mch-id: 1234567890
     api-key: your_api_key_32_characters
     serial-no: your_serial_number
-    cert-path: /path/to/apiclient_cert.p12
+    cert-path:
     notify-url: http://localhost:8080/api/payment/notify
     freeze-notify-url: http://localhost:8080/api/payment/freeze-notify
     api-v3-key: your_api_v3_key_32_characters
+    private-key-path: /path/to/apiclient_key.pem
+    private-key:
+    platform-public-key-path: /path/to/wechatpay_platform_public_key.pem
+    platform-public-key:
 
 # 日志配置
 logging:

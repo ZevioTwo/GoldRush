@@ -12,8 +12,8 @@
       <view>
         <text class="info-label">当前信誉等级</text>
         <view class="info-score-row">
-          <text class="info-score">985 分</text>
-          <text class="info-tag">极好</text>
+          <text class="info-score">{{creditDisplay}}<text class="info-score-unit">分</text></text>
+          <text class="info-tag">{{creditLevel}}</text>
         </view>
       </view>
     </view>
@@ -50,16 +50,22 @@
       <view class="pay-item {{paymentMethod === 'wechat' ? 'active' : ''}}" data-method="wechat" bindtap="choosePayment">
         <view class="pay-left">
           <view class="pay-icon wechat">微</view>
-          <text class="pay-name">微信支付</text>
+          <view class="pay-copy">
+            <text class="pay-name">微信支付</text>
+            <text class="pay-desc">小程序内直接完成支付</text>
+          </view>
         </view>
         <view class="pay-radio"></view>
       </view>
-      <view class="pay-item {{paymentMethod === 'alipay' ? 'active' : ''}}" data-method="alipay" bindtap="choosePayment">
+      <view class="pay-item disabled" data-method="alipay" bindtap="choosePayment">
         <view class="pay-left">
           <view class="pay-icon alipay">支</view>
-          <text class="pay-name">支付宝</text>
+          <view class="pay-copy">
+            <text class="pay-name">支付宝</text>
+            <text class="pay-desc">暂未开通</text>
+          </view>
         </view>
-        <view class="pay-radio"></view>
+        <text class="pay-disabled-tag">待开通</text>
       </view>
     </view>
   </view>
@@ -68,5 +74,7 @@
     <text class="warning-text">温馨提示：信誉分充值成功后无法直接提现，仅可用于签署契约时的信誉抵扣或仲裁赔付。请根据实际需求充值。</text>
   </view>
 
-  <button class="pay-btn" bindtap="submitRecharge">立即支付 ¥{{presets[selectedPreset].price}}</button>
+  <button class="pay-btn" bindtap="submitRecharge" loading="{{loading}}">
+    {{loading ? '拉起支付中...' : '立即支付 ¥' + presets[selectedPreset].price}}
+  </button>
 </view>
