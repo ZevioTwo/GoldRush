@@ -1,50 +1,5 @@
 const { request } = require("../../utils/request");
 
-const mockJobs = [
-  {
-    contractId: "MJK-001",
-    title: "狙击手信条 - 连胜契约",
-    game: "三角洲行动",
-    boss: "摸金小王",
-    credit: 98,
-    price: "200.00",
-    deposit: "50",
-    remaining: "02:45:10",
-    desc: "要求：需配合默契，不压力队友，目标今日10连胜，败场由发起人全额赔付。",
-    statusLabel: "进行中",
-    statusClass: "success",
-    image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop"
-  },
-  {
-    contractId: "MJK-002",
-    title: "DNF 团本金牌代打契约",
-    game: "DNF",
-    boss: "凯丽的邻居",
-    credit: 95,
-    price: "150.00",
-    deposit: "30",
-    remaining: "05:12:00",
-    desc: "高端本包通关，若未达成目标，全额退还契约金并额外补偿。",
-    statusLabel: "待开始",
-    statusClass: "info",
-    image: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=1200&auto=format&fit=crop"
-  },
-  {
-    contractId: "MJK-003",
-    title: "王者荣耀 - 巅峰赛保分",
-    game: "王者荣耀",
-    boss: "野王求带",
-    credit: 92,
-    price: "300.00",
-    deposit: "60",
-    remaining: "01:20:45",
-    desc: "巅峰2000分段求稳健边路，诚信契约，输赢共同承担。",
-    statusLabel: "进行中",
-    statusClass: "success",
-    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop"
-  }
-];
-
 Page({
   data: {
     list: [],
@@ -126,7 +81,7 @@ Page({
           const hasMore = list.length >= this.data.size;
 
           if (!nextList.length) {
-            this.setData({ list: mockJobs, hasMore: false });
+            this.setData({ list: [], hasMore: false });
             return;
           }
 
@@ -134,11 +89,11 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        this.setData({ list: mockJobs, hasMore: false });
+        this.setData({ list: [], hasMore: false });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ list: mockJobs, hasMore: false });
+        this.setData({ list: [], hasMore: false });
       })
       .finally(() => {
         this.setData({ loading: false });
@@ -162,9 +117,9 @@ Page({
       boss: item.boss || item.initiatorNickname || item.publisherNickname || "匿名发起人",
       credit: item.credit || item.minCredit || 0,
       deposit: item.deposit || item.depositAmount || 0,
-      remaining: item.remaining || item.remainingTime || "02:45:10",
+      remaining: item.remaining || item.remainingTime || "",
       desc: item.desc || item.requirementPreview || item.successCondition || "暂无详细要求说明",
-      image: item.image || item.coverImage || mockJobs[0].image,
+      image: item.image || item.coverImage || "",
       statusClass: item.statusClass || statusMap[item.status] || "warning"
     };
   },
@@ -236,7 +191,7 @@ Page({
     }
 
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
+    if (Number.isNaN(date.getTime())) return "";
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
   },
   getStatusLabel(status) {

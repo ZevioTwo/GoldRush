@@ -2,7 +2,7 @@ const { request } = require("../../utils/request");
 
 Page({
   data: {
-    creditScore: "985",
+    creditScore: "-",
     presets: [
       { points: 100, price: 100, label: "初级契约包", bonus: "送5分" },
       { points: 500, price: 488, label: "专业老板包", bonus: "送30分", popular: true },
@@ -23,15 +23,15 @@ Page({
     })
       .then((res) => {
         if (res && (res.code === 0 || res.code === 200)) {
-          this.setData({ creditScore: res.data?.currentScore ?? "985" });
+          this.setData({ creditScore: res.data?.currentScore ?? "-" });
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        this.setData({ creditScore: "985" });
+        this.setData({ creditScore: "-" });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ creditScore: "985" });
+        this.setData({ creditScore: "-" });
       });
   },
   selectPreset(e) {

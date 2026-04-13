@@ -1,48 +1,5 @@
 const { request } = require("../../utils/request");
 
-const mockContracts = [
-  {
-    contractId: "8829341",
-    contractNo: "8829341",
-    status: "ACTIVE",
-    depositAmount: 500,
-    displayName: "张三",
-    remainingTime: "12:45:30",
-    createTime: "2026-10-24 14:30",
-    creditPoints: 1200
-  },
-  {
-    contractId: "8829342",
-    contractNo: "8829342",
-    status: "PENDING",
-    depositAmount: 200,
-    displayName: "李四",
-    remainingTime: "--",
-    createTime: "2026-10-24 10:12",
-    creditPoints: 85
-  },
-  {
-    contractId: "8829345",
-    contractNo: "8829345",
-    status: "DISPUTE",
-    depositAmount: 1200,
-    displayName: "王五",
-    remainingTime: "--",
-    createTime: "2026-10-20 09:03",
-    creditPoints: 450
-  },
-  {
-    contractId: "8829301",
-    contractNo: "8829301",
-    status: "COMPLETED",
-    depositAmount: 300,
-    displayName: "赵六",
-    remainingTime: "--",
-    createTime: "2026-10-18 16:40",
-    creditPoints: 960
-  }
-];
-
 Page({
   data: {
     list: [],
@@ -106,8 +63,7 @@ Page({
           const hasMore = list.length >= this.data.size;
 
           if (!nextRawList.length) {
-            const fallbackList = mockContracts.map((item) => this.normalizeContract(item));
-            this.setData({ rawList: fallbackList, hasMore: false }, () => this.applyFilters(fallbackList));
+            this.setData({ rawList: [], hasMore: false }, () => this.applyFilters([]));
             return;
           }
 
@@ -139,13 +95,11 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        const fallbackList = mockContracts.map((item) => this.normalizeContract(item));
-        this.setData({ rawList: fallbackList, hasMore: false }, () => this.applyFilters(fallbackList));
+        this.setData({ rawList: [], hasMore: false }, () => this.applyFilters([]));
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        const fallbackList = mockContracts.map((item) => this.normalizeContract(item));
-        this.setData({ rawList: fallbackList, hasMore: false }, () => this.applyFilters(fallbackList));
+        this.setData({ rawList: [], hasMore: false }, () => this.applyFilters([]));
       })
       .finally(() => {
         this.setData({ loading: false });
@@ -182,7 +136,7 @@ Page({
       contractNo: item.contractNo || item.contractId || "",
       displayName: item.displayName || item.counterpartyNickname || item.receiverNickname || item.initiatorNickname || "对方用户",
       depositAmount: Number(item.depositAmount || item.deposit || 0),
-      remainingTime: item.remainingTime || item.remaining || "12:45:30",
+      remainingTime: item.remainingTime || item.remaining || "",
       statusLabel: statusInfo.label,
       statusGroup: statusInfo.group,
       statusClass: statusInfo.className,
@@ -193,7 +147,7 @@ Page({
     };
   },
   getStatusInfo(status) {
-    const defaultFooter = (item) => item.remainingTime || item.remaining || "12:45:30";
+    const defaultFooter = (item) => item.remainingTime || item.remaining || "";
     const config = {
       PENDING: {
         group: "pending",

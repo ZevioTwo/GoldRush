@@ -1,25 +1,5 @@
 const { request } = require("../../utils/request");
 
-const mockDetail = {
-  contractNo: "MJK-001",
-  statusLabel: "进行中",
-  gameType: "三角洲行动",
-  title: "狙击手信条 - 连胜契约",
-  remaining: "02:45:10",
-  credit: 98,
-  depositAmount: 50,
-  desc: "要求：需配合默契，不压力队友，目标今日10连胜，败场由发起人全额赔付。",
-  terms: [
-    "打手必须保证账号安全，不得使用任何外挂插件",
-    "连续两场表现不佳（评分低于6.0）发起人有权单方面解除契约",
-    "完成目标后，契约金将在24小时内通过平台托管释放",
-    "如遇系统断开连接，需在5分钟内重连，否则视为违约"
-  ],
-  bossAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300&auto=format&fit=crop",
-  image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop",
-  initiator: { nickname: "摸金小王" }
-};
-
 Page({
   data: {
     id: "",
@@ -37,7 +17,7 @@ Page({
       this.setData({ id: options.id, fromHall }, () => this.fetchDetail());
       return;
     }
-    this.setData({ detail: this.normalizeDetail(mockDetail) });
+    this.setData({ detail: {} });
   },
   fetchDetail() {
     request({
@@ -68,11 +48,11 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        this.setData({ detail: this.normalizeDetail(mockDetail) });
+        this.setData({ detail: {} });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ detail: this.normalizeDetail(mockDetail) });
+        this.setData({ detail: {} });
       });
   },
   normalizeDetail(detail) {
@@ -92,11 +72,11 @@ Page({
     };
     return {
       ...detail,
-      image: detail.image || mockDetail.image,
-      bossAvatar: detail.bossAvatar || detail.initiator?.avatar || mockDetail.bossAvatar,
+      image: detail.image || "",
+      bossAvatar: detail.bossAvatar || detail.initiator?.avatar || "",
       statusLabel: detail.statusLabel || mapped.label,
       statusClass: detail.statusClass || mapped.className,
-      terms: Array.isArray(detail.terms) && detail.terms.length ? detail.terms : mockDetail.terms
+      terms: Array.isArray(detail.terms) && detail.terms.length ? detail.terms : []
     };
   },
   acceptContract() {

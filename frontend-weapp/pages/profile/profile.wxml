@@ -6,10 +6,10 @@
       <view class="avatar-badge">🛡</view>
     </view>
     <view class="name-row">
-      <text class="name">{{profile.nickname || '张晓明'}}</text>
-      <text class="level-tag">{{profile.userLevel || '高保户'}}</text>
+      <text class="name">{{profile.nickname || '-'}}</text>
+      <text class="level-tag">{{profile.userLevel || '-'}}</text>
     </view>
-    <text class="user-id">ID: {{profile.userId || '8888 6666'}}</text>
+    <text class="user-id">ID: {{profile.userId || '-'}}</text>
   </view>
 
   <view class="card credit-card">
@@ -23,15 +23,15 @@
       </view>
       <view class="credit-right">
         <text class="credit-label">摸金值余额</text>
-        <text class="credit-balance">12,500</text>
-        <text class="credit-lock">含锁定 450</text>
+        <text class="credit-balance">{{profile.mojinBalance || '-'}}</text>
+        <text class="credit-lock">含锁定 {{profile.mojinLocked || '-'}}</text>
       </view>
     </view>
 
     <view class="checkin-card">
       <view class="checkin-header">
         <text class="checkin-title">7日签到福利</text>
-        <text class="checkin-days">已累计: 3天</text>
+        <text class="checkin-days">已累计: {{checkinDays}}天</text>
       </view>
       <view class="checkin-grid">
         <block wx:for="{{checkinRewards}}" wx:key="index">
@@ -40,7 +40,9 @@
           </view>
         </block>
       </view>
-      <button class="checkin-btn">签到领取锁定摸金值</button>
+      <button class="checkin-btn" bindtap="claimCheckin" disabled="{{checkinSignedToday || checkinLoading}}">
+        {{checkinSignedToday ? '今日已签到' : '签到领取锁定摸金值'}}
+      </button>
     </view>
 
     <view class="credit-actions">

@@ -5,39 +5,23 @@ Page({
     loading: false,
     depositRequiredOptions: ["需要", "不需要"],
     depositRequiredIndex: 0,
-    gameTypeOptions: [
-      "三角洲行动",
-      "DNF",
-      "王者荣耀",
-      "和平精英",
-      "绝地求生",
-      "永劫无间",
-      "英雄联盟",
-      "金铲铲之战",
-      "原神",
-      "无畏契约",
-      "永劫无间手游",
-      "魔兽世界",
-      "CS2",
-      "逃离塔科夫",
-      "暗区突围"
-    ],
+    gameTypeOptions: [],
     gameTypeIndex: 0,
     gameDropdownOpen: false,
     searchTerm: "",
     filteredGames: [],
     minCreditRequired: true,
-    minCredit: "650",
+    minCredit: "",
     form: {
       title: "",
-      gameType: "三角洲行动",
+      gameType: "",
       depositAmount: "",
       termsText: "",
       successCondition: ""
     }
   },
   onLoad() {
-    this.setData({ filteredGames: this.data.gameTypeOptions });
+    this.setData({ filteredGames: [] });
   },
   onInput(e) {
     const field = e.currentTarget.dataset.field;
@@ -127,11 +111,9 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "创建失败", icon: "none" });
-        wx.showToast({ title: "后端未就绪，已展示静态页面", icon: "none" });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        wx.showToast({ title: "后端未就绪，已展示静态页面", icon: "none" });
       })
       .finally(() => {
         this.setData({ loading: false });

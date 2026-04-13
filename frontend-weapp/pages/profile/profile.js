@@ -4,26 +4,22 @@ const { setToken } = require("../../utils/auth");
 Page({
   data: {
     profile: {},
-    creditScore: "985",
+    creditScore: "-",
     stats: {
-      activeContracts: "12",
-      completedContracts: "156",
-      successRate: "100%"
+      activeContracts: "-",
+      completedContracts: "-",
+      successRate: "-"
     },
-    checkinRewards: [
-      { label: "2", active: true },
-      { label: "4", active: true },
-      { label: "6", active: true },
-      { label: "8", active: false },
-      { label: "10", active: false },
-      { label: "12", active: false },
-      { label: "?", active: false }
-    ]
+    checkinRewards: [],
+    checkinDays: 0,
+    checkinLoading: false,
+    checkinSignedToday: false
   },
   onShow() {
     this.fetchProfile();
     this.fetchCredit();
     this.fetchStats();
+    this.fetchCheckinStatus();
     const tabbar = this.getTabBar && this.getTabBar();
     if (tabbar && tabbar.setSelected) {
       tabbar.setSelected("/pages/profile/profile");
@@ -40,11 +36,11 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        this.setData({ profile: { nickname: "张晓明", userId: "8888 6666", userLevel: "高保户" } });
+        this.setData({ profile: {} });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ profile: { nickname: "张晓明", userId: "8888 6666", userLevel: "高保户" } });
+        this.setData({ profile: {} });
       });
   },
   fetchCredit() {
@@ -58,11 +54,11 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        this.setData({ creditScore: "985" });
+        this.setData({ creditScore: "-" });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ creditScore: "985" });
+        this.setData({ creditScore: "-" });
       });
   },
   fetchStats() {
@@ -86,11 +82,61 @@ Page({
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        this.setData({ stats: { activeContracts: "12", completedContracts: "156", successRate: "100%" } });
+        this.setData({ stats: { activeContracts: "-", completedContracts: "-", successRate: "-" } });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ stats: { activeContracts: "12", completedContracts: "156", successRate: "100%" } });
+        this.setData({ stats: { activeContracts: "-", completedContracts: "-", successRate: "-" } });
+      });
+  },
+  fetchCheckinStatus() {
+    request({
+      url: "/api/user/checkin/status",
+      method: "GET"
+    })
+      .then((res) => {
+        if (res && (res.code === 0 || res.code === 200)) {
+          const data = res.data || {};
+          this.setData({
+            checkinRewards: Array.isArray(data.rewards) ? data.rewards : [],
+            checkinDays: data.totalDays ?? 0,
+            checkinSignedToday: !!data.signedToday
+          });
+          return;
+        }
+        wx.showToast({ title: res.message || "获取签到失败", icon: "none" });
+        this.setData({ checkinRewards: [], checkinDays: 0, checkinSignedToday: false });
+      })
+      .catch(() => {
+        wx.showToast({ title: "网络错误", icon: "none" });
+        this.setData({ checkinRewards: [], checkinDays: 0, checkinSignedToday: false });
+      });
+  },
+  claimCheckin() {
+    if (this.data.checkinLoading || this.data.checkinSignedToday) return;
+    this.setData({ checkinLoading: true });
+    request({
+      url: "/api/user/checkin/claim",
+      method: "POST"
+    })
+      .then((res) => {
+        if (res && (res.code === 0 || res.code === 200)) {
+          const data = res.data || {};
+          this.setData({
+            checkinRewards: Array.isArray(data.rewards) ? data.rewards : this.data.checkinRewards,
+            checkinDays: data.totalDays ?? this.data.checkinDays,
+            checkinSignedToday: !!data.signedToday
+          });
+          wx.showToast({ title: "签到成功", icon: "success" });
+          return;
+        }
+        wx.showToast({ title: res.message || "签到失败", icon: "none" });
+      })
+      .catch(() => {
+        wx.showToast({ title: "网络错误", icon: "none" });
+      })
+      .finally(() => {
+        this.setData({ checkinLoading: false });
       });
   },
   goCredit() {

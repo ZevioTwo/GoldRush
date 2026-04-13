@@ -146,6 +146,56 @@ public class UserController {
     }
 
     /**
+     * 获取签到状态
+     * GET /api/user/checkin/status
+     */
+    @GetMapping("/checkin/status")
+    public CommonResponse<Map<String, Object>> getCheckinStatus(HttpServletRequest request) {
+        try {
+            String token = extractToken(request);
+            if (token == null) {
+                throw new BusinessException(401, "未提供认证token");
+            }
+            Long userId = userService.getUserIdByToken(token);
+            if (userId == null) {
+                throw new BusinessException(401, "token无效或已过期");
+            }
+
+            return CommonResponse.success(userService.getCheckinStatus(userId));
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("获取签到状态失败", e);
+            throw new BusinessException(500, "获取签到状态失败");
+        }
+    }
+
+    /**
+     * 签到领取
+     * POST /api/user/checkin/claim
+     */
+    @PostMapping("/checkin/claim")
+    public CommonResponse<Map<String, Object>> claimCheckin(HttpServletRequest request) {
+        try {
+            String token = extractToken(request);
+            if (token == null) {
+                throw new BusinessException(401, "未提供认证token");
+            }
+            Long userId = userService.getUserIdByToken(token);
+            if (userId == null) {
+                throw new BusinessException(401, "token无效或已过期");
+            }
+
+            return CommonResponse.success(userService.claimCheckin(userId));
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("签到失败", e);
+            throw new BusinessException(500, "签到失败");
+        }
+    }
+
+    /**
      * 完善资料（微信号/手机号）
      * POST /api/user/profile/update
      */

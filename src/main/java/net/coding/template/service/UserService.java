@@ -8,6 +8,7 @@ import net.coding.template.entity.dto.CreditScoreDTO;
 import net.coding.template.entity.request.LoginRequest;
 import net.coding.template.entity.dto.UserProfileDTO;
 import net.coding.template.entity.dto.UserStatsDTO;
+import net.coding.template.exception.BusinessException;
 import net.coding.template.mapper.UserMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -250,6 +254,68 @@ public class UserService {
         dto.setCompletedContracts(user.getCompletedContracts() == null ? 0 : user.getCompletedContracts());
         dto.setSuccessRate(successRate);
         return dto;
+    }
+
+    /**
+     * 获取签到状态
+     */
+    public Map<String, Object> getCheckinStatus(Long userId) {
+        String dateKey = LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.BASIC_ISO_DATE);
+        String signedKey = String.format("user:checkin:date:%s:%s", userId, dateKey);
+        String totalKey = String.format("user:checkin:total:%s", userId);
+
+        boolean signedToday = Boolean.TRUE.equals(stringRedisTemplate.hasKey(signedKey));
+        String totalStr = stringRedisTemplate.opsForValue().get(totalKey);
+        int totalDays = 0;
+        if (totalStr != null) {
+            try {
+                totalDays = Integer.parseInt(totalStr);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("signedToday", signedToday);
+        result.put("totalDays", totalDays);
+        result.put("rewards", buildCheckinRewards(totalDays));
+        return result;
+    }
+
+    /**
+     * 执行签到
+     */
+    public Map<String, Object> claimCheckin(Long userId) {
+        String dateKey = LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.BASIC_ISO_DATE);
+        String signedKey = String.format("user:checkin:date:%s:%s", userId, dateKey);
+        String totalKey = String.format("user:checkin:total:%s", userId);
+
+        boolean signedToday = Boolean.TRUE.equals(stringRedisTemplate.hasKey(signedKey));
+        if (signedToday) {
+            throw new BusinessException(400, "今日已签到");
+        }
+
+        Long totalDays = stringRedisTemplate.opsForValue().increment(totalKey, 1);
+        stringRedisTemplate.opsForValue().set(signedKey, "1", 2, TimeUnit.DAYS);
+
+        int total = totalDays == null ? 0 : totalDays.intValue();
+        Map<String, Object> result = new HashMap<>();
+        result.put("signedToday", true);
+        result.put("totalDays", total);
+        result.put("rewards", buildCheckinRewards(total));
+        return result;
+    }
+
+    private List<Map<String, Object>> buildCheckinRewards(int totalDays) {
+        String[] labels = new String[] { "2", "4", "6", "8", "10", "12", "?" };
+        int activeDays = Math.max(0, Math.min(totalDays, labels.length));
+        List<Map<String, Object>> rewards = new ArrayList<>();
+        for (int i = 0; i < labels.length; i++) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("label", labels[i]);
+            item.put("active", i < activeDays);
+            rewards.add(item);
+        }
+        return rewards;
     }
 
     /**
