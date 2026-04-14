@@ -38,10 +38,6 @@
         "text": "契约大厅"
       },
       {
-        "pagePath": "pages/ranking/index",
-        "text": "信誉排行"
-      },
-      {
         "pagePath": "pages/profile/profile",
         "text": "个人中心"
       }

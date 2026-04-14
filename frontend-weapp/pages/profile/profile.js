@@ -145,6 +145,9 @@ Page({
   goArbitration() {
     wx.navigateTo({ url: "/pages/dispute/index" });
   },
+  goRanking() {
+    wx.navigateTo({ url: "/pages/ranking/index" });
+  },
   goUserInfo() {
     wx.navigateTo({ url: "/pages/profile/info" });
   },

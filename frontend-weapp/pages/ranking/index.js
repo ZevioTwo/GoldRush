@@ -9,10 +9,6 @@ Page({
     defaultAvatar: "/images/user_avatar.png"
   },
   onShow() {
-    const tabbar = this.getTabBar && this.getTabBar();
-    if (tabbar && tabbar.setSelected) {
-      tabbar.setSelected("/pages/ranking/index");
-    }
     this.fetchRanking();
   },
   fetchRanking() {

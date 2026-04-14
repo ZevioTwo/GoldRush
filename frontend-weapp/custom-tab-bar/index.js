@@ -15,12 +15,6 @@ Component({
         activeIcon: "/images/hall_active.png"
       },
       {
-        pagePath: "/pages/ranking/index",
-        text: "信誉排行",
-        icon: "/images/ranking.png",
-        activeIcon: "/images/ranking_active.png"
-      },
-      {
         pagePath: "/pages/profile/profile",
         text: "个人中心",
         icon: "/images/me.png",
