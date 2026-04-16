@@ -1,0 +1,51 @@
+<view class="chat-page page-shell page-shell--white {{session && session.canReply ? 'chat-page--reply' : ''}}">
+  <view class="page-orb page-orb--gold"></view>
+  <view class="page-orb page-orb--soft"></view>
+
+  <view wx:if="{{loading}}" class="loading-card floating-card">消息加载中...</view>
+
+  <block wx:elif="{{session}}">
+    <view class="chat-header floating-card">
+      <image class="chat-avatar" src="{{session.peerAvatar}}" mode="aspectFill" binderror="onAvatarError"></image>
+      <view class="chat-copy">
+        <text class="chat-name">{{session.peerName}}</text>
+        <text class="chat-meta">{{session.peerTag}}</text>
+      </view>
+    </view>
+
+    <scroll-view class="message-scroll" scroll-y="true" scroll-into-view="{{scrollIntoView}}">
+      <view wx:if="{{session.items.length === 0}}" class="empty-block">{{session.canReply ? '还没有消息，先发一句吧。' : '暂无系统通知'}}</view>
+
+      <block wx:for="{{session.items}}" wx:key="id">
+        <view id="msg-{{item.id}}" class="message-row {{item.self ? 'message-row--self' : ''}} {{item.isSystem ? 'message-row--system' : ''}}">
+          <view wx:if="{{item.isSystem}}" class="system-bubble">
+            <text class="system-text">{{item.content}}</text>
+            <text class="system-time">{{item.timeDisplay}}</text>
+          </view>
+
+          <block wx:else>
+            <view class="bubble {{item.self ? 'bubble--self' : 'bubble--other'}}">
+              <text class="bubble-text">{{item.content}}</text>
+            </view>
+            <text class="bubble-time">{{item.timeDisplay}}</text>
+          </block>
+        </view>
+      </block>
+    </scroll-view>
+
+    <view wx:if="{{session.canReply}}" class="composer soft-panel">
+      <input
+        class="composer-input"
+        placeholder="输入消息，和对方沟通契约细节"
+        placeholder-class="composer-placeholder"
+        value="{{inputValue}}"
+        bindinput="onInput"
+        confirm-type="send"
+        bindconfirm="sendMessage"
+      />
+      <button class="composer-send" bindtap="sendMessage" loading="{{sending}}" disabled="{{sending}}">发送</button>
+    </view>
+  </block>
+
+  <view wx:else class="loading-card floating-card">未找到对应会话</view>
+</view>

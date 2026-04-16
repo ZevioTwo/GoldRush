@@ -5,6 +5,7 @@
     "pages/hall/list",
     "pages/dispute/index",
     "pages/message/index",
+    "pages/message/detail",
     "pages/profile/profile",
     "pages/contracts/create",
     "pages/contracts/detail",
@@ -40,6 +41,10 @@
       {
         "pagePath": "pages/hall/list",
         "text": "契约大厅"
+      },
+      {
+        "pagePath": "pages/message/index",
+        "text": "消息"
       },
       {
         "pagePath": "pages/bounty/index",

@@ -77,6 +77,7 @@
     <button class="action-btn primary" wx:if="{{fromHall}}" bindtap="acceptContract" loading="{{confirming}}">接单确认</button>
     <button class="action-btn primary" wx:if="{{detail.canSign}}" bindtap="signContract" loading="{{confirming}}">签订契约</button>
     <button class="action-btn primary" wx:if="{{detail.canFinishBySigner && detail.canFinish}}" bindtap="finishContract" loading="{{confirming}}">契约完成</button>
+    <button class="action-btn secondary" wx:if="{{!fromHall && detail.receiver && detail.receiver.userId}}" bindtap="openChat" loading="{{openingChat}}">联系对方</button>
     <button class="action-btn secondary" wx:if="{{!fromHall}}" bindtap="goDisputeApply">申请仲裁</button>
   </view>
 </view>

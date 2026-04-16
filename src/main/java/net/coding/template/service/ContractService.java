@@ -67,6 +67,9 @@ public class ContractService {
     @Resource
     private RedisService redisService;
 
+    @Resource
+    private MessageService messageService;
+
     /**
      * 创建契约
      */
@@ -265,6 +268,12 @@ public class ContractService {
 
         // 接单后状态进入已支付待开始
         contractMapper.updateContractStatus(contract.getId(), ContractStatus.PAID.getCode());
+
+        try {
+            messageService.notifyContractAccepted(contract.getId(), currentUser.getId());
+        } catch (Exception e) {
+            log.error("发送接单消息通知失败: contractId={}", contract.getId(), e);
+        }
     }
 
     /**
@@ -509,6 +518,12 @@ public class ContractService {
 
             log.info("契约完成: {}, 双方确认", contract.getContractNo());
 
+            try {
+                messageService.notifyContractCompleted(contract.getId());
+            } catch (Exception e) {
+                log.error("发送契约完成消息通知失败: contractId={}", contract.getId(), e);
+            }
+
             // 返回完成响应
             ContractConfirmResponse response = new ContractConfirmResponse();
             response.setContractId(contract.getId());
@@ -519,6 +534,12 @@ public class ContractService {
         } else {
             // 只有一方确认，等待另一方
             log.info("契约部分确认: {}, 用户: {}", contract.getContractNo(), currentUser.getId());
+
+            try {
+                messageService.notifyContractWaitingOtherConfirm(contract.getId(), currentUser.getId());
+            } catch (Exception e) {
+                log.error("发送待对方确认消息通知失败: contractId={}", contract.getId(), e);
+            }
 
             ContractConfirmResponse response = new ContractConfirmResponse();
             response.setContractId(contract.getId());
@@ -765,6 +786,11 @@ public class ContractService {
 
     private void sendContractStartNotification(Contract contract) {
         // 发送契约开始通知
+        try {
+            messageService.notifyContractStarted(contract.getId());
+        } catch (Exception e) {
+            log.error("发送契约开始消息通知失败: contractId={}", contract.getId(), e);
+        }
         log.info("发送契约开始通知: {}", contract.getContractNo());
     }
 

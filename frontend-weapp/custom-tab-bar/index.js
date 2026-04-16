@@ -15,6 +15,12 @@ Component({
         activeIcon: "/images/hall_active.png"
       },
       {
+        pagePath: "/pages/message/index",
+        text: "消息",
+        icon: "/images/message.png",
+        activeIcon: "/images/message_active.png"
+      },
+      {
         pagePath: "/pages/bounty/index",
         text: "悬赏榜单",
         icon: "/images/ranking.png",

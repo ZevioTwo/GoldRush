@@ -11,7 +11,8 @@ Page({
     confirming: false,
     countdownText: "",
     countdownTimer: null,
-    activeTab: "terms"
+    activeTab: "terms",
+    openingChat: false
   },
   onLoad(options) {
     if (options && options.id) {
@@ -211,6 +212,27 @@ Page({
       return;
     }
     wx.navigateTo({ url: `/pages/dispute/apply?contractId=${this.data.id}` });
+  },
+  openChat() {
+    if (this.data.openingChat || !this.data.id) return;
+    this.setData({ openingChat: true });
+    request({
+      url: `/api/message/contract/${this.data.id}/session`,
+      method: "POST"
+    })
+      .then((res) => {
+        if (res && (res.code === 0 || res.code === 200) && res.data?.sessionId) {
+          wx.navigateTo({ url: `/pages/message/detail?id=${res.data.sessionId}` });
+          return;
+        }
+        wx.showToast({ title: res.message || "打开私聊失败", icon: "none" });
+      })
+      .catch(() => {
+        wx.showToast({ title: "网络错误", icon: "none" });
+      })
+      .finally(() => {
+        this.setData({ openingChat: false });
+      });
   },
   switchTab(e) {
     const tab = e.currentTarget.dataset.tab;
