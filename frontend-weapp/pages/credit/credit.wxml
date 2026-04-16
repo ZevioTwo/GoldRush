@@ -1,23 +1,28 @@
 <view class="topup-page page-shell">
   <view class="page-orb page-orb--gold"></view>
-  <view class="header">
-    <button class="back-btn" bindtap="goBack">‹</button>
-    <text class="header-title">信誉分充值</text>
-    <text class="info-icon">ℹ️</text>
-  </view>
 
   <view class="info-card">
     <view class="info-left">
-      <view class="info-icon-box">🛡</view>
+      <view class="info-icon-box">🪙</view>
       <view>
-        <text class="info-label">当前信誉等级</text>
+        <text class="info-label">当前摸金币余额</text>
         <view class="info-score-row">
-          <text class="info-score">{{creditDisplay}}<text class="info-score-unit">分</text></text>
-          <text class="info-tag">{{creditLevel}}</text>
+          <text class="info-score">{{mojinBalanceDisplay}}</text>
+          <text class="info-score-unit">金币</text>
         </view>
       </view>
     </view>
-    <text class="info-desc">信誉分可作为契约签署时的诚信担保，1分等值于1元人民币。信誉分越高，在契约纠纷仲裁中拥有更高的信任权重。</text>
+    <view class="wallet-meta">
+      <view class="wallet-meta-item">
+        <text class="wallet-meta-label">当前信誉分</text>
+        <text class="wallet-meta-value">{{creditDisplay}}</text>
+      </view>
+      <view class="wallet-meta-item">
+        <text class="wallet-meta-label">充值汇率</text>
+        <text class="wallet-meta-value">1元 = 10摸金币</text>
+      </view>
+    </view>
+    <text class="info-desc">充值到账的是摸金币，不会直接增加信誉分。需要提升信誉分时，请前往“摸金币兑换”按固定汇率兑换。</text>
   </view>
 
   <view class="section">
@@ -26,16 +31,16 @@
       选择充值包
     </view>
     <view class="preset-grid">
-      <block wx:for="{{presets}}" wx:key="points">
+      <block wx:for="{{presets}}" wx:key="mojin">
         <view class="preset-card {{selectedPreset === index ? 'active' : ''}}" data-index="{{index}}" bindtap="selectPreset">
           <text class="preset-label">{{item.label}}</text>
           <view class="preset-points">
-            <text class="preset-value">{{item.points}}</text>
-            <text class="preset-unit">分</text>
+            <text class="preset-value">{{item.mojin}}</text>
+            <text class="preset-unit">金币</text>
           </view>
           <text class="preset-price">¥{{item.price}}</text>
-          <view class="preset-bonus">{{item.bonus}}</view>
-          <text wx:if="{{item.popular}}" class="preset-badge">最受欢迎</text>
+          <view class="preset-bonus">{{item.note}}</view>
+          <text wx:if="{{item.popular}}" class="preset-badge">常用选择</text>
         </view>
       </block>
     </view>
@@ -71,7 +76,7 @@
   </view>
 
   <view class="warning">
-    <text class="warning-text">温馨提示：信誉分充值成功后无法直接提现，仅可用于签署契约时的信誉抵扣或仲裁赔付。请根据实际需求充值。</text>
+    <text class="warning-text">温馨提示：付款后到账的是摸金币余额，可用于后续摸金币兑换或平台内其他金币场景消耗，不会直接增加信誉分。</text>
   </view>
 
   <button class="pay-btn" bindtap="submitRecharge" loading="{{loading}}">

@@ -13,7 +13,7 @@ public class PaymentRequest {
     private String contractId;
 
     @NotBlank(message = "订单类型不能为空")
-    private String orderType; // SERVICE_FEE, DEPOSIT_FREEZE, VIP_PAYMENT, ARBITRATION_FEE, CREDIT_RECHARGE
+    private String orderType; // SERVICE_FEE, DEPOSIT_FREEZE, VIP_PAYMENT, ARBITRATION_FEE, CREDIT_RECHARGE(摸金币充值)
 
     @NotNull(message = "支付金额不能为空")
     @DecimalMin(value = "0.01", message = "支付金额不能小于0.01元")

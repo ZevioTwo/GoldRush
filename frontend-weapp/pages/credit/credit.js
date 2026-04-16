@@ -5,52 +5,49 @@ const MAX_POLL_TIMES = 6;
 
 Page({
   data: {
-    creditScore: "-",
+    profile: {},
     creditDisplay: "--",
-    creditLevel: "待评估",
+    mojinBalanceDisplay: "0.00",
     presets: [
-      { points: 100, price: 100, label: "初级契约包", bonus: "送5分" },
-      { points: 500, price: 488, label: "专业老板包", bonus: "送30分", popular: true },
-      { points: 1000, price: 958, label: "顶奢打手包", bonus: "送80分" },
-      { points: 2000, price: 1888, label: "荣耀金牌包", bonus: "送200分" }
+      { mojin: 100, price: 10, label: "试水补给包", note: "到账100摸金币" },
+      { mojin: 500, price: 50, label: "常用储备包", note: "到账500摸金币", popular: true },
+      { mojin: 1000, price: 100, label: "进阶冲刺包", note: "到账1000摸金币" },
+      { mojin: 2000, price: 200, label: "重装储备包", note: "到账2000摸金币" }
     ],
     selectedPreset: 1,
     paymentMethod: "wechat",
     loading: false
   },
   onShow() {
-    this.fetchCredit();
+    this.fetchProfile();
   },
-  fetchCredit() {
+  fetchProfile() {
     request({
-      url: "/api/user/credit",
+      url: "/api/user/profile",
       method: "GET"
     })
       .then((res) => {
         if (res && (res.code === 0 || res.code === 200)) {
-          const score = res.data?.currentScore ?? "-";
+          const profile = res.data || {};
           this.setData({
-            creditScore: score,
-            creditDisplay: score === "-" ? "--" : String(score),
-            creditLevel: this.getCreditLevel(score)
+            profile,
+            creditDisplay: profile.creditScore ?? "--",
+            mojinBalanceDisplay: this.formatBalance(profile.mojinBalance)
           });
           return;
         }
         wx.showToast({ title: res.message || "获取失败", icon: "none" });
-        this.setData({ creditScore: "-", creditDisplay: "--", creditLevel: "待评估" });
+        this.setData({ profile: {}, creditDisplay: "--", mojinBalanceDisplay: "0.00" });
       })
       .catch(() => {
         wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ creditScore: "-", creditDisplay: "--", creditLevel: "待评估" });
+        this.setData({ profile: {}, creditDisplay: "--", mojinBalanceDisplay: "0.00" });
       });
   },
-  getCreditLevel(score) {
-    const value = Number(score);
-    if (!Number.isFinite(value)) return "待评估";
-    if (value >= 900) return "极好";
-    if (value >= 750) return "优秀";
-    if (value >= 600) return "稳定";
-    return "待提升";
+  formatBalance(value) {
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) return "0.00";
+    return amount.toFixed(2);
   },
   selectPreset(e) {
     const index = Number(e.currentTarget.dataset.index) || 0;
@@ -96,8 +93,8 @@ Page({
         return this.invokeWechatPayment(orderNo, payParams);
       })
       .then(() => {
-        this.fetchCredit();
-        wx.showToast({ title: "充值成功", icon: "success" });
+        this.fetchProfile();
+        wx.showToast({ title: "充值成功，摸金币已到账", icon: "success" });
       })
       .catch((err) => {
         const message = err && err.message ? err.message : "";
@@ -168,8 +165,5 @@ Page({
     return new Promise((resolve) => {
       setTimeout(resolve, duration);
     });
-  },
-  goBack() {
-    wx.navigateBack({ delta: 1 });
   }
 });

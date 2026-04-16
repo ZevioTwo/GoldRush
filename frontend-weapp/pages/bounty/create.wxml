@@ -1,0 +1,98 @@
+<view class="create-page page-shell page-shell--white">
+  <view class="summary-card">
+    <view class="summary-row">
+      <view>
+        <text class="summary-label">当前摸金币余额</text>
+        <text class="summary-value">{{mojinBalanceDisplay}}</text>
+      </view>
+      <view class="summary-pill {{balanceEnough ? 'ok' : 'warn'}}">
+        {{balanceEnough ? '余额充足' : '余额不足'}}
+      </view>
+    </view>
+    <view class="summary-grid">
+      <view class="summary-item">
+        <text class="summary-item-label">单人奖励</text>
+        <text class="summary-item-value">{{form.rewardMojin || '0.00'}}</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-item-label">招募数量</text>
+        <text class="summary-item-value">{{form.recruitTargetCount || 0}}</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-item-label">总预扣摸金币</text>
+        <text class="summary-item-value accent">{{totalDeductionDisplay}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="reward-note-card">
+    <text class="reward-note-title">奖励说明</text>
+    <text class="reward-note-desc">悬赏奖励是按每位摸金校尉单独计算的。比如单人奖励 100 摸金币、目标招募 3 人，发布时会一次性扣除 300 摸金币。</text>
+  </view>
+
+  <view class="form-group">
+    <text class="group-title">被悬赏角色名称</text>
+    <input class="input-field" placeholder="请输入游戏内角色名称" value="{{form.targetRoleName}}" data-field="targetRoleName" bindinput="onInput" />
+  </view>
+
+  <view class="form-group">
+    <text class="group-title">悬赏标题</text>
+    <input class="input-field" placeholder="例如：追查失信跑单玩家" value="{{form.title}}" data-field="title" bindinput="onInput" />
+  </view>
+
+  <view class="form-group">
+    <text class="group-title">游戏类型</text>
+    <view class="dropdown" bindtap="toggleGameDropdown">
+      <view class="dropdown-trigger {{gameDropdownOpen ? 'active' : ''}}">
+        <text class="dropdown-text">{{gameTypeOptions[gameTypeIndex]}}</text>
+        <text class="dropdown-arrow {{gameDropdownOpen ? 'open' : ''}}">⌄</text>
+      </view>
+      <view wx:if="{{gameDropdownOpen}}" class="dropdown-panel">
+        <view class="dropdown-search">
+          <text class="search-icon">🔍</text>
+          <input class="search-input" placeholder="搜索游戏..." value="{{searchTerm}}" bindinput="onGameSearch" />
+        </view>
+        <scroll-view scroll-y="true" class="dropdown-list">
+          <view
+            wx:for="{{filteredGames}}"
+            wx:key="index"
+            class="dropdown-item {{gameTypeOptions[gameTypeIndex] === item ? 'active' : ''}}"
+            data-game="{{item}}"
+            bindtap="selectGame"
+          >
+            {{item}}
+            <text wx:if="{{gameTypeOptions[gameTypeIndex] === item}}" class="check-icon">✓</text>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-group">
+    <text class="group-title">每位摸金校尉悬赏奖励</text>
+    <view class="input-with-unit">
+      <input class="input-field" type="digit" placeholder="100.00" value="{{form.rewardMojin}}" data-field="rewardMojin" bindinput="onInput" />
+      <text class="unit">摸金币</text>
+    </view>
+  </view>
+
+  <view class="form-group">
+    <text class="group-title">招募摸金校尉数量</text>
+    <view class="input-with-unit">
+      <input class="input-field" type="number" placeholder="3" value="{{form.recruitTargetCount}}" data-field="recruitTargetCount" bindinput="onInput" />
+      <text class="unit">人</text>
+    </view>
+  </view>
+
+  <view class="form-group">
+    <text class="group-title">悬赏描述</text>
+    <textarea class="textarea-field" placeholder="请描述对方失信经过、希望摸金校尉协助处理的内容，以及补充说明..." value="{{form.description}}" data-field="description" bindinput="onInput"></textarea>
+  </view>
+
+  <view class="reminder-box">
+    <text class="reminder-icon">ℹ️</text>
+    <text class="reminder-text">发起悬赏后会立即扣除总悬赏摸金币。当前版本仅支持发布与接取，后续可继续扩展结算、取消与退款等流程。</text>
+  </view>
+
+  <button class="submit-btn" bindtap="submit" loading="{{loading}}">确认发起悬赏</button>
+</view>

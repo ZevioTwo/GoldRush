@@ -10,11 +10,15 @@
     "pages/contracts/detail",
     "pages/dispute/apply",
     "pages/ranking/index",
+    "pages/bounty/index",
+    "pages/bounty/create",
+    "pages/bounty/detail",
     "pages/profile/info",
     "pages/profile/vip",
     "pages/profile/edit",
     "pages/profile/accounts",
-    "pages/credit/credit"
+    "pages/credit/credit",
+    "pages/credit/exchange"
   ],
   "window": {
     "navigationBarTitleText": "Gold Rush Contract",
@@ -36,6 +40,10 @@
       {
         "pagePath": "pages/hall/list",
         "text": "契约大厅"
+      },
+      {
+        "pagePath": "pages/bounty/index",
+        "text": "悬赏榜单"
       },
       {
         "pagePath": "pages/profile/profile",

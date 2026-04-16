@@ -10,7 +10,7 @@ public enum OrderType {
     DEPOSIT_UNFREEZE("DEPOSIT_UNFREEZE", "押金解冻"),
     VIP_PAYMENT("VIP_PAYMENT", "VIP会员支付"),
     ARBITRATION_FEE("ARBITRATION_FEE", "仲裁加急费"),
-    CREDIT_RECHARGE("CREDIT_RECHARGE", "信誉分充值"),
+    CREDIT_RECHARGE("CREDIT_RECHARGE", "摸金币充值"),
     COMPENSATION("COMPENSATION", "违约赔偿金"),
     REFUND("REFUND", "退款订单");
 

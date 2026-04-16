@@ -5,6 +5,7 @@ import net.coding.template.entity.dto.CreditRankingItemDTO;
 import net.coding.template.entity.po.User;
 import org.apache.ibatis.annotations.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,6 +24,30 @@ public interface UserMapper extends BaseMapper<User> {
      */
     @Update("UPDATE users SET credit_score = #{creditScore}, update_time = NOW() WHERE id = #{userId}")
     int updateCreditScore(@Param("userId") Long userId, @Param("creditScore") Integer creditScore);
+
+    /**
+     * 增加摸金币余额
+     */
+    @Update("UPDATE users SET mojin_balance = mojin_balance + #{amount}, update_time = NOW() WHERE id = #{userId}")
+    int incrementMojinBalance(@Param("userId") Long userId, @Param("amount") BigDecimal amount);
+
+    /**
+     * 扣减摸金币余额
+     */
+    @Update("UPDATE users SET mojin_balance = mojin_balance - #{amount}, update_time = NOW() " +
+            "WHERE id = #{userId} AND mojin_balance >= #{amount}")
+    int deductMojinBalance(@Param("userId") Long userId, @Param("amount") BigDecimal amount);
+
+    /**
+     * 摸金币兑换信誉分
+     */
+    @Update("UPDATE users SET mojin_balance = mojin_balance - #{mojinAmount}, " +
+            "credit_score = credit_score + #{creditAmount}, " +
+            "update_time = NOW() " +
+            "WHERE id = #{userId} AND mojin_balance >= #{mojinAmount}")
+    int exchangeMojinToCredit(@Param("userId") Long userId,
+                              @Param("mojinAmount") BigDecimal mojinAmount,
+                              @Param("creditAmount") Integer creditAmount);
 
     /**
      * 增加用户总契约数

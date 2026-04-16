@@ -1,0 +1,56 @@
+<view class="exchange-page page-shell">
+  <view class="page-orb page-orb--gold"></view>
+
+  <view class="info-card">
+    <view class="info-left">
+      <view class="info-icon-box">⇄</view>
+      <view>
+        <text class="info-label">当前可兑换摸金币</text>
+        <view class="info-score-row">
+          <text class="info-score">{{mojinBalanceDisplay}}</text>
+          <text class="info-score-unit">金币</text>
+        </view>
+      </view>
+    </view>
+    <view class="wallet-meta">
+      <view class="wallet-meta-item">
+        <text class="wallet-meta-label">当前信誉分</text>
+        <text class="wallet-meta-value">{{creditDisplay}}</text>
+      </view>
+      <view class="wallet-meta-item">
+        <text class="wallet-meta-label">兑换汇率</text>
+        <text class="wallet-meta-value">100 金币 = 10 分</text>
+      </view>
+    </view>
+    <text class="info-desc">兑换会立即扣除摸金币余额，并同步增加信誉分。当前按固定汇率兑换，暂不支持退款回退。</text>
+  </view>
+
+  <view class="section">
+    <view class="section-title">
+      <text class="section-icon">⇄</text>
+      选择兑换档位
+    </view>
+    <view class="preset-grid">
+      <block wx:for="{{presets}}" wx:key="mojin">
+        <view class="preset-card {{selectedPreset === index ? 'active' : ''}} {{balanceNumber < item.mojin ? 'disabled' : ''}}" data-index="{{index}}" bindtap="selectPreset">
+          <text class="preset-label">{{item.label}}</text>
+          <view class="preset-points">
+            <text class="preset-value">{{item.mojin}}</text>
+            <text class="preset-unit">金币</text>
+          </view>
+          <text class="exchange-text">可兑换 {{item.credit}} 信誉分</text>
+          <view class="preset-bonus">{{balanceNumber < item.mojin ? '余额不足' : '实时到账'}}</view>
+          <text wx:if="{{item.popular}}" class="preset-badge">常用档位</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="warning">
+    <text class="warning-text">温馨提示：摸金币兑换会直接扣减摸金币余额并增加信誉分。当前仅支持按100摸金币的整数倍兑换，请按实际需要操作。</text>
+  </view>
+
+  <button class="pay-btn" bindtap="submitExchange" loading="{{loading}}">
+    {{loading ? '兑换中...' : buttonText}}
+  </button>
+</view>

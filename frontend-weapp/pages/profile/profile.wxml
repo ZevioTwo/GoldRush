@@ -22,7 +22,7 @@
         </view>
       </view>
       <view class="credit-right">
-        <text class="credit-label">摸金值余额</text>
+        <text class="credit-label">摸金币余额</text>
         <text class="credit-balance">{{profile.mojinBalance || '-'}}</text>
         <text class="credit-lock">含锁定 {{profile.mojinLocked || '-'}}</text>
       </view>
@@ -41,13 +41,13 @@
         </block>
       </view>
       <button class="checkin-btn" bindtap="claimCheckin" disabled="{{checkinSignedToday || checkinLoading}}">
-        {{checkinSignedToday ? '今日已签到' : '签到领取锁定摸金值'}}
+        {{checkinSignedToday ? '今日已签到' : '签到领取锁定摸金币'}}
       </button>
     </view>
 
     <view class="credit-actions">
-      <button class="action-btn primary" bindtap="goCredit">↗ 摸金充值</button>
-      <button class="action-btn secondary" bindtap="goExchange">⇄ 金兑信誉</button>
+      <button class="action-btn primary" bindtap="goCredit">↗ 摸金币充值</button>
+      <button class="action-btn secondary" bindtap="goExchange">⇄ 摸金币兑换</button>
     </view>
   </view>
 

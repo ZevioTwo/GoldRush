@@ -3,9 +3,11 @@ package net.coding.template.controller;
 import net.coding.template.entity.dto.CreditRankingDTO;
 import net.coding.template.entity.dto.CreditScoreDTO;
 import net.coding.template.entity.request.LoginRequest;
+import net.coding.template.entity.request.CreditExchangeRequest;
 import net.coding.template.entity.dto.UserProfileDTO;
 import net.coding.template.entity.dto.UserStatsDTO;
 import net.coding.template.entity.response.CommonResponse;
+import net.coding.template.entity.response.CreditExchangeResponse;
 import net.coding.template.exception.BusinessException;
 import net.coding.template.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -116,6 +118,34 @@ public class UserController {
         } catch (Exception e) {
             log.error("查询信用分失败", e);
             throw new BusinessException(500, "查询信用分失败");
+        }
+    }
+
+    /**
+     * 摸金币兑换信誉分
+     * POST /api/user/credit/exchange
+     */
+    @PostMapping("/credit/exchange")
+    public CommonResponse<CreditExchangeResponse> exchangeCredit(@Valid @RequestBody CreditExchangeRequest request,
+                                                                 HttpServletRequest httpRequest) {
+        try {
+            String token = extractToken(httpRequest);
+            if (token == null) {
+                throw new BusinessException(401, "未提供认证token");
+            }
+
+            Long userId = userService.getUserIdByToken(token);
+            if (userId == null) {
+                throw new BusinessException(401, "token无效或已过期");
+            }
+
+            CreditExchangeResponse response = userService.exchangeMojinToCredit(userId, request.getMojinAmount());
+            return CommonResponse.success("兑换成功", response);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("摸金币兑换信誉分失败", e);
+            throw new BusinessException(500, "摸金币兑换信誉分失败");
         }
     }
 

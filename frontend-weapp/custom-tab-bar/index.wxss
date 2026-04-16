@@ -24,7 +24,7 @@
 .tabbar-inner {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
   height: 100%;
   padding: 10rpx 14rpx;

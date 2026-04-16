@@ -1,0 +1,83 @@
+<view class="bounty-detail-page page-shell page-shell--white">
+  <view class="page-orb page-orb--gold"></view>
+  <view class="page-orb page-orb--soft"></view>
+
+  <view wx:if="{{loading}}" class="loading-state">加载中...</view>
+
+  <block wx:elif="{{detail}}">
+    <view class="hero-card floating-card">
+      <view class="hero-top">
+        <view class="hero-title-wrap">
+          <text class="hero-title">{{detail.title}}</text>
+          <text class="hero-subtitle">目标角色：{{detail.targetRoleName}} · {{detail.gameType}}</text>
+        </view>
+        <text class="status-pill {{detail.statusClass}}">{{detail.statusLabel}}</text>
+      </view>
+
+      <view class="reward-panel">
+        <view>
+          <text class="reward-label">单人悬赏金额</text>
+          <view class="reward-value-row">
+            <text class="reward-value">{{detail.rewardDisplay}}</text>
+            <text class="reward-unit">摸金币</text>
+          </view>
+        </view>
+        <view class="reward-side">
+          <text class="reward-side-text">总预扣 {{detail.totalRewardDisplay}}</text>
+          <text class="reward-side-text">发起信誉 {{detail.creatorCreditScore || 0}}</text>
+        </view>
+      </view>
+
+      <view class="hero-meta">
+        <text class="meta-item">编号 {{detail.bountyNo || '-'}}</text>
+        <text class="meta-item">{{detail.createTimeDisplay || '时间待更新'}}</text>
+      </view>
+    </view>
+
+    <view class="detail-section floating-card">
+      <view class="section-header">
+        <text class="section-title">招募进度</text>
+        <text class="section-tag">{{detail.progressText}}</text>
+      </view>
+      <view class="stats-grid">
+        <view class="stat-card">
+          <text class="stat-label">目标招募摸金校尉数量</text>
+          <text class="stat-value">{{detail.recruitTargetCount}}</text>
+        </view>
+        <view class="stat-card">
+          <text class="stat-label">当前已接取数量</text>
+          <text class="stat-value">{{detail.recruitCurrentCount}}</text>
+        </view>
+      </view>
+      <view class="progress-track">
+        <view class="progress-fill" style="width: {{detail.progressPercentText}};"></view>
+      </view>
+      <text class="progress-note">当前已完成 {{detail.progressText}}，接满后该悬赏会自动变更为“已招满”。</text>
+    </view>
+
+    <view class="detail-section floating-card">
+      <view class="section-header">
+        <text class="section-title">悬赏描述</text>
+      </view>
+      <text class="description-text">{{detail.descriptionDisplay}}</text>
+    </view>
+
+    <view class="detail-section floating-card">
+      <view class="section-header">
+        <text class="section-title">奖励说明</text>
+      </view>
+      <text class="description-text">悬赏奖励按每位摸金校尉单独计算，发起时已经一次性预扣总额。接取前请确认目标、描述和当前招募进度。</text>
+    </view>
+
+    <button
+      class="claim-btn {{detail.actionDisabled ? 'disabled' : ''}}"
+      bindtap="claimBounty"
+      loading="{{claiming}}"
+      disabled="{{detail.actionDisabled || claiming}}"
+    >
+      {{detail.actionText}}
+    </button>
+  </block>
+
+  <view wx:else class="empty-card">未找到对应悬赏</view>
+</view>

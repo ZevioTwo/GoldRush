@@ -161,7 +161,7 @@ Page({
     wx.navigateTo({ url: "/pages/contracts/list" });
   },
   goExchange() {
-    wx.showToast({ title: "功能开发中", icon: "none" });
+    wx.navigateTo({ url: "/pages/credit/exchange" });
   },
   goCreditHistory() {
     wx.showToast({ title: "功能开发中", icon: "none" });

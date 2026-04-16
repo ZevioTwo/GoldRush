@@ -5,12 +5,17 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import net.coding.template.entity.dto.CreditRankingDTO;
 import net.coding.template.entity.dto.CreditRankingItemDTO;
+import net.coding.template.entity.po.CreditHistory;
+import net.coding.template.entity.po.MojinLedger;
 import net.coding.template.entity.po.User;
 import net.coding.template.entity.dto.CreditScoreDTO;
 import net.coding.template.entity.request.LoginRequest;
 import net.coding.template.entity.dto.UserProfileDTO;
 import net.coding.template.entity.dto.UserStatsDTO;
+import net.coding.template.entity.response.CreditExchangeResponse;
 import net.coding.template.exception.BusinessException;
+import net.coding.template.mapper.CreditHistoryMapper;
+import net.coding.template.mapper.MojinLedgerMapper;
 import net.coding.template.mapper.UserMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,6 +36,9 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class UserService {
 
+    private static final BigDecimal MOJIN_EXCHANGE_UNIT = new BigDecimal("100");
+    private static final BigDecimal MOJIN_TO_CREDIT_DIVISOR = new BigDecimal("10");
+
     @Resource
     private UserMapper userMapper;
 
@@ -37,6 +47,12 @@ public class UserService {
 
     @Resource(name = "stringRedisTemplate")
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private CreditHistoryMapper creditHistoryMapper;
+
+    @Resource
+    private MojinLedgerMapper mojinLedgerMapper;
 
     /**
      * 用户登录/注册
@@ -386,5 +402,85 @@ public class UserService {
         if (rows == 0) {
             throw new RuntimeException("更新用户信息失败");
         }
+    }
+
+    /**
+     * 摸金币兑换信誉分
+     */
+    @Transactional
+    public CreditExchangeResponse exchangeMojinToCredit(Long userId, BigDecimal mojinAmount) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        if (mojinAmount == null || mojinAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException(400, "兑换摸金币数量必须大于0");
+        }
+
+        BigDecimal normalizedAmount = mojinAmount.stripTrailingZeros();
+        if (normalizedAmount.scale() > 0) {
+            throw new BusinessException(400, "兑换数量必须为整数摸金币");
+        }
+        normalizedAmount = normalizedAmount.setScale(0, RoundingMode.UNNECESSARY);
+        if (normalizedAmount.remainder(MOJIN_EXCHANGE_UNIT).compareTo(BigDecimal.ZERO) != 0) {
+            throw new BusinessException(400, "仅支持按100摸金币的整数倍兑换");
+        }
+
+        BigDecimal balance = defaultMojin(user.getMojinBalance());
+        if (balance.compareTo(normalizedAmount) < 0) {
+            throw new BusinessException(400, "摸金币余额不足");
+        }
+
+        int addedCredit = normalizedAmount.divide(MOJIN_TO_CREDIT_DIVISOR).intValueExact();
+        int updated = userMapper.exchangeMojinToCredit(userId, normalizedAmount, addedCredit);
+        if (updated == 0) {
+            throw new BusinessException(400, "摸金币余额不足，请刷新后重试");
+        }
+
+        User refreshedUser = userMapper.selectById(userId);
+        if (refreshedUser == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+
+        BigDecimal afterBalance = defaultMojin(refreshedUser.getMojinBalance());
+        BigDecimal beforeBalance = afterBalance.add(normalizedAmount);
+        int afterCreditScore = refreshedUser.getCreditScore() == null ? 0 : refreshedUser.getCreditScore();
+        int beforeCreditScore = afterCreditScore - addedCredit;
+        String exchangeRef = "EXCHANGE_" + userId + "_" + System.currentTimeMillis();
+
+        MojinLedger ledger = new MojinLedger();
+        ledger.setUserId(userId);
+        ledger.setChangeAmount(normalizedAmount.negate());
+        ledger.setBeforeBalance(beforeBalance);
+        ledger.setAfterBalance(afterBalance);
+        ledger.setChangeType("EXCHANGE_TO_CREDIT");
+        ledger.setRelatedId(exchangeRef);
+        ledger.setRelatedType("CREDIT_EXCHANGE");
+        ledger.setDescription("摸金币兑换信誉分");
+        mojinLedgerMapper.insert(ledger);
+
+        CreditHistory history = new CreditHistory();
+        history.setUserId(userId);
+        history.setChangeType("EXCHANGE");
+        history.setChangeAmount(addedCredit);
+        history.setBeforeScore(beforeCreditScore);
+        history.setAfterScore(afterCreditScore);
+        history.setRelatedId(exchangeRef);
+        history.setRelatedType("CREDIT_EXCHANGE");
+        history.setDescription(String.format("摸金币兑换信誉分，消耗%s摸金币", normalizedAmount.toPlainString()));
+        creditHistoryMapper.insert(history);
+
+        CreditExchangeResponse response = new CreditExchangeResponse();
+        response.setExchangedMojin(normalizedAmount);
+        response.setAddedCreditScore(addedCredit);
+        response.setBeforeMojinBalance(beforeBalance);
+        response.setAfterMojinBalance(afterBalance);
+        response.setBeforeCreditScore(beforeCreditScore);
+        response.setAfterCreditScore(afterCreditScore);
+        return response;
+    }
+
+    private BigDecimal defaultMojin(BigDecimal amount) {
+        return amount == null ? BigDecimal.ZERO : amount;
     }
 }

@@ -1,0 +1,67 @@
+<view class="bounty-page page-shell">
+  <view class="page-orb page-orb--gold"></view>
+  <view class="page-orb page-orb--soft"></view>
+
+  <view class="home-header">
+    <view>
+      <text class="header-title">悬赏榜单</text>
+      <text class="header-subtitle">按发起者信誉分排序，发布时会一次性预扣全部悬赏摸金币</text>
+    </view>
+    <button class="create-bounty-btn" bindtap="goCreate">
+      <text class="plus-icon">＋</text>
+      <text>发起悬赏</text>
+    </button>
+  </view>
+
+  <view class="bounty-list">
+    <block wx:for="{{list}}" wx:key="id">
+      <view class="bounty-card floating-card" bindtap="goDetail" data-id="{{item.id}}" hover-class="bounty-card--active" hover-stay-time="80">
+        <view class="card-top">
+          <view class="title-wrap">
+            <text class="card-title">{{item.title}}</text>
+            <text class="card-subtitle">目标角色：{{item.targetRoleName}} · {{item.gameType}}</text>
+          </view>
+          <text class="status-pill {{item.statusClass}}">{{item.statusLabel}}</text>
+        </view>
+
+        <view class="reward-strip">
+          <view>
+            <text class="reward-label">单人悬赏金额</text>
+            <view class="reward-value-row">
+              <text class="reward-value">{{item.rewardDisplay}}</text>
+              <text class="reward-unit">摸金币</text>
+            </view>
+          </view>
+          <view class="reward-side">
+            <text class="reward-side-text">总预扣 {{item.totalRewardDisplay}}</text>
+            <text class="reward-side-text">{{item.createTimeDisplay}}</text>
+          </view>
+        </view>
+
+        <view class="card-footer">
+          <view class="footer-note-wrap">
+            <text class="footer-note">点击卡片查看招募进度、描述和完整详情</text>
+            <text class="footer-link">查看详情</text>
+          </view>
+          <button
+            class="claim-btn {{item.actionDisabled ? 'disabled' : ''}}"
+            catchtap="claimBounty"
+            data-id="{{item.id}}"
+            data-index="{{index}}"
+            loading="{{claimingId === item.id}}"
+            disabled="{{item.actionDisabled || claimingId === item.id}}"
+          >
+            {{item.actionText}}
+          </button>
+        </view>
+      </view>
+    </block>
+
+    <view wx:if="{{list.length === 0 && !loading}}" class="empty-card">
+      暂无悬赏，快来发起第一单吧
+    </view>
+
+    <view wx:if="{{loading}}" class="loading-state">加载中...</view>
+    <view wx:if="{{!hasMore && list.length > 0}}" class="list-end">没有更多了</view>
+  </view>
+</view>

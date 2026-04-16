@@ -8,9 +8,9 @@ import net.coding.template.entity.enums.ContractStatus;
 import net.coding.template.entity.enums.OrderType;
 import net.coding.template.entity.enums.PaymentStatus;
 import net.coding.template.entity.po.Contract;
+import net.coding.template.entity.po.MojinLedger;
 import net.coding.template.entity.po.PaymentOrder;
 import net.coding.template.entity.po.User;
-import net.coding.template.entity.po.CreditHistory;
 import net.coding.template.entity.request.*;
 import net.coding.template.entity.response.DeductResponse;
 import net.coding.template.entity.response.FreezeResponse;
@@ -18,9 +18,9 @@ import net.coding.template.entity.response.PaymentResponse;
 import net.coding.template.entity.response.UnfreezeResponse;
 import net.coding.template.exception.BusinessException;
 import net.coding.template.mapper.ContractMapper;
+import net.coding.template.mapper.MojinLedgerMapper;
 import net.coding.template.mapper.PaymentOrderMapper;
 import net.coding.template.mapper.UserMapper;
-import net.coding.template.mapper.CreditHistoryMapper;
 import net.coding.template.util.OrderNoGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,14 +41,7 @@ import java.util.stream.Collectors;
 @Service
 public class PaymentService {
 
-    private static final Map<String, Integer> CREDIT_RECHARGE_SCORE_MAP = new HashMap<>();
-
-    static {
-        CREDIT_RECHARGE_SCORE_MAP.put("100.00", 105);
-        CREDIT_RECHARGE_SCORE_MAP.put("488.00", 530);
-        CREDIT_RECHARGE_SCORE_MAP.put("958.00", 1080);
-        CREDIT_RECHARGE_SCORE_MAP.put("1888.00", 2200);
-    }
+    private static final BigDecimal RMB_TO_MOJIN_RATE = new BigDecimal("10");
 
     @Resource
     private PaymentOrderMapper paymentOrderMapper;
@@ -72,13 +65,13 @@ public class PaymentService {
     private SystemConfigService configService;
 
     @Resource
-    private CreditHistoryMapper creditHistoryMapper;
-
-    @Resource
     private RedisService redisService;
 
     @Resource
     private WeChatPayConfig weChatPayConfig;
+
+    @Resource
+    private MojinLedgerMapper mojinLedgerMapper;
 
     /**
      * 1. 生成支付预订单
@@ -94,7 +87,7 @@ public class PaymentService {
 
             if (OrderType.CREDIT_RECHARGE.getCode().equals(request.getOrderType())
                     && !StringUtils.hasText(request.getContractId())) {
-                request.setContractId("CREDIT_RECHARGE_" + currentUser.getId());
+                request.setContractId("MOJIN_RECHARGE_" + currentUser.getId());
             }
 
             // 2. 验证请求参数
@@ -511,9 +504,6 @@ public class PaymentService {
             if (request.getAmount().remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) {
                 throw new BusinessException(400, "充值金额必须为整数");
             }
-            if (resolveRechargeScore(request.getAmount()) == null) {
-                throw new BusinessException(400, "不支持的充值档位");
-            }
             return;
         }
 
@@ -564,7 +554,7 @@ public class PaymentService {
 
         if (OrderType.CREDIT_RECHARGE.getCode().equals(request.getOrderType())
                 && !StringUtils.hasText(order.getContractId())) {
-            order.setContractId("CREDIT_RECHARGE_" + user.getId());
+            order.setContractId("MOJIN_RECHARGE_" + user.getId());
         }
 
         // 计算手续费（根据不同订单类型）
@@ -592,7 +582,7 @@ public class PaymentService {
             businessData.putAll(request.getExtraData());
         }
         if (OrderType.CREDIT_RECHARGE.getCode().equals(request.getOrderType())) {
-            businessData.put("rechargeScore", resolveRechargeScore(request.getAmount()));
+            businessData.put("rechargeMojin", resolveRechargeMojin(request.getAmount()));
         }
 
         // 存储扩展数据
@@ -644,8 +634,8 @@ public class PaymentService {
                 break;
 
             case CREDIT_RECHARGE:
-                // 信誉分充值成功
-                handleCreditRecharge(order);
+                // 摸金币充值成功
+                handleMojinRecharge(order);
                 break;
 
             default:
@@ -673,48 +663,53 @@ public class PaymentService {
     /**
      * 更新契约冻结状态
      */
-    private void handleCreditRecharge(PaymentOrder order) {
+    private void handleMojinRecharge(PaymentOrder order) {
         User user = userMapper.selectById(order.getUserId());
         if (user == null) {
             log.warn("充值用户不存在: userId={}", order.getUserId());
             return;
         }
 
-        Integer presetScore = null;
+        BigDecimal rechargeMojin = null;
         if (StringUtils.hasText(order.getBusinessData())) {
             try {
-                presetScore = JSON.parseObject(order.getBusinessData()).getInteger("rechargeScore");
+                rechargeMojin = JSON.parseObject(order.getBusinessData()).getBigDecimal("rechargeMojin");
             } catch (Exception e) {
                 log.warn("解析充值档位扩展数据失败: orderNo={}", order.getOrderNo(), e);
             }
         }
 
-        int addScore = presetScore != null
-                ? presetScore
-                : order.getAmount().setScale(0, RoundingMode.DOWN).intValue();
-        if (addScore <= 0) {
-            log.warn("充值金额不足以增加信誉分: orderNo={}", order.getOrderNo());
+        BigDecimal addMojin = rechargeMojin != null
+                ? rechargeMojin
+                : resolveRechargeMojin(order.getAmount());
+        if (addMojin.compareTo(BigDecimal.ZERO) <= 0) {
+            log.warn("充值金额不足以增加摸金币: orderNo={}", order.getOrderNo());
             return;
         }
 
-        int beforeScore = user.getCreditScore() == null ? 0 : user.getCreditScore();
-        int afterScore = beforeScore + addScore;
+        userMapper.incrementMojinBalance(user.getId(), addMojin);
+        User refreshedUser = userMapper.selectById(user.getId());
+        if (refreshedUser == null) {
+            log.warn("充值后用户不存在: userId={}", user.getId());
+            return;
+        }
 
-        userMapper.updateCreditScore(user.getId(), afterScore);
+        BigDecimal afterBalance = refreshedUser.getMojinBalance() == null ? BigDecimal.ZERO : refreshedUser.getMojinBalance();
+        BigDecimal beforeBalance = afterBalance.subtract(addMojin);
 
-        CreditHistory history = new CreditHistory();
-        history.setUserId(user.getId());
-        history.setChangeType("RECHARGE");
-        history.setChangeAmount(addScore);
-        history.setBeforeScore(beforeScore);
-        history.setAfterScore(afterScore);
-        history.setRelatedId(order.getOrderNo());
-        history.setRelatedType("RECHARGE");
-        history.setDescription("信誉分充值");
-        creditHistoryMapper.insert(history);
+        MojinLedger ledger = new MojinLedger();
+        ledger.setUserId(user.getId());
+        ledger.setChangeAmount(addMojin);
+        ledger.setBeforeBalance(beforeBalance);
+        ledger.setAfterBalance(afterBalance);
+        ledger.setChangeType("RECHARGE");
+        ledger.setRelatedId(order.getOrderNo());
+        ledger.setRelatedType("PAYMENT_ORDER");
+        ledger.setDescription("摸金币充值");
+        mojinLedgerMapper.insert(ledger);
 
-        log.info("信誉分充值成功: userId={}, addScore={}, afterScore={}",
-                user.getId(), addScore, afterScore);
+        log.info("摸金币充值成功: userId={}, addMojin={}, afterBalance={}",
+                user.getId(), addMojin, afterBalance);
     }
 
     private void markOrderPaid(PaymentOrder paymentOrder, String transactionId, LocalDateTime payTime) {
@@ -761,12 +756,11 @@ public class PaymentService {
         throw new BusinessException(400, "不支持的订单类型");
     }
 
-    private Integer resolveRechargeScore(BigDecimal amount) {
+    private BigDecimal resolveRechargeMojin(BigDecimal amount) {
         if (amount == null) {
-            return null;
+            return BigDecimal.ZERO;
         }
-        String amountKey = amount.setScale(2, RoundingMode.HALF_UP).toPlainString();
-        return CREDIT_RECHARGE_SCORE_MAP.get(amountKey);
+        return amount.multiply(RMB_TO_MOJIN_RATE).setScale(2, RoundingMode.HALF_UP);
     }
 
     private void updateContractFreezeStatus(Contract contract, Long userId) {

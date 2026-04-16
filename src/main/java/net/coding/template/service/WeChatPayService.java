@@ -489,7 +489,7 @@ public class WeChatPayService {
             case "ARBITRATION_FEE":
                 return "仲裁加急费";
             case "CREDIT_RECHARGE":
-                return "信誉分充值";
+                return "摸金币充值";
             default:
                 return "订单支付";
         }
