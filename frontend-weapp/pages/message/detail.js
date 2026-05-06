@@ -1,5 +1,7 @@
 const { request } = require("../../utils/request");
 
+const POLL_INTERVAL = 3000;
+
 Page({
   data: {
     id: "",
@@ -10,6 +12,8 @@ Page({
     scrollIntoView: "",
     defaultAvatar: "/images/user_avatar.png"
   },
+  pollTimer: null,
+  isPolling: false,
   onLoad(options) {
     const id = options && options.id ? String(options.id) : "";
     if (!id) {
@@ -17,13 +21,50 @@ Page({
       wx.showToast({ title: "缺少会话ID", icon: "none" });
       return;
     }
-    this.setData({ id }, () => this.fetchDetail());
+    this.setData({ id }, () => {
+      this.fetchDetail({ forceScroll: true });
+      this.startPolling();
+    });
+  },
+  onShow() {
+    if (this.data.id) {
+      this.fetchDetail({ silent: true });
+      this.startPolling();
+    }
+  },
+  onHide() {
+    this.stopPolling();
+  },
+  onUnload() {
+    this.stopPolling();
   },
   onPullDownRefresh() {
-    this.fetchDetail();
+    this.fetchDetail({ forceScroll: true });
   },
-  fetchDetail() {
-    this.setData({ loading: true });
+  startPolling() {
+    this.stopPolling();
+    this.pollTimer = setInterval(() => {
+      if (this.isPolling || !this.data.id) return;
+      this.fetchDetail({ silent: true });
+    }, POLL_INTERVAL);
+  },
+  stopPolling() {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
+  },
+  fetchDetail(options = {}) {
+    const { silent = false, forceScroll = false } = options;
+    const previousItems = this.data.session && Array.isArray(this.data.session.items)
+      ? this.data.session.items
+      : [];
+    const previousLastId = previousItems.length ? previousItems[previousItems.length - 1].id : null;
+
+    if (!silent) {
+      this.setData({ loading: true });
+    }
+    this.isPolling = silent;
     request({
       url: `/api/message/sessions/${this.data.id}`,
       method: "GET"
@@ -31,23 +72,33 @@ Page({
       .then((res) => {
         if (res && (res.code === 0 || res.code === 200)) {
           const session = this.normalizeSession(res.data || {});
+          const nextItems = Array.isArray(session.items) ? session.items : [];
+          const nextLastId = nextItems.length ? nextItems[nextItems.length - 1].id : null;
+          const shouldScroll = forceScroll || (!!nextLastId && nextLastId !== previousLastId);
           this.setData({
             session,
-            scrollIntoView: session.items.length ? `msg-${session.items[session.items.length - 1].id}` : ""
+            scrollIntoView: shouldScroll && nextLastId ? `msg-${nextLastId}` : this.data.scrollIntoView
           });
           wx.setNavigationBarTitle({ title: session.peerName || "聊天详情" });
           return;
         }
-        wx.showToast({ title: res.message || "获取消息失败", icon: "none" });
-        this.setData({ session: null });
+        if (!silent) {
+          wx.showToast({ title: res.message || "获取消息失败", icon: "none" });
+          this.setData({ session: null });
+        }
       })
       .catch(() => {
-        wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ session: null });
+        if (!silent) {
+          wx.showToast({ title: "网络错误", icon: "none" });
+          this.setData({ session: null });
+        }
       })
       .finally(() => {
-        this.setData({ loading: false });
-        wx.stopPullDownRefresh();
+        this.isPolling = false;
+        if (!silent) {
+          this.setData({ loading: false });
+          wx.stopPullDownRefresh();
+        }
       });
   },
   normalizeSession(session) {
@@ -83,7 +134,7 @@ Page({
       .then((res) => {
         if (res && (res.code === 0 || res.code === 200)) {
           this.setData({ inputValue: "" });
-          this.fetchDetail();
+          this.fetchDetail({ silent: true, forceScroll: true });
           return;
         }
         wx.showToast({ title: res.message || "发送失败", icon: "none" });

@@ -1,5 +1,7 @@
 const { request } = require("../../utils/request");
 
+const POLL_INTERVAL = 3000;
+
 Page({
   data: {
     sessions: [],
@@ -8,18 +10,44 @@ Page({
     loading: false,
     defaultAvatar: "/images/user_avatar.png"
   },
+  pollTimer: null,
+  isPolling: false,
   onShow() {
     const tabbar = this.getTabBar && this.getTabBar();
     if (tabbar && tabbar.setSelected) {
       tabbar.setSelected("/pages/message/index");
     }
     this.fetchSessions();
+    this.startPolling();
+  },
+  onHide() {
+    this.stopPolling();
+  },
+  onUnload() {
+    this.stopPolling();
   },
   onPullDownRefresh() {
     this.fetchSessions();
   },
-  fetchSessions() {
-    this.setData({ loading: true });
+  startPolling() {
+    this.stopPolling();
+    this.pollTimer = setInterval(() => {
+      if (this.isPolling) return;
+      this.fetchSessions({ silent: true });
+    }, POLL_INTERVAL);
+  },
+  stopPolling() {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
+  },
+  fetchSessions(options = {}) {
+    const { silent = false } = options;
+    if (!silent) {
+      this.setData({ loading: true });
+    }
+    this.isPolling = silent;
     request({
       url: "/api/message/sessions",
       method: "GET"
@@ -30,16 +58,23 @@ Page({
           this.setData({ sessions }, () => this.applyFilter());
           return;
         }
-        wx.showToast({ title: res.message || "获取消息失败", icon: "none" });
-        this.setData({ sessions: [], filteredSessions: [] });
+        if (!silent) {
+          wx.showToast({ title: res.message || "获取消息失败", icon: "none" });
+          this.setData({ sessions: [], filteredSessions: [] });
+        }
       })
       .catch(() => {
-        wx.showToast({ title: "网络错误", icon: "none" });
-        this.setData({ sessions: [], filteredSessions: [] });
+        if (!silent) {
+          wx.showToast({ title: "网络错误", icon: "none" });
+          this.setData({ sessions: [], filteredSessions: [] });
+        }
       })
       .finally(() => {
-        this.setData({ loading: false });
-        wx.stopPullDownRefresh();
+        this.isPolling = false;
+        if (!silent) {
+          this.setData({ loading: false });
+          wx.stopPullDownRefresh();
+        }
       });
   },
   normalizeSession(item) {
